@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  host: 'https://backend.edsolutions.com.tn',
+  apiUrl: 'https://backend.edsolutions.com.tn',
   defaultLang: 'en',
   cloudHost: 'https://edquiz.edsolutions.com.tn',
   socket:'https://backend.edsolutions.com.tn/ws',
