@@ -62,7 +62,7 @@ export class PublicMenuService {
                 tableNumber: string | null): void {
     if (!this.isBrowser) return;
     this.http.post(
-      `${this.api}/api/menu/track/view`,
+      `${this.api}/api/dashboard/analytics/menu/track/view`,
       {
         sessionId,
         qrCode,
