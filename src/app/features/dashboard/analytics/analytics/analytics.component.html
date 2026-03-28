@@ -1,0 +1,299 @@
+<div class="page">
+
+  <!-- ── PAGE HEADER ─────────────────────────────────────────────────────── -->
+  <div class="page-head">
+    <div>
+      <h2 class="page-title">Analytics</h2>
+      <p class="page-sub">Track how visitors discover and interact with your menu</p>
+    </div>
+
+    <!-- Period selector -->
+    <div class="period-tabs" role="group" aria-label="Time period">
+      @for (p of periods; track p.value) {
+        <button class="period-tab"
+                [class.period-tab--active]="period() === p.value"
+                (click)="setPeriod(p.value)"
+                type="button">
+          {{ p.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ── ERROR ───────────────────────────────────────────────────────────── -->
+  @if (error()) {
+    <div class="alert-error">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- ── LOADING SKELETON ────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="kpi-grid">
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="skeleton-card">
+          <div class="sk sk-icon"></div>
+          <div class="sk-body">
+            <div class="sk sk-label"></div>
+            <div class="sk sk-value"></div>
+          </div>
+        </div>
+      }
+    </div>
+    <div class="skeleton-chart"></div>
+  }
+
+  @if (!loading() && data()) {
+
+    <!-- ── KPI CARDS ─────────────────────────────────────────────────────── -->
+    <div class="kpi-grid">
+      @for (card of cards(); track card.id; let i = $index) {
+        <div class="kpi-card kpi-card--{{ card.color }}"
+             [style.animation-delay]="(i * 0.06) + 's'">
+
+          <!-- Icon -->
+          <div class="kpi-icon kpi-icon--{{ card.color }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path [attr.d]="card.icon"/>
+            </svg>
+          </div>
+
+          <!-- Value & label -->
+          <div class="kpi-body">
+            <span class="kpi-label">{{ card.label }}</span>
+            <span class="kpi-value">
+              {{ formatValue(card.value, card.format) }}
+            </span>
+          </div>
+
+          <!-- % change badge -->
+          @if (card.prev !== null) {
+            @let change = getChange(card.value, card.prev);
+            @if (change !== null) {
+              <div class="kpi-change"
+                   [class.kpi-change--up]="changeIsPositive(change)"
+                   [class.kpi-change--down]="!changeIsPositive(change)">
+                @if (changeIsPositive(change)) {
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                    <polyline points="18 15 12 9 6 15"/>
+                  </svg>
+                } @else {
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                }
+                {{ change < 0 ? change * -1 : change }}%
+              </div>
+            }
+          }
+
+        </div>
+      }
+    </div>
+
+    <!-- ── CHART + DEVICE BREAKDOWN ──────────────────────────────────────── -->
+    <div class="chart-row">
+
+      <!-- Main chart -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <h3 class="chart-title">Daily breakdown</h3>
+            <p class="chart-sub">{{ period() === '7d' ? 'Last 7 days' : period() === '30d' ? 'Last 30 days' : 'Last 90 days' }}</p>
+          </div>
+
+          <!-- Metric selector -->
+          <div class="metric-tabs">
+            @for (m of chartMetrics; track m.value) {
+              <button class="metric-tab"
+                      [class.metric-tab--active]="chartMetric() === m.value"
+                      (click)="setChartMetric(m.value)"
+                      type="button">
+                {{ m.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Bar chart -->
+        <div class="chart-wrap">
+          <!-- Y-axis labels -->
+          <div class="y-axis">
+            <span>{{ formatValue(chartMax(), chartMetric() === 'totalRevenue' ? 'currency' : 'number') }}</span>
+            <span>{{ formatValue(Math.round(chartMax() * 0.5), chartMetric() === 'totalRevenue' ? 'currency' : 'number') }}</span>
+            <span>0</span>
+          </div>
+
+          <!-- Bars -->
+          <div class="chart-bars">
+
+            <!-- Grid lines -->
+            <div class="grid-line grid-line--top"></div>
+            <div class="grid-line grid-line--mid"></div>
+            <div class="grid-line grid-line--bot"></div>
+
+            @for (point of chartPoints(); track point.label; let i = $index) {
+              <div class="chart-bar-group"
+                   [class.chart-bar-group--hovered]="hoveredIndex() === i"
+                   (mouseenter)="onBarHover(i, $event, point.stat)"
+                   (mouseleave)="onBarLeave()">
+
+                <div class="chart-bar"
+                     [class.chart-bar--zero]="point.value === 0"
+                     [style.height.%]="getBarHeight(point.value)"
+                     [style.animation-delay]="(i * 0.03) + 's'">
+                </div>
+
+                <span class="chart-label">{{ point.label }}</span>
+              </div>
+            }
+
+            <!-- Tooltip -->
+            @if (tooltip(); as tip) {
+              <div class="chart-tooltip"
+                   [style.left.px]="tip.x"
+                   [style.top.px]="tip.y">
+                <div class="tooltip-date">{{ formatTooltipDate(tip.stat.date) }}</div>
+                <div class="tooltip-row">
+                  <span class="tooltip-metric">{{ getMetricLabel() }}</span>
+                  <span class="tooltip-val">{{ formatTooltipValue(tip.stat) }}</span>
+                </div>
+                @if (chartMetric() !== 'totalOrders') {
+                  <div class="tooltip-row">
+                    <span class="tooltip-metric">Orders</span>
+                    <span class="tooltip-val">{{ tip.stat.totalOrders }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Device breakdown -->
+      <div class="device-card">
+        <h3 class="chart-title">Devices</h3>
+        <p class="chart-sub">Where visitors open your menu</p>
+
+        @if (deviceBreakdown(); as devices) {
+          <div class="device-list">
+
+            <div class="device-row">
+              <div class="device-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                  <line x1="12" y1="18" x2="12.01" y2="18"/>
+                </svg>
+              </div>
+              <div class="device-info">
+                <div class="device-label-row">
+                  <span class="device-name">Mobile</span>
+                  <span class="device-pct">{{ devices.mobile }}%</span>
+                </div>
+                <div class="device-bar-track">
+                  <div class="device-bar device-bar--mobile"
+                       [style.width.%]="devices.mobile"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="device-row">
+              <div class="device-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              </div>
+              <div class="device-info">
+                <div class="device-label-row">
+                  <span class="device-name">Desktop</span>
+                  <span class="device-pct">{{ devices.desktop }}%</span>
+                </div>
+                <div class="device-bar-track">
+                  <div class="device-bar device-bar--desktop"
+                       [style.width.%]="devices.desktop"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="device-row">
+              <div class="device-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+                  <line x1="12" y1="18" x2="12.01" y2="18"/>
+                </svg>
+              </div>
+              <div class="device-info">
+                <div class="device-label-row">
+                  <span class="device-name">Tablet</span>
+                  <span class="device-pct">{{ devices.tablet }}%</span>
+                </div>
+                <div class="device-bar-track">
+                  <div class="device-bar device-bar--tablet"
+                       [style.width.%]="devices.tablet"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        } @else {
+          <div class="device-empty">
+            <p>No device data yet</p>
+          </div>
+        }
+
+        <!-- QR scans stat -->
+        <div class="qr-stat">
+          <div class="qr-stat-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+              <rect x="14" y="14" width="4" height="4"/>
+            </svg>
+          </div>
+          <div>
+            <span class="qr-stat-val">{{ data()!.qrScans }}</span>
+            <span class="qr-stat-label">QR scans</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── EMPTY STATE for chart ────────────────────────────────────────── -->
+    @if (data()!.totalViews === 0) {
+      <div class="empty-analytics">
+        <div class="empty-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6"  y1="20" x2="6"  y2="14"/>
+          </svg>
+        </div>
+        <h3 class="empty-title">No data yet for this period</h3>
+        <p class="empty-sub">
+          Share your menu link or QR code with customers to start tracking.
+        </p>
+      </div>
+    }
+
+  }
+</div>

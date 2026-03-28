@@ -1,0 +1,500 @@
+<!-- ── Loading ─────────────────────────────────────────────────────────────── -->
+@if (loading()) {
+  <div class="mp-loading">
+    <div class="mp-ring"></div>
+  </div>
+}
+
+<!-- ── Error ──────────────────────────────────────────────────────────────── -->
+@if (!loading() && error()) {
+  <div class="mp-error">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <p>{{ error() }}</p>
+  </div>
+}
+
+<!-- ── Menu ───────────────────────────────────────────────────────────────── -->
+@if (!loading() && menu(); as m) {
+
+  <!-- HEADER -->
+  <header class="mp-header">
+    <div class="mp-header__inner">
+      @if (m.logoUrl) {
+        <img [src]="m.logoUrl" [alt]="m.tenantName" class="mp-header__logo">
+      }
+      <div class="mp-header__text">
+        <h1 class="mp-header__name">{{ m.tenantName }}</h1>
+        @if (m.tagline) {
+          <p class="mp-header__tagline">{{ m.tagline }}</p>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- CATEGORY TABS -->
+  <nav class="mp-tabs" aria-label="Menu categories">
+    <div class="mp-tabs__inner">
+      @for (cat of categories(); track cat.id) {
+        <button class="mp-tab"
+                [class.mp-tab--active]="activeCategory() === cat.id"
+                (click)="selectCategory(cat.id)"
+                type="button">
+          @if (cat.icon) { <span>{{ cat.icon }}</span> }
+          {{ cat.name }}
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- ITEM GRID -->
+  <main class="mp-main">
+    @for (cat of categories(); track cat.id) {
+      <section [id]="'section-' + cat.id" class="mp-section">
+
+        <h2 class="mp-section__title">
+          @if (cat.icon) { {{ cat.icon }}&nbsp; }{{ cat.name }}
+        </h2>
+
+        <div class="mp-grid">
+          @for (item of cat.items; track item.id) {
+            <button class="mp-card"
+                    [class.mp-card--featured]="item.featured"
+                    (click)="openItem(item, cat.id)"
+                    type="button">
+
+              <div class="mp-card__img">
+                @if (item.imageUrl) {
+                  <img [src]="item.imageUrl" [alt]="item.name" loading="lazy">
+                } @else {
+                  <div class="mp-card__img-placeholder">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                }
+                @if (item.featured) {
+                  <span class="mp-badge mp-badge--featured">Signature</span>
+                }
+                @if (item.hasVariants) {
+                  <span class="mp-badge mp-badge--variants">Options</span>
+                }
+              </div>
+
+              <div class="mp-card__body">
+                <div class="mp-card__name-row">
+                  <span class="mp-card__name">{{ item.name }}</span>
+                  <span class="mp-card__diet">
+                    @if (item.vegetarian) { 🌿 }
+                    @if (item.vegan)      { 🌱 }
+                    @if (item.glutenFree) { 🌾 }
+                    @if (item.spicy)      { 🌶️ }
+                  </span>
+                </div>
+
+                @if (item.description) {
+                  <p class="mp-card__desc">{{ item.description }}</p>
+                }
+
+                <div class="mp-card__footer">
+                  <span class="mp-card__price">
+                    @if (item.displayPrice != null) {
+                      {{ fmt(item.displayPrice) }}
+                      <span class="mp-card__currency">{{ currency() }}</span>
+                    } @else if (item.hasVariants) {
+                      <span class="mp-card__from">See options</span>
+                    } @else {
+                      <span class="mp-card__from">Ask us</span>
+                    }
+                  </span>
+                  <span class="mp-card__add" aria-hidden="true">+</span>
+                </div>
+              </div>
+
+            </button>
+          }
+        </div>
+      </section>
+    }
+  </main>
+
+  <!-- CART FAB -->
+  @if (!cartEmpty()) {
+    <button class="mp-fab" (click)="toggleCart()" type="button"
+            aria-label="View cart">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="9" cy="21" r="1"/>
+        <circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      <span class="mp-fab__count">{{ cartCount() }}</span>
+      <span class="mp-fab__total">{{ fmt(cartSubtotal()) }} {{ currency() }}</span>
+    </button>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════
+       ITEM MODAL
+  ══════════════════════════════════════════════════════════════════ -->
+  @if (modalItem(); as item) {
+    <div class="mp-backdrop" (click)="closeModal()" role="dialog"
+         [attr.aria-label]="item.name">
+      <div class="mp-modal" (click)="$event.stopPropagation()">
+
+        <button class="mp-modal__close" (click)="closeModal()"
+                aria-label="Close" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+
+        @if (item.imageUrl) {
+          <div class="mp-modal__img">
+            <img [src]="item.imageUrl" [alt]="item.name">
+          </div>
+        }
+
+        <div class="mp-modal__body">
+
+          <h2 class="mp-modal__name">{{ item.name }}</h2>
+          @if (item.description) {
+            <p class="mp-modal__desc">{{ item.description }}</p>
+          }
+          <div class="mp-modal__diet">
+            @if (item.vegetarian) { <span class="mp-diet-tag">🌿 Vegetarian</span> }
+            @if (item.vegan)      { <span class="mp-diet-tag">🌱 Vegan</span>      }
+            @if (item.glutenFree) { <span class="mp-diet-tag">🌾 Gluten free</span>}
+            @if (item.spicy)      { <span class="mp-diet-tag">🌶️ Spicy</span>       }
+          </div>
+
+          <!-- Variant groups -->
+          @for (group of item.variantGroups; track group.id) {
+            <div class="mp-option-group">
+              <div class="mp-option-group__head">
+                <span class="mp-option-group__name">{{ group.name }}</span>
+                @if (group.required) {
+                  <span class="mp-required-badge">Required</span>
+                }
+              </div>
+              <div class="mp-variants" [class]="'mp-variants--' + group.uiType">
+                @for (v of group.variants; track v.id) {
+                  <button class="mp-variant"
+                          [class.mp-variant--active]="selectedVariant()?.id === v.id"
+                          (click)="selectVariant(v)"
+                          type="button">
+                    @if (v.imageUrl) {
+                      <img [src]="v.imageUrl" [alt]="v.name" class="mp-variant__img">
+                    }
+                    <span class="mp-variant__name">{{ v.name }}</span>
+                    <span class="mp-variant__price">
+                      {{ fmt(v.price) }} {{ currency() }}
+                    </span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Modifier groups -->
+          @for (group of item.modifierGroups; track group.id) {
+            <div class="mp-option-group">
+              <div class="mp-option-group__head">
+                <span class="mp-option-group__name">{{ group.name }}</span>
+                <div class="mp-option-group__meta">
+                  @if (group.required) {
+                    <span class="mp-required-badge">Required</span>
+                  }
+                  @if (group.maxSelect > 1) {
+                    <span class="mp-select-hint">Up to {{ group.maxSelect }}</span>
+                  }
+                </div>
+              </div>
+              <div class="mp-modifiers">
+                @for (mod of group.modifiers; track mod.id) {
+                  <button class="mp-mod"
+                          [class.mp-mod--active]="isModSelected(mod.id)"
+                          (click)="toggleMod(mod.id, group)"
+                          type="button">
+                    <div class="mp-mod__check"
+                         [class.mp-mod__check--on]="isModSelected(mod.id)"
+                         [class.mp-mod__check--radio]="group.uiType === 'radio'">
+                      @if (isModSelected(mod.id)) {
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="3.5"
+                             stroke-linecap="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      }
+                    </div>
+                    <span class="mp-mod__name">{{ mod.name }}</span>
+                    @if (mod.priceDelta > 0) {
+                      <span class="mp-mod__price">
+                        +{{ fmt(mod.priceDelta) }} {{ currency() }}
+                      </span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Special note -->
+          <div class="mp-note">
+            <label class="mp-note__label" for="specNote">
+              Special instructions
+              <span class="mp-optional">optional</span>
+            </label>
+            <textarea id="specNote" class="mp-note__input"
+                      [ngModel]="specialNote()"
+                      (ngModelChange)="setSpecialNote($event)"
+                      placeholder="No onions, extra sauce…"
+                      rows="2"></textarea>
+          </div>
+
+          <!-- Footer: qty + add -->
+          <div class="mp-modal__footer">
+            <div class="mp-stepper">
+              <button type="button" class="mp-stepper__btn"
+                      (click)="decModalQty()">−</button>
+              <span class="mp-stepper__val">{{ modalQty() }}</span>
+              <button type="button" class="mp-stepper__btn"
+                      (click)="incModalQty()">+</button>
+            </div>
+
+            <button class="mp-add-btn"
+                    [disabled]="!canAddToCart()"
+                    (click)="addToCart()"
+                    type="button">
+              Add to order
+              <span class="mp-add-btn__price">
+                {{ fmt(modalTotal()) }} {{ currency() }}
+              </span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════
+       CART DRAWER
+  ══════════════════════════════════════════════════════════════════ -->
+  @if (cartOpen()) {
+    <div class="mp-cart-backdrop" (click)="closeCart()"></div>
+    <div class="mp-cart" role="dialog" aria-label="Your order">
+
+      <div class="mp-cart__head">
+        <h2 class="mp-cart__title">Your order</h2>
+        <button class="mp-cart__close" (click)="closeCart()"
+                aria-label="Close" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="mp-cart__items">
+        @for (ci of cartItems(); track ci.cartId) {
+          <div class="mp-cart-row">
+            <div class="mp-cart-row__info">
+              <span class="mp-cart-row__name">{{ ci.item.name }}</span>
+              @if (ci.variant) {
+                <span class="mp-cart-row__meta">{{ ci.variant.name }}</span>
+              }
+              @for (mod of ci.modifiers; track mod.id) {
+                <span class="mp-cart-row__meta">+ {{ mod.name }}</span>
+              }
+              @if (ci.specialNote) {
+                <span class="mp-cart-row__note">📝 {{ ci.specialNote }}</span>
+              }
+            </div>
+            <div class="mp-cart-row__right">
+              <div class="mp-cart-stepper">
+                <button type="button"
+                        (click)="updateQty(ci.cartId, ci.quantity - 1)">−</button>
+                <span>{{ ci.quantity }}</span>
+                <button type="button"
+                        (click)="updateQty(ci.cartId, ci.quantity + 1)">+</button>
+              </div>
+              <span class="mp-cart-row__total">
+                {{ fmt(ci.lineTotal) }}
+                <span class="mp-curr">{{ currency() }}</span>
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="mp-cart__foot">
+        <div class="mp-cart__total-row">
+          <span class="mp-cart__total-label">Total</span>
+          <span class="mp-cart__total-val">
+            {{ fmt(cartSubtotal()) }} {{ currency() }}
+          </span>
+        </div>
+        <button class="mp-checkout-btn" (click)="openCheckout()" type="button">
+          Place order via WhatsApp
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════
+       CHECKOUT FORM
+  ══════════════════════════════════════════════════════════════════ -->
+  @if (orderStep() === 'checkout') {
+    <div class="mp-backdrop" (click)="backToCart()">
+      <div class="mp-checkout" (click)="$event.stopPropagation()">
+
+        <div class="mp-checkout__head">
+          <h2 class="mp-checkout__title">Complete your order</h2>
+          <button class="mp-modal__close" (click)="backToCart()"
+                  aria-label="Back" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="mp-checkout__body">
+
+          <!-- Order type -->
+          <div class="mp-co-field">
+            <label class="mp-co-label">Order type</label>
+            <div class="mp-type-tabs">
+              <button type="button" class="mp-type-tab"
+                      [class.mp-type-tab--active]="orderType() === 'dine_in'"
+                      (click)="setOrderTypeDineIn()">
+                🪑 Dine in
+              </button>
+              <button type="button" class="mp-type-tab"
+                      [class.mp-type-tab--active]="orderType() === 'takeaway'"
+                      (click)="setOrderTypeTakeaway()">
+                🥡 Takeaway
+              </button>
+            </div>
+          </div>
+
+          <!-- Table number (dine-in only) -->
+          @if (orderType() === 'dine_in') {
+            <div class="mp-co-field">
+              <label class="mp-co-label" for="tableNum">Table number</label>
+              <input id="tableNum" type="text" class="mp-co-input"
+                     [ngModel]="tableNumber()"
+                     (ngModelChange)="setTableNumber($event)"
+                     placeholder="5">
+            </div>
+          }
+
+          <!-- Name -->
+          <div class="mp-co-field">
+            <label class="mp-co-label" for="coName">
+              Your name
+              <span class="mp-optional">optional</span>
+            </label>
+            <input id="coName" type="text" class="mp-co-input"
+                   [ngModel]="customerName()"
+                   (ngModelChange)="setCustomerName($event)"
+                   placeholder="Ahmed">
+          </div>
+
+          <!-- Phone -->
+          <div class="mp-co-field">
+            <label class="mp-co-label" for="coPhone">
+              Phone number
+              <span class="mp-optional">optional</span>
+            </label>
+            <input id="coPhone" type="tel" class="mp-co-input"
+                   [ngModel]="customerPhone()"
+                   (ngModelChange)="setCustomerPhone($event)"
+                   placeholder="+216 22 000 000">
+          </div>
+
+          <!-- Notes -->
+          <div class="mp-co-field">
+            <label class="mp-co-label" for="coNotes">
+              Notes
+              <span class="mp-optional">optional</span>
+            </label>
+            <textarea id="coNotes" class="mp-co-input mp-co-textarea"
+                      [ngModel]="orderNotes()"
+                      (ngModelChange)="setOrderNotes($event)"
+                      placeholder="Any special requests…"
+                      rows="2"></textarea>
+          </div>
+
+          @if (orderError()) {
+            <p class="mp-order-error">{{ orderError() }}</p>
+          }
+
+          <div class="mp-co-summary">
+            <span>{{ cartCount() }} item{{ cartCount() > 1 ? 's' : '' }}</span>
+            <span class="mp-co-summary__total">
+              {{ fmt(cartSubtotal()) }} {{ currency() }}
+            </span>
+          </div>
+        </div>
+
+        <div class="mp-checkout__foot">
+          <button type="button" class="mp-co-back" (click)="backToCart()">
+            ← Back
+          </button>
+          <button type="button" class="mp-co-submit"
+                  [disabled]="submitting()"
+                  (click)="submitOrder()">
+            @if (submitting()) {
+              <span class="mp-ring mp-ring--sm"></span>
+            }
+            Send via WhatsApp
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════
+       SUCCESS SCREEN
+  ══════════════════════════════════════════════════════════════════ -->
+  @if (orderStep() === 'success') {
+    <div class="mp-backdrop">
+      <div class="mp-success">
+        <div class="mp-success__icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2 class="mp-success__title">Order sent!</h2>
+        <p class="mp-success__ref">
+          Reference: <strong>{{ orderRef() }}</strong>
+        </p>
+        <p class="mp-success__desc">
+          Your order has been sent to the restaurant via WhatsApp.
+          They'll confirm it shortly.
+        </p>
+        <button class="mp-success__btn" (click)="backToMenu()" type="button">
+          Back to menu
+        </button>
+      </div>
+    </div>
+  }
+
+}

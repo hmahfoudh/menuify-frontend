@@ -1,0 +1,29 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+
+/* Global reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+ 
+html, body {
+  height: 100%;
+}
+ 
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #0d0c0b;
+  color: #f0ebe2;
+  line-height: 1.5;
+}
+ 
+/* Remove autofill yellow in Chrome */
+input:-webkit-autofill {
+  transition: background-color 5000s ease-in-out 0s;
+}

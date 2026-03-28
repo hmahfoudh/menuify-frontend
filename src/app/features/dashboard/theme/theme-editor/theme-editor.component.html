@@ -1,0 +1,420 @@
+<div class="editor">
+
+  <!-- ════════════════════════════════════════════════════════════════
+       LEFT PANEL — controls
+  ════════════════════════════════════════════════════════════════ -->
+  <aside class="controls">
+
+    <!-- Header -->
+    <div class="controls-head">
+      <div>
+        <h2 class="controls-title">Theme Editor</h2>
+        @if (theme()?.hasUnpublishedChanges) {
+          <span class="unsaved-dot" title="You have unsaved changes"></span>
+        }
+      </div>
+      @if (theme()?.hasUnpublishedChanges) {
+        <span class="unsaved-label">Unsaved changes</span>
+      }
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+      @for (tab of tabs; track tab.id) {
+        <button class="tab-btn"
+                [class.tab-btn--active]="activeTab() === tab.id"
+                (click)="setTab(tab.id)"
+                type="button">
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Alerts -->
+    @if (error()) {
+      <div class="alert alert--error">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ error() }}
+        <button class="alert-close" (click)="error.set(null)">✕</button>
+      </div>
+    }
+    @if (success()) {
+      <div class="alert alert--success">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        {{ success() }}
+      </div>
+    }
+
+    <!-- Loading -->
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner-md"></div>
+        <span>Loading theme…</span>
+      </div>
+    }
+
+    @if (!loading()) {
+      <div class="tab-content">
+
+        <!-- ══════════════════════════════════
+             LAYOUT TAB
+        ══════════════════════════════════ -->
+        @if (activeTab() === 'template') {
+          <div class="section">
+            <p class="section-desc">
+              Choose the layout structure of your menu page.
+              Each layout has a different visual style.
+            </p>
+
+            @if (templates().length === 0) {
+              <p class="empty-hint">No templates available</p>
+            }
+
+            <div class="template-grid">
+              @for (t of templates(); track t.id) {
+                <button class="template-card"
+                        [class.template-card--active]="theme()?.template?.id === t.id"
+                        [class.template-card--locked]="!isPlanSufficient(t.planRequired)"
+                        (click)="isPlanSufficient(t.planRequired) && selectTemplate(t)"
+                        type="button"
+                        [attr.title]="!isPlanSufficient(t.planRequired) ? t.planRequired + ' plan required' : ''">
+
+                  <!-- Thumbnail -->
+                  <div class="template-thumb">
+                    @if (t.thumbnailUrl) {
+                      <img [src]="t.thumbnailUrl" [alt]="t.name" loading="lazy">
+                    } @else {
+                      <!-- Wireframe placeholder -->
+                      <div class="thumb-wireframe">
+                        <div class="wf-nav"></div>
+                        <div class="wf-hero"></div>
+                        <div class="wf-grid">
+                          <div class="wf-card"></div>
+                          <div class="wf-card"></div>
+                          <div class="wf-card"></div>
+                        </div>
+                      </div>
+                    }
+
+                    <!-- Plan lock overlay -->
+                    @if (!isPlanSufficient(t.planRequired)) {
+                      <div class="lock-overlay">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        <span>{{ t.planRequired }}</span>
+                      </div>
+                    }
+
+                    <!-- Active checkmark -->
+                    @if (theme()?.template?.id === t.id) {
+                      <div class="active-check">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="template-info">
+                    <span class="template-name">{{ t.name }}</span>
+                    <span class="template-desc">{{ t.description }}</span>
+                  </div>
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- ══════════════════════════════════
+             PRESET TAB
+        ══════════════════════════════════ -->
+        @if (activeTab() === 'preset') {
+          <div class="section">
+            <p class="section-desc">
+              Pick a colour palette as your starting point.
+              You can fine-tune individual tokens in the Tokens tab.
+            </p>
+
+            <div class="preset-grid">
+              @for (p of presets(); track p.id) {
+                <button class="preset-card"
+                        [class.preset-card--active]="theme()?.preset?.id === p.id"
+                        (click)="selectPreset(p)"
+                        type="button">
+
+                  <!-- Swatch -->
+                  <div class="preset-swatch"
+                       [style.background]="p.swatchColor">
+                    @if (theme()?.preset?.id === p.id) {
+                      <svg class="preset-check" width="14" height="14" viewBox="0 0 24 24"
+                           fill="none" stroke="currentColor"
+                           stroke-width="3" stroke-linecap="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    }
+                  </div>
+
+                  <span class="preset-name">{{ p.name }}</span>
+                </button>
+              }
+            </div>
+
+            @if (theme()?.preset) {
+              <div class="active-preset-info">
+                <div class="preset-badge">
+                  <div class="preset-badge-swatch"
+                       [style.background]="theme()!.preset!.swatchColor"></div>
+                  {{ theme()!.preset!.name }}
+                </div>
+                <span class="active-label">Current preset</span>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ══════════════════════════════════
+             TOKENS TAB
+        ══════════════════════════════════ -->
+        @if (activeTab() === 'tokens') {
+          <div class="section">
+            <div class="section-head">
+              <p class="section-desc">
+                Override individual design tokens on top of the preset.
+                Changes are auto-saved after you stop editing.
+              </p>
+              <button class="btn-ghost-sm" (click)="resetToPreset()"
+                      type="button">
+                Reset all
+              </button>
+            </div>
+
+            <div class="token-groups">
+
+              <!-- Colors group -->
+              <div class="token-group">
+                <h4 class="token-group-title">Colors</h4>
+                @for (field of tokenFields; track field.key) {
+                  @if (field.type === 'color') {
+                    <div class="token-row">
+                      <label class="token-label" [for]="'tok-' + field.key">
+                        {{ field.label }}
+                      </label>
+                      <div class="color-token-wrap">
+                        <div class="color-preview-swatch"
+                             [style.background]="getTokenVal(field)">
+                        </div>
+                        <input [id]="'tok-' + field.key"
+                               type="color"
+                               class="color-token-input"
+                               [value]="getTokenVal(field)"
+                               (input)="onTokenChange(field, $any($event.target).value)">
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+
+              <!-- Typography group -->
+              <div class="token-group">
+                <h4 class="token-group-title">Typography</h4>
+                @for (field of tokenFields; track field.key) {
+                  @if (field.type === 'select') {
+                    <div class="token-row token-row--col">
+                      <label class="token-label" [for]="'tok-' + field.key">
+                        {{ field.label }}
+                      </label>
+                      <select [id]="'tok-' + field.key"
+                              class="token-select"
+                              [value]="getTokenVal(field)"
+                              (change)="onTokenChange(field, $any($event.target).value)">
+                        @for (opt of field.options; track opt) {
+                          <option [value]="opt" [selected]="getTokenVal(field) === opt">
+                            {{ opt }}
+                          </option>
+                        }
+                      </select>
+                    </div>
+                  }
+                }
+              </div>
+
+              <!-- Shape group -->
+              <div class="token-group">
+                <h4 class="token-group-title">Shape</h4>
+                @for (field of tokenFields; track field.key) {
+                  @if (field.type === 'range') {
+                    <div class="token-row token-row--col">
+                      <div class="range-label-row">
+                        <label class="token-label" [for]="'tok-' + field.key">
+                          {{ field.label }}
+                        </label>
+                        <span class="range-val">
+                          {{ getRangeNumeric(field) }}{{ field.unit }}
+                        </span>
+                      </div>
+                      <input [id]="'tok-' + field.key"
+                             type="range"
+                             class="range-input"
+                             [min]="field.min ?? 0"
+                             [max]="field.max ?? 24"
+                             [value]="getRangeNumeric(field)"
+                             (input)="onTokenChange(field, $any($event.target).value)">
+                    </div>
+                  }
+                }
+              </div>
+
+            </div>
+          </div>
+        }
+
+        <!-- ══════════════════════════════════
+             CUSTOM CSS TAB
+        ══════════════════════════════════ -->
+        @if (activeTab() === 'css') {
+          <div class="section">
+            @if (tenant()?.plan !== 'PREMIUM') {
+              <div class="plan-gate">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <div>
+                  <p class="gate-title">Premium feature</p>
+                  <p class="gate-desc">Custom CSS lets you override any style on your menu page. Available on the Premium plan.</p>
+                </div>
+              </div>
+            } @else {
+              <p class="section-desc">
+                Raw CSS injected after all token-based styles.
+                Use <code>var(--colors-accent)</code> to reference tokens.
+              </p>
+
+              <textarea class="css-editor"
+                        [(ngModel)]="localCss"
+                        placeholder=".product-card {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.header {
+  backdrop-filter: blur(10px);
+}"
+                        spellcheck="false"
+                        autocomplete="off"
+                        autocorrect="off"
+                        rows="16"></textarea>
+
+              <div class="css-footer">
+                <button type="button" class="btn-ghost-sm"
+                        (click)="localCss.set('')">
+                  Clear
+                </button>
+                <button type="button" class="btn-primary-sm"
+                        [disabled]="saving()"
+                        (click)="saveCustomCss()">
+                  @if (saving()) { <span class="spinner-sm spinner-sm--dark"></span> }
+                  Save CSS
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    }
+  </aside>
+
+  <!-- ════════════════════════════════════════════════════════════════
+       RIGHT PANEL — live preview
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="preview-panel">
+
+    <!-- Preview toolbar -->
+    <div class="preview-toolbar">
+      <div class="preview-url-chip">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        {{ previewUrl() }}
+      </div>
+
+      <div class="preview-viewport-btns">
+        <button class="viewport-btn"
+                [class.viewport-btn--active]="previewMode() === 'desktop'"
+                (click)="previewMode.set('desktop')"
+                title="Desktop preview" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </button>
+        <button class="viewport-btn"
+                [class.viewport-btn--active]="previewMode() === 'mobile'"
+                (click)="previewMode.set('mobile')"
+                title="Mobile preview" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+            <line x1="12" y1="18" x2="12.01" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <a [href]="previewUrl()" target="_blank" rel="noopener"
+         class="open-link" title="Open in new tab">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          <polyline points="15 3 21 3 21 9"/>
+          <line x1="10" y1="14" x2="21" y2="3"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- iframe container -->
+    <div class="preview-frame-wrap"
+         [class.preview-frame-wrap--mobile]="previewMode() === 'mobile'">
+
+      <!-- Device chrome for mobile view -->
+      @if (previewMode() === 'mobile') {
+        <div class="mobile-chrome">
+          <div class="mobile-notch"></div>
+        </div>
+      }
+
+      @if (saving()) {
+        <div class="preview-saving">
+          <div class="spinner-md"></div>
+        </div>
+      }
+
+      <iframe #previewFrame
+              [src]="previewUrl() | trustedUrl"
+              class="preview-iframe"
+              title="Menu page preview"
+              loading="lazy"
+              sandbox="allow-scripts allow-same-origin allow-forms">
+      </iframe>
+    </div>
+  </div>
+
+</div>

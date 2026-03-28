@@ -1,0 +1,169 @@
+<div class="shell" [class.sidebar-open]="sidebarOpen()" [class.sidebar-collapsed]="sidebarCollapsed()">
+
+    <!-- ── MOBILE OVERLAY ─────────────────────────────────────────────────── -->
+    <div class="overlay" (click)="closeSidebar()" aria-hidden="true"></div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════════════════════════════════════ -->
+    <aside class="sidebar" role="navigation" aria-label="Main navigation">
+
+        <!-- Brand -->
+        <div class="sidebar-brand">
+            <a routerLink="/dashboard" class="brand-link" (click)="closeSidebar()">
+                <span class="brand-icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 11l19-9-9 19-2-8-8-2z" />
+                    </svg>
+                </span>
+                <span class="brand-name">Menuify</span>
+            </a>
+
+            <!-- Desktop collapse toggle -->
+            <button class="collapse-btn" (click)="toggleCollapsed()"
+                [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
+                    @if (sidebarCollapsed()) {
+                    <polyline points="9 18 15 12 9 6" />
+                    } @else {
+                    <polyline points="15 18 9 12 15 6" />
+                    }
+                </svg>
+            </button>
+        </div>
+
+        <!-- Tenant info -->
+        <div class="sidebar-tenant">
+            <div class="tenant-avatar">
+                @if (tenant()?.logoUrl) {
+                <img [src]="tenant()!.logoUrl" [alt]="tenant()!.name" class="tenant-logo">
+                } @else {
+                <span class="tenant-initials">
+                    {{ tenant()?.name?.charAt(0) ?? 'M' }}
+                </span>
+                }
+            </div>
+            <div class="tenant-info">
+                <span class="tenant-name">{{ tenant()?.name ?? 'My Restaurant' }}</span>
+                <span class="tenant-plan" [class]="'plan-' + (tenant()?.plan ?? 'starter' | lowercase)">
+                    {{ planLabel() }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="sidebar-divider"></div>
+
+        <!-- Navigation -->
+        <nav class="sidebar-nav">
+            <ul role="list">
+                @for (item of navItems; track item.route) {
+                <li>
+                    <a [routerLink]="item.route" routerLinkActive="nav-link--active" class="nav-link"
+                        [title]="sidebarCollapsed() ? item.label : ''" (click)="closeSidebar()">
+
+                        <!-- Icon -->
+                        <span class="nav-icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path [attr.d]="item.icon" />
+                            </svg>
+                        </span>
+
+                        <!-- Label (hidden when collapsed) -->
+                        <span class="nav-label">{{ item.label }}</span>
+
+                        <!-- Active indicator bar -->
+                        <span class="nav-active-bar" aria-hidden="true"></span>
+                    </a>
+                </li>
+                }
+            </ul>
+        </nav>
+
+        <!-- Spacer -->
+        <div class="sidebar-spacer"></div>
+
+        <!-- Divider -->
+        <div class="sidebar-divider"></div>
+
+        <!-- User profile -->
+        <div class="sidebar-user">
+            <div class="user-avatar">{{ userInitials() }}</div>
+            <div class="user-info">
+                <span class="user-name">{{ user()?.fullName ?? user()?.email }}</span>
+                <span class="user-role">{{ user()?.role | titlecase }}</span>
+            </div>
+            <button class="logout-btn" (click)="logout()" title="Sign out" aria-label="Sign out" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+       MAIN AREA
+  ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <!-- Mobile hamburger -->
+            <button class="hamburger" (click)="toggleSidebar()" aria-label="Toggle navigation" type="button">
+                <span></span><span></span><span></span>
+            </button>
+
+            <!-- Page title -->
+            <h1 class="topbar-title">{{ pageTitle() }}</h1>
+
+            <!-- Right actions -->
+            <div class="topbar-end">
+
+                <!-- Trial banner (shown when on trial) -->
+                @if (tenant()?.onTrial) {
+                <a routerLink="/dashboard/subscription" class="trial-chip">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    Trial active
+                </a>
+                }
+
+                <!-- Menu URL shortcut -->
+                @if (tenant()?.subdomain) {
+                <a [href]="'https://' + tenant()!.subdomain + '.menuify.tn'" target="_blank" rel="noopener"
+                    class="menu-link-btn" title="Open your menu page">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                    <span class="menu-link-text">View menu</span>
+                </a>
+                }
+
+                <!-- Notification bell -->
+                <app-notification-bell></app-notification-bell>
+
+            </div>
+        </header>
+
+        <!-- PAGE CONTENT -->
+        <main class="page-content" role="main">
+            <router-outlet />
+        </main>
+
+    </div>
+
+</div>

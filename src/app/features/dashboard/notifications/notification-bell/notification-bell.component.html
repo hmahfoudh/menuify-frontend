@@ -1,0 +1,121 @@
+<div class="bell-wrap">
+
+  <!-- ── BELL BUTTON ──────────────────────────────────────────────────────── -->
+  <button class="bell-btn"
+          [class.bell-btn--active]="open()"
+          [class.bell-btn--has-unread]="hasUnread()"
+          (click)="toggle()"
+          [attr.aria-label]="hasUnread()
+            ? unreadCount() + ' unread notifications'
+            : 'Notifications'"
+          [attr.aria-expanded]="open()"
+          type="button">
+
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+
+    <!-- Unread count badge -->
+    @if (hasUnread()) {
+      <span class="bell-badge" aria-hidden="true">
+        {{ unreadCount() > 9 ? '9+' : unreadCount() }}
+      </span>
+    }
+  </button>
+
+  <!-- ── DROPDOWN ─────────────────────────────────────────────────────────── -->
+  @if (open()) {
+    <div class="dropdown" role="dialog" aria-label="Notifications">
+
+      <!-- Dropdown header -->
+      <div class="dropdown-head">
+        <div class="dropdown-title-row">
+          <h3 class="dropdown-title">Notifications</h3>
+          @if (hasUnread()) {
+            <span class="unread-chip">{{ unreadCount() }} new</span>
+          }
+        </div>
+        @if (hasUnread()) {
+          <button class="mark-all-btn"
+                  [disabled]="markingAll()"
+                  (click)="markAll()"
+                  type="button">
+            @if (markingAll()) {
+              <span class="spinner-xs"></span>
+            }
+            Mark all read
+          </button>
+        }
+      </div>
+
+      <!-- Notification list -->
+      <div class="notif-list" role="list">
+
+        @if (notifications().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+            </div>
+            <p class="empty-text">You're all caught up</p>
+          </div>
+        }
+
+        @for (n of notifications(); track n.id; let i = $index) {
+          <div class="notif-row"
+               role="listitem"
+               [class.notif-row--unread]="!n.isRead"
+               [class.notif-row--clickable]="!!n.actionUrl"
+               [style.animation-delay]="(i * 0.04) + 's'"
+               (click)="clickNotification(n)">
+
+            <!-- Icon -->
+            <div class="notif-icon"
+                 [style.background]="getMeta(n.type).color + '1a'"
+                 [style.border-color]="getMeta(n.type).color + '33'">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                   [attr.stroke]="getMeta(n.type).color"
+                   stroke-width="2" stroke-linecap="round"
+                   stroke-linejoin="round">
+                <path [attr.d]="getMeta(n.type).icon"/>
+              </svg>
+            </div>
+
+            <!-- Content -->
+            <div class="notif-content">
+              <div class="notif-title-row">
+                <span class="notif-title">{{ n.title }}</span>
+                <span class="notif-time">{{ formatTime(n.createdAt) }}</span>
+              </div>
+              <p class="notif-body">{{ n.body }}</p>
+            </div>
+
+            <!-- Unread dot -->
+            @if (!n.isRead) {
+              <span class="unread-dot" aria-label="Unread"></span>
+            }
+
+          </div>
+        }
+      </div>
+
+      <!-- Dropdown footer -->
+      @if (notifications().length > 0) {
+        <div class="dropdown-footer">
+          <span class="footer-hint">
+            Only showing unread notifications
+          </span>
+        </div>
+      }
+
+    </div>
+  }
+
+</div>
