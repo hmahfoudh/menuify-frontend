@@ -591,3 +591,13 @@
   .step2-actions { flex-direction: column-reverse; }
   .btn-submit--flex { width: 100%; }
 }
+
+// Server-side field error — slightly different style from client-side
+// to visually distinguish "server rejected this" from "you forgot to fill it"
+.field-error--server {
+  display:     flex;
+  align-items: center;
+  gap:         0.3rem;
+  color:       #f4a261;   // amber vs red — softer, "already taken" not "wrong"
+  svg { flex-shrink: 0; }
+}

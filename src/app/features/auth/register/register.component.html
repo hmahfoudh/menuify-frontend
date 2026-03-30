@@ -93,7 +93,7 @@
           </div>
 
           <!-- Email -->
-          <div class="field" [class.field--error]="email.invalid && email.touched">
+          <div class="field" [class.field--error]="(email.invalid && email.touched) || !!serverError('email')">
             <label class="field-label" for="regEmail">Email address</label>
             <div class="field-input-wrap">
               <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24"
@@ -109,6 +109,17 @@
             @if (email.invalid && email.touched) {
               <span class="field-error">
                 {{ email.hasError('required') ? 'Email is required' : 'Enter a valid email' }}
+              </span>
+            }
+            @if (serverError('email')) {
+              <span class="field-error field-error--server">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                {{ serverError('email') }}
               </span>
             }
           </div>
@@ -206,7 +217,7 @@
           </div>
 
           <!-- Subdomain preview -->
-          <div class="field" [class.field--error]="subdomain.invalid && subdomain.touched">
+          <div class="field" [class.field--error]="(subdomain.invalid && subdomain.touched) || !!serverError('tenant.subdomain')">
             <label class="field-label" for="subdomain">Your menu URL</label>
             <div class="field-input-wrap">
               <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24"
@@ -227,7 +238,18 @@
                     : 'Subdomain is required' }}
               </span>
             }
-            @if (subdomain.valid && subdomain.value) {
+            @if (serverError('tenant.subdomain')) {
+              <span class="field-error field-error--server">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                {{ serverError('tenant.subdomain') }}
+              </span>
+            }
+            @if (!serverError('tenant.subdomain') && subdomain.valid && subdomain.value) {
               <span class="field-hint">
                 {{ subdomain.value }}.menuify.tn
               </span>

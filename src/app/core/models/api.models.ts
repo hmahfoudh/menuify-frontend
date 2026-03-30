@@ -13,3 +13,10 @@ export interface PageResponse<T> {
   totalPages:    number;
   last:          boolean;
 }
+
+export interface ErrorResponse{
+  code: string;
+  message: string;
+  errors?: { [field: string]: string };
+  timestamp: string;
+}

@@ -7,6 +7,7 @@ import { AuthResponse, LoginRequest, RegisterRequest, UserResponse } from '../mo
 import { ApiResponse } from '../models/api.models';
 import { LocalStorageService } from './local-storage.service';
 import { TenantResponse } from '../models/tenant.models';
+import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -29,13 +30,13 @@ export class AuthService {
 
     constructor(private http: HttpClient, private router: Router) { }
 
-    login(req: LoginRequest) {
+    login(req: LoginRequest) : Observable<ApiResponse<AuthResponse>> {
         return this.http
             .post<ApiResponse<AuthResponse>>(`${this.api}/api/auth/login`, req)
             .pipe(tap(res => this.storeSession(res.data)));
     }
 
-    register(req: RegisterRequest) {
+    register(req: RegisterRequest): Observable<ApiResponse<AuthResponse>> {
         return this.http
             .post<ApiResponse<AuthResponse>>(`${this.api}/api/auth/register`, req)
             .pipe(tap(res => this.storeSession(res.data)));
