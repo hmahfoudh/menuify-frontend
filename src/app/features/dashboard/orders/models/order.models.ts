@@ -24,18 +24,22 @@ export interface OrderLineResponse {
 }
 
 export interface OrderResponse {
-  id:             string;
-  reference:      string;
-  customerName:   string | null;
-  customerPhone:  string | null;
-  orderType:      'dine_in' | 'takeaway' | 'delivery';
-  tableNumber:    string | null;
-  subtotal:       number;
-  total:          number;
-  status:         OrderStatus;
-  notes:          string | null;
-  createdAt:      string;
-  lines:          OrderLineResponse[];
+  id:               string;
+  reference:        string;
+  customerName:     string | null;
+  customerPhone:    string | null;
+  orderType:        'dine_in' | 'takeaway' | 'delivery';
+  tableNumber:      string | null;
+  subtotal:         number;
+  total:            number;
+  status:           OrderStatus;
+  notes:            string | null;
+  createdAt:        string;
+  confirmedAt:      string | null;
+  estimatedMinutes: number | null;
+  restaurantMessage:string | null;
+  minutesRemaining: number | null;
+  lines:            OrderLineResponse[];
 }
 
 export interface PageResponse<T> {

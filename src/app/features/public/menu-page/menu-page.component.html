@@ -125,20 +125,68 @@
     }
   </main>
 
-  <!-- CART FAB -->
-  @if (!cartEmpty()) {
-    <button class="mp-fab" (click)="toggleCart()" type="button"
+  <!-- ══════════════════════════════════════════════════════════════
+       PERSISTENT BOTTOM BAR
+       Always visible. Shows:
+         - Cart section (left): item count + total, opens cart drawer
+         - Order tracker (right): live status pill when order in progress
+       The bar is always rendered so there's no layout jump when
+       items are added or an order is placed.
+  ══════════════════════════════════════════════════════════════════ -->
+  <div class="mp-bottom-bar" [class.mp-bottom-bar--has-order]="hasActiveOrders()">
+
+    <!-- ── Cart side ─────────────────────────────────────────────── -->
+    <button class="mp-bottom-bar__cart" (click)="toggleCart()" type="button"
             aria-label="View cart">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <circle cx="9" cy="21" r="1"/>
-        <circle cx="20" cy="21" r="1"/>
-        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-      </svg>
-      <span class="mp-fab__count">{{ cartCount() }}</span>
-      <span class="mp-fab__total">{{ fmt(cartSubtotal()) }} {{ currency() }}</span>
+      <div class="mp-bbc__icon-wrap" [class.mp-bbc__icon-wrap--filled]="!cartEmpty()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <circle cx="9" cy="21" r="1"/>
+          <circle cx="20" cy="21" r="1"/>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        @if (!cartEmpty()) {
+          <span class="mp-bbc__count">{{ cartCount() }}</span>
+        }
+      </div>
+      <div class="mp-bbc__text">
+        @if (cartEmpty()) {
+          <span class="mp-bbc__empty-label">Your cart</span>
+        } @else {
+          <span class="mp-bbc__items-label">
+            {{ cartCount() }} item{{ cartCount() > 1 ? 's' : '' }}
+          </span>
+          <span class="mp-bbc__total">
+            {{ fmt(cartSubtotal()) }} {{ currency() }}
+          </span>
+        }
+      </div>
     </button>
-  }
+
+    <!-- ── Divider (only when orders exist) ────────────────────── -->
+    @if (hasActiveOrders()) {
+      <div class="mp-bottom-bar__divider"></div>
+    }
+
+    <!-- ── Single track button ─────────────────────────────────── -->
+    @if (hasActiveOrders()) {
+      <button class="mp-bottom-bar__tracker"
+              (click)="openTracking()"
+              type="button"
+              aria-label="Track your orders">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <div class="mp-bbt__text">
+          <span class="mp-bbt__status">Track orders</span>
+        </div>
+        <span class="mp-bbt__count">{{ activeOrders().length }}</span>
+      </button>
+    }
+
+  </div>
 
   <!-- ══════════════════════════════════════════════════════════════
        ITEM MODAL
@@ -293,8 +341,39 @@
     <div class="mp-cart-backdrop" (click)="closeCart()"></div>
     <div class="mp-cart" role="dialog" aria-label="Your order">
 
+      <!-- Header with tab switcher -->
       <div class="mp-cart__head">
-        <h2 class="mp-cart__title">Your order</h2>
+        <div class="mp-cart__tabs">
+          <button class="mp-cart__tab"
+                  [class.mp-cart__tab--active]="cartMode() === 'cart'"
+                  (click)="setCartMode('cart')" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            Cart
+            @if (!cartEmpty()) {
+              <span class="mp-cart__tab-badge">{{ cartCount() }}</span>
+            }
+          </button>
+          @if (hasActiveOrders()) {
+            <button class="mp-cart__tab"
+                    [class.mp-cart__tab--active]="cartMode() === 'orders'"
+                    (click)="setCartMode('orders')" type="button">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Orders
+              <span class="mp-cart__tab-badge mp-cart__tab-badge--accent">
+                {{ activeOrders().length }}
+              </span>
+            </button>
+          }
+        </div>
         <button class="mp-cart__close" (click)="closeCart()"
                 aria-label="Close" type="button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -305,6 +384,115 @@
         </button>
       </div>
 
+      <!-- ── Active orders tab ─────────────────────────────────────────────── -->
+      @if (cartMode() === 'orders' && hasActiveOrders()) {
+        <div class="mp-cart__order-progress">
+
+          @for (order of activeOrders(); track order.reference) {
+            <div class="mp-cop__order-card">
+
+              <!-- Status card -->
+              <div class="mp-cop__status-card
+                          mp-cop__status-card--{{ getTrackingMeta(order.status).color }}">
+                <div class="mp-cop__status-top">
+                  <span class="mp-cop__dot mp-cop__dot--{{ getTrackingMeta(order.status).color }}">
+                  </span>
+                  <span class="mp-cop__status-label">
+                    {{ getTrackingMeta(order.status).label }}
+                  </span>
+                  <span class="mp-cop__order-ref-inline">{{ order.reference }}</span>
+                </div>
+                <p class="mp-cop__status-desc">
+                  {{ getTrackingMeta(order.status).desc }}
+                </p>
+
+                <!-- ETA -->
+                @if (order.minutesRemaining != null
+                     && !getTrackingMeta(order.status).terminal) {
+                  <div class="mp-cop__eta">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    @if (order.minutesRemaining === 0) {
+                      Ready any moment now!
+                    } @else {
+                      Ready in ~<strong>{{ order.minutesRemaining }} min</strong>
+                    }
+                  </div>
+                }
+
+                @if (order.restaurantMessage) {
+                  <p class="mp-cop__message">"{{ order.restaurantMessage }}"</p>
+                }
+              </div>
+
+              <!-- Progress steps -->
+              @if (order.status !== 'CANCELLED') {
+                <div class="mp-cop__steps">
+                  @for (step of trackingSteps; track step; let i = $index) {
+                    <div class="mp-cop__step"
+                         [class.mp-cop__step--done]="isStepDone(step, order.status)"
+                         [class.mp-cop__step--active]="isStepActive(step, order.status)">
+                      <div class="mp-cop__step-dot">
+                        @if (isStepDone(step, order.status)) {
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none"
+                               stroke="currentColor" stroke-width="4"
+                               stroke-linecap="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        }
+                      </div>
+                      @if (i < trackingSteps.length - 1) {
+                        <div class="mp-cop__step-line"
+                             [class.mp-cop__step-line--done]="isStepDone(step, order.status)">
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="mp-cop__step-labels">
+                  @for (step of trackingSteps; track step) {
+                    <span class="mp-cop__step-label"
+                          [class.mp-cop__step-label--active]="isStepActive(step, order.status)"
+                          [class.mp-cop__step-label--done]="isStepDone(step, order.status)">
+                      {{ trackingMetaMap[step].label }}
+                    </span>
+                  }
+                </div>
+              }
+
+              <!-- Done or View detail -->
+              @if (getTrackingMeta(order.status).terminal) {
+                <button class="mp-cop__done-btn"
+                        (click)="endTracking(order.reference)"
+                        type="button">
+                  Done with {{ order.reference }}
+                </button>
+              } @else {
+                <button class="mp-cop__track-btn"
+                        (click)="openTracking(order.reference); closeCart()"
+                        type="button">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2.5"
+                       stroke-linecap="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  Full tracking for {{ order.reference }}
+                </button>
+              }
+
+            </div>
+          }
+
+        </div>
+
+      } @else {
+
+      <!-- ── Cart tab — item list ──────────────────────────────────── -->
       <div class="mp-cart__items">
         @for (ci of cartItems(); track ci.cartId) {
           <div class="mp-cart-row">
@@ -345,12 +533,15 @@
           </span>
         </div>
         <button class="mp-checkout-btn" (click)="openCheckout()" type="button">
-          Place order via WhatsApp
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          Place order
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="5 12 12 19 19 5"/>
           </svg>
         </button>
       </div>
+
+      } <!-- end cart/orders tabs -->
     </div>
   }
 
@@ -462,7 +653,7 @@
             @if (submitting()) {
               <span class="mp-ring mp-ring--sm"></span>
             }
-            Send via WhatsApp
+            Place order
           </button>
         </div>
 
@@ -476,25 +667,304 @@
   @if (orderStep() === 'success') {
     <div class="mp-backdrop">
       <div class="mp-success">
+
+        <!-- Animated checkmark -->
         <div class="mp-success__icon">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="3" stroke-linecap="round"
+               stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>
-        <h2 class="mp-success__title">Order sent!</h2>
-        <p class="mp-success__ref">
-          Reference: <strong>{{ orderRef() }}</strong>
-        </p>
+
+        <h2 class="mp-success__title">Order received!</h2>
+
+        <!-- Order reference — the customer's tracking number -->
+        <div class="mp-success__ref-box">
+          <span class="mp-success__ref-label">Your order reference</span>
+          <span class="mp-success__ref-code">{{ latestOrderRef() }}</span>
+          <span class="mp-success__ref-hint">
+            Keep this for your records
+          </span>
+        </div>
+
+        <!-- Status steps -->
+        <div class="mp-success__steps">
+          <div class="mp-success__step mp-success__step--done">
+            <span class="mp-success__step-dot">✓</span>
+            <span>Order placed</span>
+          </div>
+          <div class="mp-success__step-line"></div>
+          <div class="mp-success__step mp-success__step--active">
+            <span class="mp-success__step-dot mp-success__step-dot--pulse"></span>
+            <span>Being prepared</span>
+          </div>
+          <div class="mp-success__step-line"></div>
+          <div class="mp-success__step">
+            <span class="mp-success__step-dot mp-success__step-dot--empty"></span>
+            <span>Ready</span>
+          </div>
+        </div>
+
         <p class="mp-success__desc">
-          Your order has been sent to the restaurant via WhatsApp.
-          They'll confirm it shortly.
+          The restaurant has received your order and will prepare it shortly.
+          No action needed on your end.
         </p>
-        <button class="mp-success__btn" (click)="backToMenu()" type="button">
-          Back to menu
-        </button>
+
+        <div class="mp-success__actions">
+          <button class="mp-success__btn mp-success__btn--track"
+                  (click)="openTracking()" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Track my order
+          </button>
+          <button class="mp-success__btn mp-success__btn--ghost"
+                  (click)="backToMenu()" type="button">
+            Back to menu
+          </button>
+        </div>
+
       </div>
     </div>
   }
+
+
+  <!-- ══════════════════════════════════════════════════════════════
+       ORDER TRACKING PANEL
+  ══════════════════════════════════════════════════════════════════ -->
+  @if (trackingView()) {
+    <div class="mp-backdrop" (click)="closeTracking()">
+      <div class="mp-tracking" (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="mp-tracking__head">
+          <div class="mp-tracking__head-left">
+            <h2 class="mp-tracking__title">Your orders</h2>
+            @if (activeOrders().length > 0) {
+              <span class="mp-tracking__count-badge">
+                {{ activeOrders().length }}
+              </span>
+            }
+          </div>
+          <button class="mp-modal__close" (click)="closeTracking()"
+                  aria-label="Close" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- ── Active orders list ──────────────────────────────────── -->
+        @if (activeOrders().length > 0) {
+          <div class="mp-tracking__orders">
+            @for (order of activeOrders(); track order.reference) {
+
+              <!-- Collapsed row — tap to expand -->
+              <div class="mp-tracking__order-row"
+                   [class.mp-tracking__order-row--expanded]="expandedRef() === order.reference"
+                   [class.mp-tracking__order-row--terminal]="getTrackingMeta(order.status).terminal">
+
+                <button class="mp-tracking__order-summary"
+                        (click)="expandOrder(order.reference)"
+                        type="button">
+                  <span class="mp-tros__dot
+                               mp-tros__dot--{{ getTrackingMeta(order.status).color }}">
+                  </span>
+                  <div class="mp-tros__info">
+                    <span class="mp-tros__ref">{{ order.reference }}</span>
+                    <span class="mp-tros__status">
+                      {{ getTrackingMeta(order.status).label }}
+                      @if (order.minutesRemaining != null
+                           && order.minutesRemaining > 0
+                           && !getTrackingMeta(order.status).terminal) {
+                        · ~{{ order.minutesRemaining }} min
+                      }
+                    </span>
+                  </div>
+                  <svg class="mp-tros__chevron"
+                       [class.mp-tros__chevron--open]="expandedRef() === order.reference"
+                       width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+
+                <!-- Expanded detail -->
+                @if (expandedRef() === order.reference) {
+                  <div class="mp-tracking__order-detail">
+
+                    <!-- Status hero -->
+                    <div class="mp-tracking__status-hero
+                                mp-tracking__status-hero--{{ getTrackingMeta(order.status).color }}">
+                      <span class="mp-tracking__status-label">
+                        {{ getTrackingMeta(order.status).label }}
+                      </span>
+                      <p class="mp-tracking__status-desc">
+                        {{ getTrackingMeta(order.status).desc }}
+                      </p>
+
+                      <!-- ETA + message -->
+                      @if (order.minutesRemaining != null
+                           && !getTrackingMeta(order.status).terminal) {
+                        <div class="mp-tracking__eta-countdown">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                               stroke="currentColor" stroke-width="2.5"
+                               stroke-linecap="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                          </svg>
+                          @if (order.minutesRemaining === 0) {
+                            <span>Ready any moment now!</span>
+                          } @else {
+                            <span>Ready in approximately
+                              <strong>{{ order.minutesRemaining }} min</strong>
+                            </span>
+                          }
+                        </div>
+                      }
+                      @if (order.restaurantMessage) {
+                        <div class="mp-tracking__restaurant-msg">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                               stroke="currentColor" stroke-width="2"
+                               stroke-linecap="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                          </svg>
+                          <span>{{ order.restaurantMessage }}</span>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Progress bar -->
+                    @if (order.status !== 'CANCELLED') {
+                      <div class="mp-tracking__progress">
+                        @for (step of trackingSteps; track step; let i = $index) {
+                          <div class="mp-tracking__progress-step"
+                               [class.mp-tracking__progress-step--done]="isStepDone(step, order.status)"
+                               [class.mp-tracking__progress-step--active]="isStepActive(step, order.status)">
+                            <div class="mp-tracking__step-dot">
+                              @if (isStepDone(step, order.status)) {
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                                     stroke="currentColor" stroke-width="3.5"
+                                     stroke-linecap="round">
+                                  <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                              }
+                            </div>
+                            @if (i < trackingSteps.length - 1) {
+                              <div class="mp-tracking__step-line"
+                                   [class.mp-tracking__step-line--done]="isStepDone(step, order.status)">
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                      <div class="mp-tracking__step-labels">
+                        @for (step of trackingSteps; track step) {
+                          <span class="mp-tracking__step-label"
+                                [class.mp-tracking__step-label--active]="isStepActive(step, order.status)"
+                                [class.mp-tracking__step-label--done]="isStepDone(step, order.status)">
+                            {{ trackingMetaMap[step].label }}
+                          </span>
+                        }
+                      </div>
+                    }
+
+                    <!-- Order lines -->
+                    <div class="mp-tracking__lines">
+                      <span class="mp-tracking__lines-title">Order summary</span>
+                      @for (line of order.lines; track line.id) {
+                        <div class="mp-tracking__line">
+                          <span class="mp-tracking__line-qty">{{ line.quantity }}×</span>
+                          <div class="mp-tracking__line-info">
+                            <span class="mp-tracking__line-name">
+                              {{ line.itemNameSnapshot }}
+                            </span>
+                            @if (line.variantNameSnapshot) {
+                              <span class="mp-tracking__line-variant">
+                                {{ line.variantNameSnapshot }}
+                              </span>
+                            }
+                            @for (mod of line.selectedModifiers; track mod.id) {
+                              <span class="mp-tracking__line-mod">
+                                + {{ mod.modifierNameSnapshot }}
+                              </span>
+                            }
+                          </div>
+                          <span class="mp-tracking__line-total">
+                            {{ fmt(line.lineTotal) }} {{ currency() }}
+                          </span>
+                        </div>
+                      }
+                      <div class="mp-tracking__total-row">
+                        <span>Total</span>
+                        <span class="mp-tracking__total">
+                          {{ fmt(order.total) }} {{ currency() }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Done or auto-refresh -->
+                    @if (getTrackingMeta(order.status).terminal) {
+                      <button class="mp-tracking__done-btn"
+                              (click)="endTracking(order.reference)"
+                              type="button">
+                        Done
+                      </button>
+                    } @else {
+                      <p class="mp-tracking__refresh-hint">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5"
+                             stroke-linecap="round">
+                          <polyline points="23 4 23 10 17 10"/>
+                          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                        Updates automatically every 30 seconds
+                      </p>
+                    }
+
+                  </div>
+                }
+
+              </div>
+
+            }
+          </div>
+        }
+
+        <!-- ── Manual lookup ──────────────────────────────────────── -->
+        <div class="mp-tracking__lookup-section">
+          <p class="mp-tracking__lookup-label">
+            Track another order
+          </p>
+          <div class="mp-tracking__lookup">
+            <input type="text" class="mp-tracking__input"
+                   placeholder="Reference number e.g. BLK-20260328-0001"
+                   [value]="trackingRef()"
+                   (input)="setTrackingRef($any($event.target).value)"
+                   (keydown.enter)="lookupOrder()">
+            <button class="mp-tracking__lookup-btn" (click)="lookupOrder()"
+                    [disabled]="!trackingRef().trim() || trackingLoading()"
+                    type="button">
+              @if (trackingLoading()) {
+                <span class="mp-ring mp-ring--sm mp-ring--dark"></span>
+              } @else {
+                Search
+              }
+            </button>
+          </div>
+          @if (trackingError()) {
+            <p class="mp-tracking__error">{{ trackingError() }}</p>
+          }
+        </div>
+
+      </div>
+    </div>
+  }
+
 
 }

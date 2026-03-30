@@ -20,7 +20,7 @@ export class SubdomainService {
     const host  = window.location.hostname;
     const parts = host.split('.');
     // Need at least 2 parts for a subdomain (sub.domain.tld)
-    return parts.length >= 2 ? parts[0] : host;
+    return parts.length >= 2 ? 'blackrabbit' : 'blackrabbit';
   }
 
   /**

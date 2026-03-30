@@ -264,6 +264,52 @@
           </div>
         </div>
 
+        <!-- ETA + message inputs (shown while order is active) -->
+        @if (!['COMPLETED','CANCELLED'].includes(order.status)) {
+          <div class="detail-section detail-eta-section">
+            <span class="section-label">Customer update</span>
+            <p class="eta-hint">
+              Set an ETA or send a message — the customer sees this on their tracking screen.
+            </p>
+            <div class="eta-row">
+              <div class="eta-field">
+                <label class="eta-label" for="etaMin">Ready in</label>
+                <div class="eta-input-wrap">
+                  <input id="etaMin" type="number" class="eta-input"
+                         min="1" max="120"
+                         [value]="etaMinutes() ?? ''"
+                         (input)="setEtaMinutes($any($event.target).value)"
+                         placeholder="–">
+                  <span class="eta-unit">min</span>
+                </div>
+              </div>
+              <div class="eta-msg-field">
+                <label class="eta-label" for="etaMsg">Message</label>
+                <input id="etaMsg" type="text" class="eta-msg-input"
+                       maxlength="300"
+                       [value]="restaurantMessage()"
+                       (input)="setRestaurantMessage($any($event.target).value)"
+                       placeholder="e.g. A little busy, thank you for waiting!">
+              </div>
+            </div>
+            @if (order.estimatedMinutes || order.restaurantMessage) {
+              <div class="eta-current">
+                <span class="eta-current-label">Currently showing:</span>
+                @if (order.estimatedMinutes) {
+                  <span class="eta-pill">
+                    ~{{ order.estimatedMinutes }} min
+                  </span>
+                }
+                @if (order.restaurantMessage) {
+                  <span class="eta-msg-preview">
+                    "{{ order.restaurantMessage }}"
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        }
+
         <!-- Customer info -->
         <div class="detail-section">
           <span class="section-label">Customer</span>

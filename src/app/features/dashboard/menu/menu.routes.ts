@@ -2,15 +2,9 @@ import { Routes } from '@angular/router';
 
 export const MENU_ROUTES: Routes = [
   {
-    path: '',
+    path:          '',
     loadComponent: () =>
-      import('./categories/categories.component')
-        .then(m => m.CategoriesComponent)
+      import('./menu-manager/menu-manager.component')
+        .then(m => m.MenuManagerComponent),
   },
-  {
-    path: 'items/:categoryId',
-    loadComponent: () =>
-      import('./items/items.component')
-        .then(m => m.ItemsComponent)
-  }
 ];

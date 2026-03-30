@@ -1,3 +1,5 @@
+// ── Category ──────────────────────────────────────────────────────────────────
+
 export interface CategoryResponse {
   id:        string;
   name:      string;
@@ -10,7 +12,7 @@ export interface CategoryResponse {
   itemCount: number;
   createdAt: string;
 }
- 
+
 export interface CategoryRequest {
   name:    string;
   nameAr?: string;
@@ -18,54 +20,166 @@ export interface CategoryRequest {
   icon?:   string;
   visible: boolean;
 }
- 
-export interface ItemResponse {
-  id:           string;
-  categoryId:   string;
-  name:         string;
-  nameAr:       string | null;
-  nameFr:       string | null;
-  description:  string | null;
-  basePrice:    number | null;
-  displayPrice: number | null;
-  imageUrl:     string | null;
-  featured:     boolean;
-  available:    boolean;
-  hasVariants:  boolean;
-  vegetarian:   boolean;
-  vegan:        boolean;
-  glutenFree:   boolean;
-  spicy:        boolean;
-  tags:         string | null;
-  position:     number;
-  createdAt:    string;
-}
- 
-export interface ItemRequest {
-  categoryId:    string;
-  name:          string;
-  nameAr?:       string;
-  nameFr?:       string;
-  description?:  string;
-  basePrice?:    number | null;
-  featured:      boolean;
-  available:     boolean;
-  vegetarian:    boolean;
-  vegan:         boolean;
-  glutenFree:    boolean;
-  spicy:         boolean;
-  tags?:         string;
-}
- 
+
 export interface ReorderRequest {
   id:       string;
   position: number;
 }
- 
-// Dietary flags for the item form chips
-export const DIETARY_FLAGS = [
-  { key: 'vegetarian', label: 'Vegetarian', emoji: '🌿' },
-  { key: 'vegan',      label: 'Vegan',      emoji: '🌱' },
-  { key: 'glutenFree', label: 'Gluten free', emoji: '🌾' },
-  { key: 'spicy',      label: 'Spicy',      emoji: '🌶️'  },
-] as const;
+
+// ── Item ──────────────────────────────────────────────────────────────────────
+
+export interface ItemResponse {
+  id:             string;
+  categoryId:     string;
+  name:           string;
+  nameAr:         string | null;
+  nameFr:         string | null;
+  description:    string | null;
+  descriptionAr:  string | null;
+  descriptionFr:  string | null;
+  basePrice:      number | null;
+  displayPrice:   number | null;
+  imageUrl:       string | null;
+  featured:       boolean;
+  available:      boolean;
+  vegetarian:     boolean;
+  vegan:          boolean;
+  glutenFree:     boolean;
+  spicy:          boolean;
+  tags:           string | null;
+  position:       number;
+  variantGroups:  VariantGroupResponse[];
+  modifierGroups: ModifierGroupResponse[];
+  createdAt:      string;
+}
+
+export interface ItemRequest {
+  categoryId:   string;
+  name:         string;
+  nameAr?:      string;
+  nameFr?:      string;
+  description?: string;
+  basePrice?:   number;
+  featured:     boolean;
+  available:    boolean;
+  vegetarian:   boolean;
+  vegan:        boolean;
+  glutenFree:   boolean;
+  spicy:        boolean;
+  tags?:        string;
+}
+
+// ── Variant Group ─────────────────────────────────────────────────────────────
+
+export interface VariantGroupResponse {
+  id:       string;
+  name:     string;
+  nameAr:   string | null;
+  nameFr:   string | null;
+  required: boolean;
+  uiType:   'pills' | 'dropdown' | 'cards';
+  position: number;
+  variants: VariantResponse[];
+}
+
+export interface VariantGroupRequest {
+  name:      string;
+  nameAr?:   string;
+  required:  boolean;
+  uiType:    'pills' | 'dropdown' | 'cards';
+  variants?: VariantRequest[];
+}
+
+export interface VariantResponse {
+  id:          string;
+  name:        string;
+  nameAr:      string | null;
+  description: string | null;
+  price:       number;
+  imageUrl:    string | null;
+  available:   boolean;
+  isDefault:   boolean;
+  position:    number;
+}
+
+export interface VariantRequest {
+  name:         string;
+  nameAr?:      string;
+  description?: string;
+  price:        number;
+  available:    boolean;
+  isDefault:    boolean;
+}
+
+// ── Modifier Group ────────────────────────────────────────────────────────────
+
+export interface ModifierGroupResponse {
+  id:          string;
+  name:        string;
+  nameAr:      string | null;
+  description: string | null;
+  required:    boolean;
+  minSelect:   number;
+  maxSelect:   number;
+  uiType:      'checkbox' | 'radio' | 'stepper';
+  position:    number;
+  modifiers:   ModifierResponse[];
+}
+
+export interface ModifierGroupRequest {
+  name:        string;
+  nameAr?:     string;
+  description?:string;
+  required:    boolean;
+  minSelect:   number;
+  maxSelect:   number;
+  uiType:      'checkbox' | 'radio' | 'stepper';
+  modifiers?:  ModifierRequest[];
+}
+
+export interface ModifierResponse {
+  id:         string;
+  name:       string;
+  nameAr:     string | null;
+  priceDelta: number;
+  available:  boolean;
+  isDefault:  boolean;
+  position:   number;
+}
+
+export interface ModifierRequest {
+  name:        string;
+  nameAr?:     string;
+  priceDelta:  number;
+  available:   boolean;
+  isDefault:   boolean;
+}
+
+// ── API wrapper ───────────────────────────────────────────────────────────────
+
+export interface ApiResponse<T> {
+  success:   boolean;
+  message:   string;
+  data:      T;
+  timestamp: string;
+}
+
+// ── UI state helpers ──────────────────────────────────────────────────────────
+
+export type PanelMode = 'create' | 'edit';
+
+export const UI_TYPE_LABELS = {
+  pills:    'Pills',
+  dropdown: 'Dropdown',
+  cards:    'Cards',
+  checkbox: 'Checkbox',
+  radio:    'Radio',
+  stepper:  'Stepper',
+};
+
+export const COMMON_ICONS = [
+  '☕', '🍵', '🥤', '🧃', '🥛', '🍺', '🍷', '🍹',
+  '🍕', '🍔', '🌮', '🌯', '🥗', '🍜', '🍱', '🍣',
+  '🥩', '🍗', '🥚', '🧆', '🥙', '🫕', '🥘', '🍲',
+  '🍰', '🎂', '🧁', '🍩', '🍪', '🍫', '🍦', '🍮',
+];

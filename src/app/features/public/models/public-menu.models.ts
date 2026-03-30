@@ -130,3 +130,65 @@ export interface SubmittedOrder {
   total:           number;
   whatsappMessage: string;
 }
+
+
+// ── Order tracking (public) ───────────────────────────────────────────────────
+
+export type TrackingStatus =
+  'PENDING' | 'CONFIRMED' | 'PREPARING' | 'READY' | 'COMPLETED' | 'CANCELLED';
+
+export interface TrackedOrderModifier {
+  id:                   string;
+  modifierNameSnapshot: string;
+  priceDeltaSnapshot:   number;
+}
+
+export interface TrackedOrderLine {
+  id:                   string;
+  itemNameSnapshot:     string;
+  variantNameSnapshot:  string | null;
+  quantity:             number;
+  unitPrice:            number;
+  lineTotal:            number;
+  specialInstructions:  string | null;
+  selectedModifiers:    TrackedOrderModifier[];
+}
+
+export interface TrackedOrder {
+  id:               string;
+  reference:        string;
+  status:           TrackingStatus;
+  orderType:        'dine_in' | 'takeaway' | 'delivery';
+  tableNumber:      string | null;
+  customerName:     string | null;
+  subtotal:         number;
+  total:            number;
+  notes:            string | null;
+  createdAt:        string;
+  confirmedAt:      string | null;
+  estimatedMinutes: number | null;     // set by restaurant staff
+  restaurantMessage:string | null;     // message shown on tracking screen
+  minutesRemaining: number | null;     // computed by backend: ETA - elapsed
+  lines:            TrackedOrderLine[];
+}
+
+export interface TrackingStatusMeta {
+  label:    string;
+  desc:     string;
+  step:     number;   // 0-4 for progress bar
+  color:    string;
+  terminal: boolean;  // true = no more updates expected
+}
+
+export const TRACKING_STATUS_META: Record<TrackingStatus, TrackingStatusMeta> = {
+  PENDING:   { label: 'Order received',  desc: 'Your order is waiting to be confirmed by the restaurant.', step: 0, color: 'amber',  terminal: false },
+  CONFIRMED: { label: 'Confirmed',       desc: 'The restaurant has confirmed your order.',                 step: 1, color: 'blue',   terminal: false },
+  PREPARING: { label: 'Being prepared',  desc: 'The kitchen is working on your order.',                   step: 2, color: 'purple', terminal: false },
+  READY:     { label: 'Ready!',          desc: 'Your order is ready. Please collect it.',                 step: 3, color: 'green',  terminal: false },
+  COMPLETED: { label: 'Completed',       desc: 'Your order has been completed. Enjoy!',                  step: 4, color: 'green',  terminal: true  },
+  CANCELLED: { label: 'Cancelled',       desc: 'This order has been cancelled.',                         step: -1, color: 'red',   terminal: true  },
+};
+
+export const TRACKING_STEPS: TrackingStatus[] = [
+  'PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'COMPLETED'
+];

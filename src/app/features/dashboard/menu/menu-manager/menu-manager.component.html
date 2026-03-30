@@ -1,0 +1,987 @@
+<div class="page">
+
+  <!-- ── PAGE HEADER ─────────────────────────────────────────────────────── -->
+  <div class="page-head">
+    <div>
+      <h2 class="page-title">Menu</h2>
+      <p class="page-sub">
+        {{ categories().length }} categories ·
+        {{ visibleCount() }} visible
+      </p>
+    </div>
+  </div>
+
+  <!-- ── ALERTS ──────────────────────────────────────────────────────────── -->
+  @if (error()) {
+    <div class="alert alert--error">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ error() }}
+      <button class="alert-close" (click)="error.set(null)">✕</button>
+    </div>
+  }
+  @if (success()) {
+    <div class="alert alert--success">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      {{ success() }}
+    </div>
+  }
+
+  <!-- ── MAIN LAYOUT ─────────────────────────────────────────────────────── -->
+  <div class="layout" [class.layout--panel-open]="activePanel() !== 'none'">
+
+    <!-- ── CATEGORY SIDEBAR ────────────────────────────────────────────────── -->
+    <aside class="cat-sidebar">
+      <div class="cat-sidebar-head">
+        <span class="cat-sidebar-label">Categories</span>
+        <button class="btn-icon-sm" (click)="openCreateCategory()"
+                title="Add category" type="button">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Skeletons -->
+      @if (loadingCats()) {
+        @for (i of [1,2,3,4]; track i) {
+          <div class="cat-skeleton">
+            <div class="sk sk-icon"></div>
+            <div class="sk sk-name"></div>
+          </div>
+        }
+      }
+
+      <!-- Category list (draggable) -->
+      @if (!loadingCats()) {
+        @if (categories().length === 0) {
+          <div class="cat-empty">
+            <p>No categories yet</p>
+            <button class="btn-ghost-sm" (click)="openCreateCategory()">
+              Add first category
+            </button>
+          </div>
+        }
+
+        @for (cat of categories(); track cat.id; let i = $index) {
+          <div class="cat-item"
+               [class.cat-item--active]="selectedCatId() === cat.id"
+               [class.cat-item--hidden]="!cat.visible"
+               draggable="true"
+               (dragstart)="onDragStart(i)"
+               (dragover)="onDragOver($event, i)"
+               (dragend)="onDragEnd()"
+               (click)="selectCategory(cat.id)">
+
+            <span class="cat-drag-handle" aria-hidden="true">⠿</span>
+
+            <span class="cat-icon">
+              @if (cat.icon) { {{ cat.icon }} } @else { 📂 }
+            </span>
+
+            <div class="cat-info">
+              <span class="cat-name">{{ cat.name }}</span>
+              <span class="cat-count">{{ cat.itemCount }} items</span>
+            </div>
+
+            <!-- Visibility toggle -->
+            <button class="cat-vis-btn"
+                    [class.cat-vis-btn--hidden]="!cat.visible"
+                    (click)="$event.stopPropagation(); toggleCategoryVisibility(cat)"
+                    [title]="cat.visible ? 'Hide' : 'Show'"
+                    type="button">
+              @if (cat.visible) {
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              } @else {
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              }
+            </button>
+
+            <!-- Edit button -->
+            <button class="cat-edit-btn"
+                    (click)="$event.stopPropagation(); openEditCategory(cat)"
+                    title="Edit" type="button">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+
+          </div>
+        }
+      }
+    </aside>
+
+    <!-- ── ITEM AREA ──────────────────────────────────────────────────────── -->
+    <div class="item-area">
+
+      <!-- Item area header -->
+      @if (selectedCategory(); as cat) {
+        <div class="item-area-head">
+          <div>
+            <h3 class="item-area-title">
+              @if (cat.icon) { {{ cat.icon }}&nbsp; }{{ cat.name }}
+            </h3>
+            <p class="item-area-sub">{{ cat.itemCount }} items</p>
+          </div>
+          <button class="btn-primary" (click)="openCreateItem()" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add item
+          </button>
+        </div>
+      }
+
+      <!-- Loading skeletons -->
+      @if (loadingItems()) {
+        <div class="item-grid">
+          @for (i of [1,2,3,4,5,6]; track i) {
+            <div class="item-skeleton">
+              <div class="sk sk-img"></div>
+              <div class="sk-body">
+                <div class="sk sk-item-name"></div>
+                <div class="sk sk-item-price"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Empty state -->
+      @if (!loadingItems() && items().length === 0 && selectedCatId()) {
+        <div class="item-empty">
+          <div class="item-empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <h3 class="item-empty-title">No items yet</h3>
+          <p class="item-empty-sub">Add your first item to this category</p>
+          <button class="btn-primary" (click)="openCreateItem()">Add item</button>
+        </div>
+      }
+
+      <!-- No category selected -->
+      @if (!loadingCats() && !selectedCatId()) {
+        <div class="item-empty">
+          <div class="item-empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h3 class="item-empty-title">No categories yet</h3>
+          <p class="item-empty-sub">Create your first category to start adding items</p>
+          <button class="btn-primary" (click)="openCreateCategory()">
+            Add category
+          </button>
+        </div>
+      }
+
+      <!-- Item grid -->
+      @if (!loadingItems() && items().length > 0) {
+        <div class="item-grid">
+          @for (item of items(); track item.id; let i = $index) {
+            <div class="item-card"
+                 [class.item-card--unavailable]="!item.available"
+                 [class.item-card--editing]="editingItem()?.id === item.id"
+                 [style.animation-delay]="(i * 0.04) + 's'"
+                 (click)="openEditItem(item)">
+
+              <!-- Image -->
+              <div class="item-card-img">
+                @if (item.imageUrl) {
+                  <img [src]="item.imageUrl" [alt]="item.name" loading="lazy">
+                } @else {
+                  <div class="item-card-img-placeholder">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.5"
+                         stroke-linecap="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </div>
+                }
+
+                <!-- Badges -->
+                @if (item.featured) {
+                  <span class="item-badge item-badge--featured">★</span>
+                }
+                @if (!item.available) {
+                  <span class="item-badge item-badge--off">Off</span>
+                }
+              </div>
+
+              <!-- Body -->
+              <div class="item-card-body">
+                <span class="item-card-name">{{ item.name }}</span>
+
+                @if (item.description) {
+                  <span class="item-card-desc">{{ item.description }}</span>
+                }
+
+                <div class="item-card-footer">
+                  <span class="item-card-price">
+                    @if (item.basePrice != null) {
+                      {{ formatPrice(item.basePrice) }}
+                    } @else if (item.variantGroups.length > 0) {
+                      <span class="item-card-variants">
+                        {{ item.variantGroups[0].variants.length }} options
+                      </span>
+                    } @else {
+                      <span class="item-card-ask">—</span>
+                    }
+                  </span>
+                  <div class="item-card-diet">
+                    @if (item.vegetarian) { 🌿 }
+                    @if (item.vegan)      { 🌱 }
+                    @if (item.spicy)      { 🌶️ }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick toggle availability -->
+              <button class="item-avail-btn"
+                      [class.item-avail-btn--on]="item.available"
+                      [title]="item.available ? 'Mark unavailable' : 'Mark available'"
+                      (click)="$event.stopPropagation(); toggleItemAvailability(item)"
+                      type="button">
+                {{ item.available ? '✓' : '✗' }}
+              </button>
+
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         SLIDE-IN PANELS
+    ═══════════════════════════════════════════════════════════════════ -->
+
+    @if (activePanel() !== 'none') {
+      <div class="panel-backdrop" (click)="closePanel()"></div>
+    }
+
+    <!-- ── CATEGORY PANEL ─────────────────────────────────────────────────── -->
+    @if (activePanel() === 'category') {
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h3 class="panel-title">
+              {{ panelMode() === 'create' ? 'New category' : 'Edit category' }}
+            </h3>
+          </div>
+          <button class="panel-close" (click)="closePanel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="panel-body">
+
+          <!-- Icon + name -->
+          <div class="field">
+            <label class="field-label">Icon & Name</label>
+            <div class="icon-name-row">
+              <button class="icon-pick-btn" (click)="toggleIconPicker()"
+                      type="button">
+                @if (catIcon()) {
+                  {{ catIcon() }}
+                } @else {
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="16"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                  </svg>
+                }
+              </button>
+              <input type="text" class="field-input"
+                     [value]="catName()"
+                     (input)="setCatName($any($event.target).value)"
+                     placeholder="e.g. Hot Drinks"
+                     autofocus>
+            </div>
+          </div>
+
+          <!-- Icon picker -->
+          @if (showIconPicker()) {
+            <div class="icon-picker">
+              @for (ic of commonIcons; track ic) {
+                <button class="icon-picker-btn"
+                        [class.icon-picker-btn--selected]="catIcon() === ic"
+                        (click)="pickIcon(ic)"
+                        type="button">
+                  {{ ic }}
+                </button>
+              }
+            </div>
+          }
+
+          <!-- Visibility toggle -->
+          <div class="field-toggle">
+            <div>
+              <span class="field-label">Visible on menu</span>
+              <span class="field-hint-inline">
+                Hidden categories won't appear to customers
+              </span>
+            </div>
+            <button class="toggle"
+                    [class.toggle--on]="catVisible()"
+                    (click)="toggleCatVisible()"
+                    type="button">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+
+          <!-- Delete -->
+          @if (panelMode() === 'edit' && editingCat()) {
+            <div class="panel-danger-zone">
+              <button class="btn-danger"
+                      [disabled]="deletingId() === editingCat()!.id"
+                      (click)="deleteCategory(editingCat()!)"
+                      type="button">
+                Delete category
+              </button>
+              <span class="danger-hint">This will remove all items inside</span>
+            </div>
+          }
+        </div>
+
+        <div class="panel-foot">
+          <button class="btn-ghost" (click)="closePanel()" type="button">
+            Cancel
+          </button>
+          <button class="btn-primary" [disabled]="saving() || !catName().trim()"
+                  (click)="saveCategory()" type="button">
+            @if (saving()) { <span class="spinner-sm spinner-sm--dark"></span> }
+            Save category
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ── ITEM PANEL ──────────────────────────────────────────────────────── -->
+    @if (activePanel() === 'item') {
+      <div class="panel panel--wide">
+        <div class="panel-head">
+          <div>
+            <h3 class="panel-title">
+              {{ panelMode() === 'create' ? 'New item' : editingItem()?.name }}
+            </h3>
+            @if (panelMode() === 'edit' && editingItem()) {
+              <span class="panel-sub">
+                {{ editingItem()!.available ? '✓ Available' : '✗ Unavailable' }}
+              </span>
+            }
+          </div>
+          <button class="panel-close" (click)="closePanel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="panel-body panel-body--scroll">
+
+          <!-- Image upload -->
+          <div class="field">
+            <label class="field-label">Photo</label>
+            <div class="img-upload-area">
+              @if (itemImagePreview()) {
+                <div class="img-preview-wrap">
+                  <img [src]="itemImagePreview()!" alt="Item photo"
+                       class="img-preview">
+                  <button class="img-clear-btn" (click)="clearItemImage()"
+                          type="button">✕</button>
+                </div>
+              } @else {
+                <label class="img-upload-label" for="itemImg">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round">
+                    <polyline points="16 16 12 12 8 16"/>
+                    <line x1="12" y1="12" x2="12" y2="21"/>
+                    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                  </svg>
+                  <span>Upload photo</span>
+                  <span class="img-hint">PNG, JPG · Max 5MB</span>
+                </label>
+              }
+              <input id="itemImg" type="file" accept="image/*"
+                     class="sr-only"
+                     (change)="onItemImageChange($event)">
+            </div>
+          </div>
+
+          <!-- Name -->
+          <div class="field">
+            <label class="field-label" for="itemName">
+              Name <span class="req">*</span>
+            </label>
+            <input id="itemName" type="text" class="field-input"
+                   [value]="itemName()"
+                   (input)="setItemName($any($event.target).value)"
+                   placeholder="e.g. Espresso">
+          </div>
+
+          <!-- Description -->
+          <div class="field">
+            <label class="field-label" for="itemDesc">
+              Description
+              <span class="field-optional">optional</span>
+            </label>
+            <textarea id="itemDesc" class="field-input field-textarea"
+                      [value]="itemDesc()"
+                      (input)="setItemDesc($any($event.target).value)"
+                      placeholder="Short description shown on the menu…"
+                      rows="2"></textarea>
+          </div>
+
+          <!-- Price -->
+          <div class="field">
+            <label class="field-label" for="itemPrice">
+              Base price (DT)
+              <span class="field-optional">leave empty if using variants</span>
+            </label>
+            <input id="itemPrice" type="number" class="field-input"
+                   [value]="itemPrice() ?? ''"
+                   (input)="setItemPrice($any($event.target).value)"
+                   placeholder="0.000"
+                   step="0.001" min="0">
+          </div>
+
+          <!-- Flags grid -->
+          <div class="flags-grid">
+            <button class="flag-btn" [class.flag-btn--on]="itemAvailable()"
+                    (click)="toggleAvailable()" type="button">
+              <span>{{ itemAvailable() ? '✓' : '✗' }}</span> Available
+            </button>
+            <button class="flag-btn" [class.flag-btn--gold]="itemFeatured()"
+                    (click)="toggleFeatured()" type="button">
+              <span>★</span> Featured
+            </button>
+            <button class="flag-btn" [class.flag-btn--on]="itemVeg()"
+                    (click)="toggleVeg()" type="button">
+              🌿 Vegetarian
+            </button>
+            <button class="flag-btn" [class.flag-btn--on]="itemVegan()"
+                    (click)="toggleVegan()" type="button">
+              🌱 Vegan
+            </button>
+            <button class="flag-btn" [class.flag-btn--on]="itemGluten()"
+                    (click)="toggleGluten()" type="button">
+              🌾 Gluten free
+            </button>
+            <button class="flag-btn" [class.flag-btn--on]="itemSpicy()"
+                    (click)="toggleSpicy()" type="button">
+              🌶️ Spicy
+            </button>
+          </div>
+
+          <!-- Tags -->
+          <div class="field">
+            <label class="field-label" for="itemTags">
+              Tags
+              <span class="field-optional">comma-separated</span>
+            </label>
+            <input id="itemTags" type="text" class="field-input"
+                   [value]="itemTags()"
+                   (input)="setItemTags($any($event.target).value)"
+                   placeholder="bestseller, new, seasonal">
+          </div>
+
+          <!-- Variants & Modifiers — only when editing -->
+          @if (panelMode() === 'edit' && editingItem(); as item) {
+
+            <div class="section-divider">
+              <span>Options</span>
+            </div>
+
+            <!-- ── VARIANT GROUPS ──────────────────────────────────────── -->
+            <div class="options-section">
+              <div class="options-section-head">
+                <h4 class="options-title">Variant groups</h4>
+                <button class="btn-ghost-sm" (click)="openAddVariantGroup()"
+                        type="button">+ Add</button>
+              </div>
+              <p class="options-hint">
+                Size, milk type, etc. Each variant sets the price.
+              </p>
+
+              @if (item.variantGroups.length === 0) {
+                <p class="options-empty">No variant groups yet</p>
+              }
+
+              @for (g of item.variantGroups; track g.id) {
+                <div class="option-group-card">
+
+                  <!-- Group header -->
+                  <div class="ogc-head">
+                    <div class="ogc-title-row">
+                      <span class="ogc-name">{{ g.name }}</span>
+                      <span class="ogc-badge"
+                            [class.ogc-badge--required]="g.required">
+                        {{ g.required ? 'Required' : 'Optional' }}
+                      </span>
+                      <span class="ogc-badge ogc-badge--type">{{ g.uiType }}</span>
+                    </div>
+                    <div class="ogc-actions">
+                      <button class="btn-icon-sm"
+                              (click)="openEditVariantGroup(g)"
+                              title="Edit group" type="button">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      <button class="btn-icon-sm btn-icon-sm--danger"
+                              (click)="deleteVariantGroup(item.id, g.id)"
+                              title="Delete group" type="button">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Variants list -->
+                  @if (g.variants.length > 0) {
+                    <div class="ogc-items">
+                      @for (v of g.variants; track v.id) {
+                        <div class="ogc-item">
+                          <span class="ogc-item-icon">
+                            {{ v.isDefault ? '★' : '○' }}
+                          </span>
+                          <span class="ogc-item-name">{{ v.name }}</span>
+                          <span class="ogc-item-price">
+                            {{ formatPrice(v.price) }}
+                          </span>
+                          @if (!v.available) {
+                            <span class="ogc-item-off">off</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <p class="ogc-empty">No variants — click Edit to add some</p>
+                  }
+
+                </div>
+              }
+            </div>
+
+            <!-- ── MODIFIER GROUPS ─────────────────────────────────────── -->
+            <div class="options-section">
+              <div class="options-section-head">
+                <h4 class="options-title">Modifier groups</h4>
+                <button class="btn-ghost-sm" (click)="openAddModifierGroup()"
+                        type="button">+ Add</button>
+              </div>
+              <p class="options-hint">
+                Extras, sauces, add-ons. Each modifier adjusts the price.
+              </p>
+
+              @if (item.modifierGroups.length === 0) {
+                <p class="options-empty">No modifier groups yet</p>
+              }
+
+              @for (g of item.modifierGroups; track g.id) {
+                <div class="option-group-card">
+
+                  <!-- Group header -->
+                  <div class="ogc-head">
+                    <div class="ogc-title-row">
+                      <span class="ogc-name">{{ g.name }}</span>
+                      <span class="ogc-badge"
+                            [class.ogc-badge--required]="g.required">
+                        {{ g.required ? 'Required' : 'Optional' }}
+                      </span>
+                      <span class="ogc-badge ogc-badge--type">{{ g.uiType }}</span>
+                      @if (g.maxSelect > 1) {
+                        <span class="ogc-badge">max {{ g.maxSelect }}</span>
+                      }
+                    </div>
+                    <div class="ogc-actions">
+                      <button class="btn-icon-sm"
+                              (click)="openEditModifierGroup(g)"
+                              title="Edit group" type="button">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      <button class="btn-icon-sm btn-icon-sm--danger"
+                              (click)="deleteModifierGroup(item.id, g.id)"
+                              title="Delete group" type="button">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Modifiers list -->
+                  @if (g.modifiers.length > 0) {
+                    <div class="ogc-items">
+                      @for (m of g.modifiers; track m.id) {
+                        <div class="ogc-item">
+                          <span class="ogc-item-name">{{ m.name }}</span>
+                          @if (m.priceDelta > 0) {
+                            <span class="ogc-item-price ogc-item-price--delta">
+                              +{{ formatPrice(m.priceDelta) }}
+                            </span>
+                          } @else {
+                            <span class="ogc-item-free">free</span>
+                          }
+                          @if (!m.available) {
+                            <span class="ogc-item-off">off</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <p class="ogc-empty">No modifiers — click Edit to add some</p>
+                  }
+
+                </div>
+              }
+            </div>
+
+            <!-- Delete item -->
+            <div class="panel-danger-zone">
+              <button class="btn-danger"
+                      [disabled]="deletingId() === item.id"
+                      (click)="deleteItem(item)"
+                      type="button">
+                Delete item
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="panel-foot">
+          <button class="btn-ghost" (click)="closePanel()" type="button">
+            Cancel
+          </button>
+          <button class="btn-primary"
+                  [disabled]="saving() || !itemName().trim()"
+                  (click)="saveItem()"
+                  type="button">
+            @if (saving()) { <span class="spinner-sm spinner-sm--dark"></span> }
+            {{ panelMode() === 'create' ? 'Create item' : 'Save changes' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ── VARIANT GROUP PANEL ────────────────────────────────────────────── -->
+    @if (activePanel() === 'variantGroup') {
+      <div class="panel panel--wide">
+        <div class="panel-head">
+          <div>
+            <button class="panel-back" (click)="backToItem()" type="button">
+              ← Back to item
+            </button>
+            <h3 class="panel-title">
+              {{ panelMode() === 'create' ? 'New variant group' : 'Edit variant group' }}
+            </h3>
+          </div>
+          <button class="panel-close" (click)="closePanel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="panel-body panel-body--scroll">
+
+          <div class="field">
+            <label class="field-label" for="vgName">
+              Group name <span class="req">*</span>
+            </label>
+            <input id="vgName" type="text" class="field-input"
+                   [value]="vgName()"
+                   (input)="setVgName($any($event.target).value)"
+                   placeholder="e.g. Size, Milk type">
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label class="field-label">Display style</label>
+              <select class="field-input"
+                      [value]="vgUiType()"
+                      (change)="setVgUiType($any($event.target).value)">
+                <option value="pills">Pills</option>
+                <option value="dropdown">Dropdown</option>
+                <option value="cards">Cards</option>
+              </select>
+            </div>
+            <div class="field-toggle field-toggle--inline">
+              <span class="field-label">Required</span>
+              <button class="toggle" [class.toggle--on]="vgRequired()"
+                      (click)="toggleVgRequired()" type="button">
+                <span class="toggle-knob"></span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Save group before adding variants -->
+          @if (panelMode() === 'create') {
+            <div class="inline-hint">
+              Save the group first, then add variants below.
+            </div>
+          }
+
+          <!-- Variants list (only when editing) -->
+          @if (panelMode() === 'edit' && editingVGroup(); as group) {
+
+            <div class="section-divider"><span>Variants</span></div>
+
+            @for (v of group.variants; track v.id) {
+              <div class="variant-row">
+                <span class="variant-icon">
+                  @if (v.isDefault) { ★ } @else { ○ }
+                </span>
+                <span class="variant-name">{{ v.name }}</span>
+                <span class="variant-price">{{ formatPrice(v.price) }}</span>
+                <button class="btn-icon-sm btn-icon-sm--danger"
+                        (click)="deleteVariant(editingItem()!.id, group.id, v.id)"
+                        type="button">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                  </svg>
+                </button>
+              </div>
+            }
+
+            <!-- Add variant inline -->
+            <div class="add-inline-form">
+              <input type="text" class="field-input"
+                     [value]="newVariantName()"
+                     (input)="setNewVarName($any($event.target).value)"
+                     placeholder="Variant name (e.g. Large)">
+              <input type="number" class="field-input field-input--sm"
+                     [value]="newVariantPrice()"
+                     (input)="setNewVarPrice($any($event.target).value)"
+                     placeholder="Price" step="0.001" min="0">
+              <button class="btn-primary-sm" (click)="addVariant()" type="button">
+                Add
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="panel-foot">
+          <button class="btn-ghost" (click)="backToItem()" type="button">
+            Cancel
+          </button>
+          <button class="btn-primary"
+                  [disabled]="saving() || !vgName().trim()"
+                  (click)="saveVariantGroup()"
+                  type="button">
+            @if (saving()) { <span class="spinner-sm spinner-sm--dark"></span> }
+            {{ panelMode() === 'create' ? 'Create group' : 'Save group' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- ── MODIFIER GROUP PANEL ───────────────────────────────────────────── -->
+    @if (activePanel() === 'modifierGroup') {
+      <div class="panel panel--wide">
+        <div class="panel-head">
+          <div>
+            <button class="panel-back" (click)="backToItem()" type="button">
+              ← Back to item
+            </button>
+            <h3 class="panel-title">
+              {{ panelMode() === 'create' ? 'New modifier group' : 'Edit modifier group' }}
+            </h3>
+          </div>
+          <button class="panel-close" (click)="closePanel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="panel-body panel-body--scroll">
+
+          <div class="field">
+            <label class="field-label" for="mgName">
+              Group name <span class="req">*</span>
+            </label>
+            <input id="mgName" type="text" class="field-input"
+                   [value]="mgName()"
+                   (input)="setMgName($any($event.target).value)"
+                   placeholder="e.g. Extras, Sauces">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="mgDesc">
+              Description
+              <span class="field-optional">optional</span>
+            </label>
+            <input id="mgDesc" type="text" class="field-input"
+                   [value]="mgDesc()"
+                   (input)="setMgDesc($any($event.target).value)"
+                   placeholder="Shown to customer">
+          </div>
+
+          <div class="form-row form-row--3col">
+            <div class="field">
+              <label class="field-label">Display</label>
+              <select class="field-input"
+                      [value]="mgUiType()"
+                      (change)="setMgUiType($any($event.target).value)">
+                <option value="checkbox">Checkbox</option>
+                <option value="radio">Radio</option>
+                <option value="stepper">Stepper</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Min select</label>
+              <input type="number" class="field-input"
+                     [value]="mgMin()"
+                     (input)="setMgMin($any($event.target).value)"
+                     min="0">
+            </div>
+            <div class="field">
+              <label class="field-label">Max select</label>
+              <input type="number" class="field-input"
+                     [value]="mgMax()"
+                     (input)="setMgMax($any($event.target).value)"
+                     min="1">
+            </div>
+          </div>
+
+          <div class="field-toggle">
+            <div>
+              <span class="field-label">Required</span>
+              <span class="field-hint-inline">
+                Customer must pick at least {{ mgMin() }}
+              </span>
+            </div>
+            <button class="toggle" [class.toggle--on]="mgRequired()"
+                    (click)="toggleMgRequired()" type="button">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+
+          @if (panelMode() === 'create') {
+            <div class="inline-hint">
+              Save the group first, then add modifiers below.
+            </div>
+          }
+
+          <!-- Modifier list -->
+          @if (panelMode() === 'edit' && editingMGroup(); as group) {
+
+            <div class="section-divider"><span>Modifiers</span></div>
+
+            @for (m of group.modifiers; track m.id) {
+              <div class="variant-row">
+                <span class="variant-name">{{ m.name }}</span>
+                @if (m.priceDelta > 0) {
+                  <span class="variant-price">+{{ formatPrice(m.priceDelta) }}</span>
+                } @else {
+                  <span class="variant-price variant-price--free">Free</span>
+                }
+                <button class="btn-icon-sm btn-icon-sm--danger"
+                        (click)="deleteModifier(editingItem()!.id, group.id, m.id)"
+                        type="button">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                  </svg>
+                </button>
+              </div>
+            }
+
+            <!-- Add modifier inline -->
+            <div class="add-inline-form">
+              <input type="text" class="field-input"
+                     [value]="newModName()"
+                     (input)="setNewModName($any($event.target).value)"
+                     placeholder="Modifier (e.g. Extra cheese)">
+              <input type="number" class="field-input field-input--sm"
+                     [value]="newModPrice()"
+                     (input)="setNewModPrice($any($event.target).value)"
+                     placeholder="+Price" step="0.001" min="0">
+              <button class="btn-primary-sm" (click)="addModifier()" type="button">
+                Add
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="panel-foot">
+          <button class="btn-ghost" (click)="backToItem()" type="button">
+            Cancel
+          </button>
+          <button class="btn-primary"
+                  [disabled]="saving() || !mgName().trim()"
+                  (click)="saveModifierGroup()"
+                  type="button">
+            @if (saving()) { <span class="spinner-sm spinner-sm--dark"></span> }
+            {{ panelMode() === 'create' ? 'Create group' : 'Save group' }}
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

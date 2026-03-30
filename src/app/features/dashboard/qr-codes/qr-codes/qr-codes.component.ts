@@ -1,13 +1,13 @@
 import {
-  Component, OnInit, signal, computed, inject
+  Component, OnInit, signal, computed, inject,
+  AfterViewChecked, ElementRef, QueryList, ViewChildren
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import {
-  ReactiveFormsModule, FormBuilder, FormGroup, Validators
-} from '@angular/forms';
-import { QrCodeService }  from '../services/qr-code.service';
-import { QrCodeResponse } from '../models/qr.models';
-import { AuthService } from '../../../../core/services/auth.service';
+import { CommonModule }        from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import QRCode                  from 'qrcode';
+import { QrCodeService }       from '../services/qr-code.service';
+import { QrCodeResponse }      from '../models/qr.models';
+import { AuthService }         from '../../../../core/services/auth.service';
 
 @Component({
   selector:    'app-qr-codes',
@@ -16,11 +16,18 @@ import { AuthService } from '../../../../core/services/auth.service';
   templateUrl: './qr-codes.component.html',
   styleUrls:   ['./qr-codes.component.scss']
 })
-export class QrCodesComponent implements OnInit {
+export class QrCodesComponent implements OnInit, AfterViewChecked {
 
   private svc  = inject(QrCodeService);
   private auth = inject(AuthService);
   private fb   = inject(FormBuilder);
+
+  // Canvas refs — one per QR card in the grid
+  @ViewChildren('qrCanvas') canvasRefs!: QueryList<ElementRef<HTMLCanvasElement>>;
+
+  // Canvas ref for the preview modal
+  @ViewChildren('previewCanvas')
+  previewCanvasRef!: QueryList<ElementRef<HTMLCanvasElement>>;
 
   // ── State ───────────────────────────────────────────────────────────────────
   qrCodes      = signal<QrCodeResponse[]>([]);
@@ -31,6 +38,10 @@ export class QrCodesComponent implements OnInit {
   previewQr    = signal<QrCodeResponse | null>(null);
   error        = signal<string | null>(null);
   success      = signal<string | null>(null);
+
+  // Track which canvas IDs have already been rendered to avoid re-renders
+  private renderedIds = new Set<string>();
+  private previewRendered = false;
 
   totalScans = computed(() =>
     this.qrCodes().reduce((sum, qr) => sum + qr.scanCount, 0));
@@ -46,29 +57,53 @@ export class QrCodesComponent implements OnInit {
     embedLogo:   [true],
   });
 
+  // ── Lifecycle ────────────────────────────────────────────────────────────────
   ngOnInit() { this.load(); }
 
+  ngAfterViewChecked() {
+    // Render QR codes into grid canvases after the view updates
+    this.canvasRefs?.forEach((ref, i) => {
+      const qr = this.qrCodes()[i];
+      if (!qr || this.renderedIds.has(qr.id)) return;
+      this.renderToCanvas(ref.nativeElement, qr);
+      this.renderedIds.add(qr.id);
+    });
+
+    // Render preview canvas when modal opens
+    if (this.previewQr() && !this.previewRendered) {
+      const ref = this.previewCanvasRef?.first;
+      if (ref) {
+        this.renderToCanvas(ref.nativeElement, this.previewQr()!, 280);
+        this.previewRendered = true;
+      }
+    }
+  }
+
+  // ── Data ─────────────────────────────────────────────────────────────────────
   load() {
     this.loading.set(true);
     this.svc.getAll().subscribe({
-      next:  qrs => { this.qrCodes.set(qrs); this.loading.set(false); },
-      error: ()  => { this.loading.set(false); this.error.set('Failed to load QR codes'); }
+      next: qrs => {
+        this.renderedIds.clear(); // reset so canvases re-render
+        this.qrCodes.set(qrs);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.error.set('Failed to load QR codes');
+      }
     });
   }
 
-  // ── Panel ────────────────────────────────────────────────────────────────────
+  // ── Panel ─────────────────────────────────────────────────────────────────────
   openPanel() {
-    this.form.reset({
-      colorDark:  '#000000',
-      colorLight: '#ffffff',
-      embedLogo:  true,
-    });
+    this.form.reset({ colorDark: '#000000', colorLight: '#ffffff', embedLogo: true });
     this.panelOpen.set(true);
   }
 
   closePanel() { this.panelOpen.set(false); }
 
-  // ── Create ───────────────────────────────────────────────────────────────────
+  // ── Create ────────────────────────────────────────────────────────────────────
   create() {
     this.saving.set(true);
     this.error.set(null);
@@ -82,10 +117,11 @@ export class QrCodesComponent implements OnInit {
       embedLogo:   v.embedLogo,
     }).subscribe({
       next: qr => {
+        this.renderedIds.delete(qr.id); // allow canvas render for new item
         this.qrCodes.update(list => [qr, ...list]);
         this.saving.set(false);
         this.closePanel();
-        this.previewQr.set(qr);
+        this.openPreview(qr);
         this.showSuccess('QR code created');
       },
       error: err => {
@@ -101,10 +137,11 @@ export class QrCodesComponent implements OnInit {
     if (!confirm(`Remove QR code "${label}"? Scans will stop working.`)) return;
     this.deletingId.set(qr.id);
     this.svc.delete(qr.id).subscribe({
-      next:  () => {
+      next: () => {
+        this.renderedIds.delete(qr.id);
         this.qrCodes.update(list => list.filter(q => q.id !== qr.id));
         this.deletingId.set(null);
-        if (this.previewQr()?.id === qr.id) this.previewQr.set(null);
+        if (this.previewQr()?.id === qr.id) this.closePreview();
       },
       error: () => {
         this.deletingId.set(null);
@@ -113,18 +150,46 @@ export class QrCodesComponent implements OnInit {
     });
   }
 
-  // ── Preview / Download ────────────────────────────────────────────────────────
-  openPreview(qr: QrCodeResponse) { this.previewQr.set(qr); }
-  closePreview()                   { this.previewQr.set(null); }
-
-  downloadPng(qr: QrCodeResponse) {
-    if (!qr.imageUrlPng) return;
-    this.triggerDownload(qr.imageUrlPng, `qr-${qr.code}.png`);
+  // ── Preview ───────────────────────────────────────────────────────────────────
+  openPreview(qr: QrCodeResponse) {
+    this.previewRendered = false; // allow canvas render in modal
+    this.previewQr.set(qr);
   }
 
-  downloadSvg(qr: QrCodeResponse) {
-    if (!qr.imageUrlSvg) return;
-    this.triggerDownload(qr.imageUrlSvg, `qr-${qr.code}.svg`);
+  closePreview() {
+    this.previewQr.set(null);
+    this.previewRendered = false;
+  }
+
+  // ── Downloads ─────────────────────────────────────────────────────────────────
+
+  async downloadPng(qr: QrCodeResponse) {
+    try {
+      const dataUrl = await QRCode.toDataURL(qr.targetUrl, {
+        width:  1024,   // high resolution for print quality
+        margin: 2,
+        color:  { dark: qr.colorDark || '#000000', light: qr.colorLight || '#ffffff' },
+      });
+      this.triggerDownload(dataUrl, `qr-${qr.label ?? qr.code}.png`);
+    } catch {
+      this.error.set('Failed to generate PNG');
+    }
+  }
+
+  async downloadSvg(qr: QrCodeResponse) {
+    try {
+      const svg = await QRCode.toString(qr.targetUrl, {
+        type:   'svg',
+        margin: 2,
+        color:  { dark: qr.colorDark || '#000000', light: qr.colorLight || '#ffffff' },
+      });
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const url  = URL.createObjectURL(blob);
+      this.triggerDownload(url, `qr-${qr.label ?? qr.code}.svg`);
+      URL.revokeObjectURL(url);
+    } catch {
+      this.error.set('Failed to generate SVG');
+    }
   }
 
   copyLink(qr: QrCodeResponse) {
@@ -133,12 +198,22 @@ export class QrCodesComponent implements OnInit {
     });
   }
 
-  private triggerDownload(url: string, filename: string) {
-    const a = document.createElement('a');
-    a.href     = url;
-    a.download = filename;
-    a.target   = '_blank';
-    a.click();
+  // ── Canvas rendering ──────────────────────────────────────────────────────────
+
+  private async renderToCanvas(
+    canvas: HTMLCanvasElement,
+    qr: QrCodeResponse,
+    size = 160
+  ) {
+    try {
+      await QRCode.toCanvas(canvas, qr.targetUrl, {
+        width:  size,
+        margin: 1,
+        color:  { dark: qr.colorDark || '#000000', light: qr.colorLight || '#ffffff' },
+      });
+    } catch (err) {
+      console.error('QR render failed', err);
+    }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -146,6 +221,13 @@ export class QrCodesComponent implements OnInit {
     return new Date(iso).toLocaleDateString('en', {
       day: 'numeric', month: 'short', year: 'numeric'
     });
+  }
+
+  private triggerDownload(url: string, filename: string) {
+    const a = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    a.click();
   }
 
   private showSuccess(msg: string) {

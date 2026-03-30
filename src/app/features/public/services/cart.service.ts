@@ -5,7 +5,7 @@ import {
   PublicVariantResponse,
   PublicModifierResponse
 } from '../models/public-menu.models';
-
+import { v4 as uuidv4 } from 'uuid';
 @Injectable({ providedIn: 'root' })
 export class CartService {
 
@@ -52,7 +52,7 @@ export class CartService {
     } else {
       this.items.update(list => [
         ...list,
-        { cartId: crypto.randomUUID(), item, variant, modifiers,
+        { cartId: uuidv4(), item, variant, modifiers,
           quantity, unitPrice, lineTotal, specialNote }
       ]);
     }

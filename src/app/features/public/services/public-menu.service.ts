@@ -7,7 +7,8 @@ import { environment }                     from '../../../../environments/enviro
 import { SubdomainService }                from '../../../core/services/subdomain.service';
 import {
   PublicMenuResponse, ThemeResponse,
-  CreateOrderRequest, SubmittedOrder, ApiResponse
+  CreateOrderRequest, SubmittedOrder, ApiResponse,
+  TrackedOrder
 } from '../models/public-menu.models';
 
 @Injectable({ providedIn: 'root' })
@@ -77,10 +78,21 @@ export class PublicMenuService {
                 sessionId: string): void {
     if (!this.isBrowser) return;
     this.http.post(
-      `${this.api}/api/menu/track/item-view`,
+      `${this.api}/api/dashboard/analytics/menu/track/item-view`,
       { itemId, categoryId, sessionId },
       { headers: this.headers }
     ).subscribe({ error: () => {} });
+  }
+
+  // ── Order tracking ────────────────────────────────────────────────────────
+ 
+  trackOrder(reference: string): Observable<TrackedOrder> {
+    return this.http
+      .get<ApiResponse<TrackedOrder>>(
+        `${this.api}/api/orders/track/${encodeURIComponent(reference)}`,
+        { headers: this.headers }
+      )
+      .pipe(map(r => r.data));
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

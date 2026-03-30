@@ -2,13 +2,13 @@ import {
   Component, OnInit, OnDestroy, signal, computed, inject
 } from '@angular/core';
 import { CommonModule }  from '@angular/common';
-import { OrderService }  from '../services/order.service';
 import {
   OrderResponse, OrderStatus,
   STATUS_META, STATUS_FILTERS
 } from '../models/order.models';
 import { interval, Subscription } from 'rxjs';
 import { switchMap, startWith }   from 'rxjs/operators';
+import { OrderService } from '../services/order.service';
 
 @Component({
   selector:    'app-orders',
@@ -34,6 +34,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
   updatingId     = signal<string | null>(null);
   error          = signal<string | null>(null);
   lastRefreshed  = signal<Date>(new Date());
+
+  // ETA / message inputs shown when advancing status
+  etaMinutes        = signal<number | null>(null);
+  restaurantMessage = signal('');
 
   // ── Constants ────────────────────────────────────────────────────────────────
   readonly statusFilters = STATUS_FILTERS;
@@ -116,7 +120,12 @@ export class OrdersComponent implements OnInit, OnDestroy {
     if (!meta.next) return;
 
     this.updatingId.set(order.id);
-    this.svc.updateStatus(order.id, meta.next).subscribe({
+    this.svc.updateStatus(
+      order.id,
+      meta.next,
+      this.etaMinutes(),
+      this.restaurantMessage() || null
+    ).subscribe({
       next: updated => {
         this.orders.update(list =>
           list.map(o => o.id === updated.id ? updated : o));
@@ -135,7 +144,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   cancelOrder(order: OrderResponse) {
     if (!confirm(`Cancel order ${order.reference}?`)) return;
     this.updatingId.set(order.id);
-    this.svc.updateStatus(order.id, 'CANCELLED').subscribe({
+    this.svc.updateStatus(order.id, 'CANCELLED', null, null).subscribe({
       next: updated => {
         this.orders.update(list =>
           list.map(o => o.id === updated.id ? updated : o));
@@ -162,6 +171,14 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
   getStatusMeta(status: OrderStatus) { return STATUS_META[status]; }
+
+  setEtaMinutes(v: string): void {
+    this.etaMinutes.set(v ? +v : null);
+  }
+
+  setRestaurantMessage(v: string): void {
+    this.restaurantMessage.set(v);
+  }
 
   formatTime(iso: string): string {
     return new Date(iso).toLocaleTimeString('fr-TN', {

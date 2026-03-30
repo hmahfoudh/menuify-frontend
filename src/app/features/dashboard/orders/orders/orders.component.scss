@@ -769,3 +769,114 @@
     gap: 0.5rem;
   }
 }
+
+// ── ETA / message section in order detail ────────────────────────────────────
+.detail-eta-section {
+  background: var(--ink-3);
+  border-top: 1px solid var(--line);
+}
+
+.eta-hint {
+  font-size:   0.72rem;
+  color:       var(--fog-2);
+  margin:      0 0 0.75rem;
+  line-height: 1.4;
+}
+
+.eta-row {
+  display: flex;
+  gap:     0.65rem;
+  align-items: flex-end;
+}
+
+.eta-field { flex-shrink: 0; }
+.eta-msg-field { flex: 1; }
+
+.eta-label {
+  display:        block;
+  font-size:      0.62rem;
+  font-weight:    600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color:          var(--cream-2);
+  margin-bottom:  0.3rem;
+}
+
+.eta-input-wrap {
+  display:     flex;
+  align-items: center;
+  gap:         0.3rem;
+}
+
+.eta-input {
+  width:          56px;
+  background:     var(--ink-4);
+  border:         1px solid var(--line);
+  border-radius:  7px;
+  padding:        0.5rem 0.5rem;
+  font-size:      0.85rem;
+  font-family:    inherit;
+  color:          var(--cream);
+  outline:        none;
+  text-align:     center;
+  transition:     border-color 0.2s;
+  -webkit-appearance: none;
+
+  &:focus { border-color: var(--gold); }
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button { opacity: 0; }
+}
+
+.eta-unit {
+  font-size: 0.72rem;
+  color:     var(--fog);
+}
+
+.eta-msg-input {
+  width:          100%;
+  background:     var(--ink-4);
+  border:         1px solid var(--line);
+  border-radius:  7px;
+  padding:        0.5rem 0.7rem;
+  font-size:      0.78rem;
+  font-family:    inherit;
+  color:          var(--cream);
+  outline:        none;
+  transition:     border-color 0.2s;
+
+  &::placeholder { color: var(--fog-2); }
+  &:focus        { border-color: var(--gold); }
+}
+
+.eta-current {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  margin-top:  0.65rem;
+  flex-wrap:   wrap;
+}
+
+.eta-current-label {
+  font-size: 0.65rem;
+  color:     var(--fog-2);
+}
+
+.eta-pill {
+  font-size:     0.7rem;
+  font-weight:   600;
+  padding:       0.18rem 0.6rem;
+  border-radius: 20px;
+  background:    var(--gold-lo);
+  border:        1px solid var(--gold-line);
+  color:         var(--gold);
+}
+
+.eta-msg-preview {
+  font-size:  0.7rem;
+  color:      var(--fog);
+  font-style: italic;
+  max-width:  180px;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}

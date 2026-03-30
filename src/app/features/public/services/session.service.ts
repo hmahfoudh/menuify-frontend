@@ -1,6 +1,6 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-
+import { v4 as uuidv4 } from 'uuid';
 @Injectable({ providedIn: 'root' })
 export class SessionService {
 
@@ -12,7 +12,7 @@ export class SessionService {
     const key      = 'menuify_sid';
     const existing = sessionStorage.getItem(key);
     if (existing) return existing;
-    const id = crypto.randomUUID();
+    const id = uuidv4();
     sessionStorage.setItem(key, id);
     return id;
   }
