@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://backend.menuify.tn',
+  apiUrl: 'https://api.menuify.tn',
   defaultLang: 'en'
 };

@@ -19,8 +19,9 @@ export class SubdomainService {
     if (!this.isBrowser) return '';
     const host  = window.location.hostname;
     const parts = host.split('.');
-    // Need at least 2 parts for a subdomain (sub.domain.tld)
-    return parts.length >= 2 ? parts[0] : host;
+    // Need at least 3 parts for a real subdomain (sub.domain.tld).
+    // If only 2 parts (e.g. menuify.tn) there is no subdomain — treat as bare root.
+    return parts.length >= 3 ? parts[0] : '';
   }
 
   /**
@@ -43,8 +44,8 @@ export class SubdomainService {
 
     const sub = this.getSubdomain();
 
-    // These subdomains always serve the dashboard
-    const dashboardSubdomains = ['app', 'dashboard', 'admin', 'localhost'];
+    // These subdomains (and the bare root domain) always serve the dashboard
+    const dashboardSubdomains = ['app', 'dashboard', 'admin', 'localhost', ''];
     if (dashboardSubdomains.includes(sub)) return 'dashboard';
 
     // Everything else is a tenant subdomain → public menu
