@@ -1,19 +1,21 @@
-import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { v4 as uuidv4 } from 'uuid';
+import { LocalStorageService } from '../../../core/services/local-storage.service';
 @Injectable({ providedIn: 'root' })
 export class SessionService {
 
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private localStorage = inject(LocalStorageService);
 
   /** Anonymous session UUID — persisted in sessionStorage for the tab lifetime */
   getSessionId(): string {
     if (!this.isBrowser) return 'ssr';
     const key      = 'menuify_sid';
-    const existing = sessionStorage.getItem(key);
+    const existing = this.localStorage.get(key);
     if (existing) return existing;
     const id = uuidv4();
-    sessionStorage.setItem(key, id);
+    this.localStorage.set(key, id);
     return id;
   }
 
