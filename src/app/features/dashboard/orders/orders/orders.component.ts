@@ -62,7 +62,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() { this.poll?.unsubscribe(); }
 
-  // ── Polling (refreshes every 30s for live order updates) ─────────────────────
+  // ── Polling (refreshes every 30s for live order list display) ───────────────
+  // Note: pending count + notifications are handled by OrderNotificationService
+  // which polls independently and runs for the entire dashboard session.
+
   startPolling() {
     this.poll = interval(30_000)
       .pipe(startWith(0), switchMap(() => {

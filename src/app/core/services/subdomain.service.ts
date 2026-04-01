@@ -65,4 +65,13 @@ export class SubdomainService {
   isDashboard(): boolean {
     return this.getContext() === 'dashboard';
   }
+
+  /**
+   * True when running on a tenant subdomain — both the public menu
+   * AND the POS live here (blackrabbit.menuify.tn/menu and /pos).
+   * Alias for isPublicMenu() — kept explicit for routing clarity.
+   */
+  isTenantSubdomain(): boolean {
+    return this.getContext() === 'public-menu';
+  }
 }

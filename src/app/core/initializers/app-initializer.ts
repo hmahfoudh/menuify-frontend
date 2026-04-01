@@ -54,7 +54,7 @@ export function initApp(): () => Promise<void> {
     }
 
     // Check if we already have this tenant cached for this subdomain
-    const cached = storage.getJson<PublicTenantInfo>('public_tenant');
+    const cached = storage.getJson<PublicTenantInfo>('tenant');
     if (cached && cached.subdomain === sub) {
       resolve();
       return;
@@ -79,7 +79,7 @@ export function initApp(): () => Promise<void> {
         };
 
         // Store so the tenantInterceptor and menu page can read it
-        storage.setJson('public_tenant', tenantInfo);
+        storage.setJson('tenant', tenantInfo);
         resolve();
       },
       error: () => {

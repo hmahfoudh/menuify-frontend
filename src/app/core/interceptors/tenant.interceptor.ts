@@ -28,7 +28,7 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
     subdomain = auth.currentTenant()?.subdomain ?? null;
   } else {
     // Public menu: read subdomain from the cached public tenant info
-    const cached = storage.getJson<{ subdomain: string }>('public_tenant');
+    const cached = storage.getJson<{ subdomain: string }>('tenant');
     subdomain = cached?.subdomain ?? subdomainSvc.getSubdomain();
   }
 

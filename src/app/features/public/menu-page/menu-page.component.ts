@@ -81,6 +81,11 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   // ── Order flow ────────────────────────────────────────────────────────────
   orderStep  = signal<OrderStep>('idle');
+
+  // ── Opening hours ──────────────────────────────────────────────────────────
+  isOpen         = signal(true);
+  nextOpenTime   = signal<string | null>(null);   // e.g. "Opens at 09:00"
+  private hoursCheckInterval?: ReturnType<typeof setInterval>;
   // orderRef() is now a computed shorthand for display — real state is activeOrders
   submitting = signal(false);
   orderError = signal<string | null>(null);
@@ -172,6 +177,11 @@ export class MenuPageComponent implements OnInit, OnDestroy {
           this.session.getSessionId(),
           this.session.getQrCode(),
           this.session.getTableNumber()
+        );
+        // Start opening hours check (runs immediately + every 60s)
+        this.checkOpeningHours(menu.openingHours);
+        this.hoursCheckInterval = setInterval(
+          () => this.checkOpeningHours(menu.openingHours), 60_000
         );
       },
       error: () => {
@@ -480,6 +490,76 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return stepStatus === current;
   }
 
+  // ── Opening hours ─────────────────────────────────────────────────────────
+
+  private checkOpeningHours(openingHoursJson: string | null): void {
+    if (!openingHoursJson) {
+      // No hours configured — assume always open
+      this.isOpen.set(true);
+      this.nextOpenTime.set(null);
+      return;
+    }
+
+    try {
+      const hours: Record<string, { open: boolean; from: string; to: string }>
+        = JSON.parse(openingHoursJson);
+
+      const now  = new Date();
+      // Day key matches the format stored in settings: 'monday', 'tuesday', etc.
+      const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+      const todayKey = days[now.getDay()];
+      const todaySlot = hours[todayKey];
+
+      if (!todaySlot?.open) {
+        // Closed today — find next open day
+        this.isOpen.set(false);
+        this.nextOpenTime.set(this.findNextOpenTime(hours, days, now));
+        return;
+      }
+
+      const [fh, fm] = todaySlot.from.split(':').map(Number);
+      const [th, tm] = todaySlot.to.split(':').map(Number);
+      const nowMins  = now.getHours() * 60 + now.getMinutes();
+      const fromMins = fh * 60 + fm;
+      const toMins   = th * 60 + tm;
+
+      if (nowMins >= fromMins && nowMins < toMins) {
+        this.isOpen.set(true);
+        this.nextOpenTime.set(null);
+      } else if (nowMins < fromMins) {
+        // Before opening time today
+        this.isOpen.set(false);
+        this.nextOpenTime.set(`Opens today at ${todaySlot.from}`);
+      } else {
+        // After closing time today — find next open day
+        this.isOpen.set(false);
+        this.nextOpenTime.set(this.findNextOpenTime(hours, days, now));
+      }
+    } catch {
+      // Malformed JSON — fail open (don't block customers)
+      this.isOpen.set(true);
+      this.nextOpenTime.set(null);
+    }
+  }
+
+  private findNextOpenTime(
+    hours: Record<string, { open: boolean; from: string; to: string }>,
+    days: string[],
+    now: Date
+  ): string | null {
+    for (let i = 1; i <= 7; i++) {
+      const dayIdx  = (now.getDay() + i) % 7;
+      const dayKey  = days[dayIdx];
+      const slot    = hours[dayKey];
+      if (slot?.open) {
+        const dayLabel = i === 1 ? 'tomorrow'
+          : days[dayIdx].charAt(0).toUpperCase() + days[dayIdx].slice(1);
+        return `Opens ${dayLabel} at ${slot.from}`;
+      }
+    }
+    return 'Currently closed';
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   fmt(n: number | null): string {
     if (n == null) return '';
@@ -493,6 +573,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   // ── Keyboard shortcuts ────────────────────────────────────────────────────
   ngOnDestroy(): void {
     this.trackPoll?.unsubscribe();
+    clearInterval(this.hoursCheckInterval);
   }
 
 

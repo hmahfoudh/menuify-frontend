@@ -126,6 +126,25 @@
   </main>
 
   <!-- ══════════════════════════════════════════════════════════════
+       CLOSED BANNER — shown when outside opening hours
+  ══════════════════════════════════════════════════════════════════ -->
+  @if (!isOpen()) {
+    <div class="mp-closed-banner">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <div class="mp-closed-banner__text">
+        <span class="mp-closed-banner__title">We're closed right now</span>
+        @if (nextOpenTime()) {
+          <span class="mp-closed-banner__sub">{{ nextOpenTime() }}</span>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════
        PERSISTENT BOTTOM BAR
        Always visible. Shows:
          - Cart section (left): item count + total, opens cart drawer
@@ -532,12 +551,25 @@
             {{ fmt(cartSubtotal()) }} {{ currency() }}
           </span>
         </div>
-        <button class="mp-checkout-btn" (click)="openCheckout()" type="button">
-          Place order
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <polyline points="5 12 12 19 19 5"/>
-          </svg>
+        <button class="mp-checkout-btn"
+                (click)="openCheckout()"
+                [disabled]="!isOpen()"
+                [class.mp-checkout-btn--closed]="!isOpen()"
+                type="button">
+          @if (!isOpen()) {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Closed
+          } @else {
+            Place order
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="5 12 12 19 19 5"/>
+            </svg>
+          }
         </button>
       </div>
 

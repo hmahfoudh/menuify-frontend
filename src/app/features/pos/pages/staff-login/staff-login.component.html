@@ -1,0 +1,98 @@
+<div class="login-root">
+
+  <div class="login-brand">
+    <div class="login-brand__dot"></div>
+    <span class="login-brand__name">Menuify POS</span>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="login-loading">
+      <div class="login-spinner"></div>
+    </div>
+  }
+
+  <!-- Error (no staff loaded) -->
+  @if (!loading() && error() && !selectedStaff()) {
+    <div class="login-error-box">
+      <p>{{ error() }}</p>
+    </div>
+  }
+
+  <!-- ── Staff selection ─────────────────────────────────────────────────── -->
+  @if (!loading() && !selectedStaff()) {
+    <div class="login-stage">
+      <h1 class="login-title">Who are you?</h1>
+      <p class="login-sub">Select your name to continue</p>
+
+      <div class="staff-grid">
+        @for (s of staff(); track s.id) {
+          <button class="staff-card" (click)="selectStaff(s)" type="button">
+            <div class="staff-card__avatar"
+                 [style.background]="staffColor(s) + '22'"
+                 [style.border-color]="staffColor(s) + '55'">
+              <span [style.color]="staffColor(s)">{{ staffInitial(s) }}</span>
+            </div>
+            <span class="staff-card__name">{{ s.name }}</span>
+          </button>
+        }
+      </div>
+
+      @if (staff().length === 0 && !error()) {
+        <p class="login-empty">No staff accounts configured yet.</p>
+      }
+    </div>
+  }
+
+  <!-- ── PIN entry ──────────────────────────────────────────────────────── -->
+  @if (selectedStaff(); as s) {
+    <div class="login-stage login-stage--pin">
+
+      <button class="pin-back" (click)="backToList()" type="button">
+        ← Back
+      </button>
+
+      <!-- Staff avatar -->
+      <div class="pin-avatar"
+           [style.background]="staffColor(s) + '22'"
+           [style.border-color]="staffColor(s) + '88'">
+        <span [style.color]="staffColor(s)">{{ staffInitial(s) }}</span>
+      </div>
+      <h1 class="login-title">{{ s.name }}</h1>
+      <p class="login-sub">Enter your PIN</p>
+
+      <!-- PIN dots -->
+      <div class="pin-dots">
+        @for (filled of pinDots(); track $index) {
+          <div class="pin-dot" [class.pin-dot--filled]="filled"></div>
+        }
+      </div>
+
+      <!-- Error -->
+      @if (error()) {
+        <p class="pin-error">{{ error() }}</p>
+      }
+
+      <!-- Numpad -->
+      <div class="numpad">
+        @for (d of ['1','2','3','4','5','6','7','8','9','C','0','⌫']; track d) {
+          <button class="numpad-key"
+                  [class.numpad-key--clear]="d === 'C'"
+                  [class.numpad-key--back]="d === '⌫'"
+                  [class.numpad-key--loading]="d === '⌫' && logging()"
+                  (click)="d === 'C' ? pressClear() : d === '⌫' ? pressBackspace() : pressDigit(d)"
+                  [disabled]="logging()"
+                  type="button">
+            @if (d === '⌫' && logging()) {
+              <span class="numpad-spinner"></span>
+            } @else {
+              {{ d }}
+            }
+          </button>
+        }
+      </div>
+
+    </div>
+  }
+
+</div>

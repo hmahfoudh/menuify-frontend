@@ -1,0 +1,441 @@
+<div class="pos-root">
+
+  <!-- ══════════════════════════════════════════
+       TOP BAR
+  ══════════════════════════════════════════ -->
+  <div class="pos-topbar">
+    <div class="pos-topbar__left">
+      <div class="pos-brand-dot"></div>
+      <span class="pos-brand-name">Menuify POS</span>
+    </div>
+
+    <!-- Order type toggle -->
+    <div class="pos-order-type">
+      @for (ot of orderTypes; track ot.value) {
+        <button class="pos-ot-btn"
+                [class.pos-ot-btn--active]="orderType() === ot.value"
+                (click)="setOrderType(ot.value)"
+                type="button">
+          {{ ot.label }}
+        </button>
+      }
+    </div>
+
+    <div class="pos-topbar__right">
+      <!-- Active orders count from table grid -->
+      @if (activeTableCount() > 0) {
+        <div class="pos-active-chip">
+          <span class="pos-active-chip__dot"></span>
+          {{ activeTableCount() }} active
+        </div>
+      }
+      <div class="pos-staff-chip">{{ staffName }}</div>
+      <button class="pos-exit-btn" (click)="logout()" type="button">
+        @if (staffName === 'Owner') { ← Dashboard } @else { Sign out }
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       MAIN LAYOUT — 3 columns
+  ══════════════════════════════════════════ -->
+  <div class="pos-layout">
+
+    <!-- ── COLUMN 1: TABLES ─────────────────────────────────── -->
+    <div class="pos-tables-col">
+
+      <div class="pos-tables-head">
+        <span class="pos-tables-head__label">Tables</span>
+      </div>
+
+      <!-- No table / Walk-in -->
+      <button class="pos-no-table"
+              [class.pos-no-table--selected]="selectedTableKey() === 'no-table'"
+              (click)="selectTable('no-table')"
+              type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/>
+          <line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+        No table — Walk-in
+      </button>
+
+      <!-- Table cards grid -->
+      <div class="pos-tables-grid">
+        @if (loading()) {
+          @for (i of [1,2,3,4,5,6]; track i) {
+            <div class="tbl-card tbl-card--skeleton"></div>
+          }
+        } @else {
+          @for (t of tables(); track t.id) {
+            <button [class]="tableCardClass(t)"
+                    (click)="selectTable(tableKey(t))"
+                    type="button">
+              <div class="tbl-card__dot"
+                   [style.background]="tableStatusDot(t)"></div>
+              <div class="tbl-card__name">{{ t.displayName }}</div>
+              <div class="tbl-card__status">{{ tableStatusLabel(t) }}</div>
+              @if (t.activeOrderRef) {
+                <div class="tbl-card__ref">{{ t.activeOrderRef }}</div>
+              }
+            </button>
+          }
+        }
+      </div>
+
+      <!-- Legend -->
+      <div class="pos-tables-legend">
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#504c44"></span>Free
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#e8a838"></span>Busy
+        </span>
+        <span class="legend-item">
+          <span class="legend-dot" style="background:#64c882"></span>Ready
+        </span>
+      </div>
+
+    </div>
+
+    <!-- ── COLUMN 2: MENU ──────────────────────────────────── -->
+    <div class="pos-menu-col">
+
+      <!-- Category sidebar -->
+      <div class="pos-cat-sidebar">
+        <button class="pos-cat-item"
+                [class.pos-cat-item--active]="activeCatId() === null"
+                (click)="setCategory(null)"
+                type="button">
+          <span class="pos-cat-icon">⊞</span>
+          <span class="pos-cat-label">Tout</span>
+        </button>
+        @for (cat of categories(); track cat.id) {
+          <button class="pos-cat-item"
+                  [class.pos-cat-item--active]="activeCatId() === cat.id"
+                  (click)="setCategory(cat.id)"
+                  type="button">
+            <span class="pos-cat-dot"
+                  [style.background]="accentFor(cat.id)"></span>
+            <span class="pos-cat-label">{{ cat.name }}</span>
+            <span class="pos-cat-count">{{ cat.items.length }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- Items area -->
+      <div class="pos-items-area">
+
+        <!-- Search -->
+        <div class="pos-search">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" placeholder="Rechercher..."
+                 [value]="searchQuery()"
+                 (input)="setSearch($any($event.target).value)">
+        </div>
+
+        <!-- Item grid -->
+        <div class="pos-item-grid">
+          @if (loading()) {
+            @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+              <div class="pos-item-card pos-item-card--skeleton"></div>
+            }
+          } @else if (filteredItems().length === 0) {
+            <div class="pos-items-empty">
+              <p>No items found</p>
+            </div>
+          } @else {
+            @for (item of filteredItems(); track item.id) {
+              <button class="pos-item-card"
+                      (click)="tapItem(item)"
+                      type="button">
+                <!-- Category accent strip (left border) -->
+                <div class="pos-item-card__accent"
+                     [style.background]="item._accent"></div>
+                <div class="pos-item-card__body">
+                  <div class="pos-item-card__name">{{ item.name }}</div>
+                  <div class="pos-item-card__price"
+                       [style.color]="item._accent">
+                    {{ fmt(item.displayPrice ?? item.basePrice ?? 0) }} DT
+                  </div>
+                </div>
+              </button>
+            }
+          }
+        </div>
+
+        <!-- Quantity preset bar -->
+        <div class="pos-qty-bar">
+          <span class="pos-qty-bar__label">QTÉ</span>
+          <div class="pos-qty-bar__current">{{ qtyPreset() }}</div>
+          @for (p of qtyPresets; track p) {
+            <button class="pos-qty-preset"
+                    [class.pos-qty-preset--active]="qtyPreset() === p"
+                    (click)="setQtyPreset(p)"
+                    type="button">
+              {{ p }}
+            </button>
+          }
+          <button class="pos-qty-preset pos-qty-preset--clear"
+                  (click)="setQtyPreset(1)"
+                  type="button">C</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── COLUMN 3: ORDER PANEL ────────────────────────────── -->
+    <div class="pos-order-col">
+
+      <!-- Order header -->
+      <div class="pos-order-head">
+        <span class="pos-order-head__title">Commande</span>
+        @if (selectedTableKey() && selectedTableKey() !== 'no-table') {
+          <span class="pos-order-head__table">
+            {{ selectedTable()?.displayName ?? ('T-' + selectedTableKey()) }}
+          </span>
+        } @else {
+          <span class="pos-order-head__walkin">Walk-in</span>
+        }
+      </div>
+
+      <!-- Order sent confirmation -->
+      @if (view() === 'orderSent') {
+        <div class="pos-order-sent">
+          <div class="pos-order-sent__check">✓</div>
+          <div class="pos-order-sent__title">Order sent!</div>
+          <div class="pos-order-sent__ref">{{ lastOrderRef() }}</div>
+          <button class="pos-btn-print" (click)="printReceipt()" type="button">
+            Print receipt
+          </button>
+          <button class="pos-btn-neworder" (click)="newOrder()" type="button">
+            New order
+          </button>
+        </div>
+
+      } @else {
+
+      <!-- Empty state -->
+      @if (cartIsEmpty()) {
+        <div class="pos-order-empty">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <p>Appuyez sur un produit</p>
+        </div>
+      }
+
+      <!-- Cart items -->
+      @if (!cartIsEmpty()) {
+        <div class="pos-order-lines">
+          @for (line of cartItems(); track line.cartId) {
+            <div class="pos-order-line">
+              <div class="pos-order-line__qty">
+                <button class="pos-qty-btn"
+                        (click)="updateQty(line.cartId, line.quantity - 1)"
+                        type="button">−</button>
+                <span class="pos-qty-val">{{ line.quantity }}</span>
+                <button class="pos-qty-btn"
+                        (click)="updateQty(line.cartId, line.quantity + 1)"
+                        type="button">+</button>
+              </div>
+              <div class="pos-order-line__info">
+                <div class="pos-order-line__name">{{ line.itemName }}</div>
+                @if (line.variant) {
+                  <div class="pos-order-line__sub">{{ line.variant.name }}</div>
+                }
+                @for (m of line.modifiers; track m.id) {
+                  <div class="pos-order-line__mod">+ {{ m.name }}</div>
+                }
+              </div>
+              <div class="pos-order-line__price">{{ fmt(line.lineTotal) }}</div>
+              <button class="pos-order-line__remove"
+                      (click)="removeItem(line.cartId)"
+                      type="button">✕</button>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Totals -->
+      <div class="pos-order-totals">
+        <div class="pos-order-totals__sub">
+          <span>Sous-total</span>
+          <span>{{ fmt(cartSubtotal()) }} DT</span>
+        </div>
+        <div class="pos-order-totals__total">
+          <span class="pos-order-totals__total-label">TOTAL</span>
+          <span class="pos-order-totals__total-val">{{ fmt(cartSubtotal()) }} DT</span>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="pos-order-notes">
+        <input type="text" placeholder="Notes..."
+               [value]="orderNotes()"
+               (input)="setOrderNotes($any($event.target).value)">
+      </div>
+
+      <!-- Error -->
+      @if (submitError()) {
+        <p class="pos-order-error">{{ submitError() }}</p>
+      }
+
+      <!-- Payment buttons -->
+      <div class="pos-payment-btns">
+        <button class="pos-pay-btn pos-pay-btn--cash"
+                [class.pos-pay-btn--active]="paymentType() === 'cash'"
+                (click)="setPaymentType('cash')" type="button">
+          ESPÈCES
+        </button>
+        <button class="pos-pay-btn"
+                [class.pos-pay-btn--active]="paymentType() === 'card'"
+                (click)="setPaymentType('card')" type="button">
+          CARTE
+        </button>
+        <button class="pos-pay-btn"
+                [class.pos-pay-btn--active]="paymentType() === 'mixed'"
+                (click)="setPaymentType('mixed')" type="button">
+          MIXTE
+        </button>
+      </div>
+
+      <!-- Place order -->
+      <button class="pos-place-btn"
+              [disabled]="cartIsEmpty() || submitting()"
+              (click)="placeOrder()"
+              type="button">
+        @if (submitting()) {
+          <span class="pos-place-spinner"></span>
+          Sending...
+        } @else {
+          Valider →
+        }
+      </button>
+
+      } <!-- end @else (not orderSent) -->
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     ITEM MODAL (variant/modifier picker)
+══════════════════════════════════════ -->
+@if (modalItem(); as item) {
+  <div class="pos-modal-backdrop" (click)="closeModal()">
+    <div class="pos-modal" (click)="$event.stopPropagation()">
+
+      <div class="pos-modal__head">
+        <div>
+          <div class="pos-modal__accent" [style.background]="item._accent"></div>
+          <h3 class="pos-modal__name">{{ item.name }}</h3>
+        </div>
+        <button class="pos-modal__close" (click)="closeModal()" type="button">✕</button>
+      </div>
+
+      <!-- Variants -->
+      @for (g of item.variantGroups; track g.id) {
+        <div class="pos-modal__section">
+          <div class="pos-modal__section-label">
+            {{ g.name }}
+            @if (g.required) { <span class="pos-modal__required">required</span> }
+          </div>
+          <div class="pos-modal__options">
+            @for (v of g.variants; track v.id) {
+              <button class="pos-modal__option"
+                      [class.pos-modal__option--active]="modalVariant()?.id === v.id"
+                      (click)="selectVariant(v)"
+                      type="button">
+                <span>{{ v.name }}</span>
+                <span class="pos-modal__option-price">{{ fmt(v.price) }} DT</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Modifiers -->
+      @for (g of item.modifierGroups; track g.id) {
+        <div class="pos-modal__section">
+          <div class="pos-modal__section-label">
+            {{ g.name }}
+            @if (g.required) { <span class="pos-modal__required">required</span> }
+          </div>
+          <div class="pos-modal__options">
+            @for (m of g.modifiers; track m.id) {
+              <button class="pos-modal__option"
+                      [class.pos-modal__option--active]="isModSelected(m.id)"
+                      (click)="toggleMod(m.id, g)"
+                      type="button">
+                <span>{{ m.name }}</span>
+                @if (m.priceDelta > 0) {
+                  <span class="pos-modal__option-price">+{{ fmt(m.priceDelta) }}</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Footer -->
+      <div class="pos-modal__foot">
+        <div class="pos-modal__unit-price">{{ fmt(modalUnitPrice()) }} DT × {{ qtyPreset() }}</div>
+        <button class="pos-modal__add"
+                (click)="addModalItemToCart()"
+                type="button">
+          Add  {{ fmt(modalUnitPrice() * qtyPreset()) }} DT
+        </button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- Print receipt (hidden on screen, shown on print) -->
+@if (view() === 'orderSent') {
+  <div class="pos-receipt">
+    <div class="pos-receipt__head">
+      <div class="pos-receipt__restaurant">{{ tenantName() }}</div>
+      @if (receiptTable()) {
+        <div class="pos-receipt__table">Table {{ receiptTable() }}</div>
+      }
+      <div class="pos-receipt__ref">Ref: {{ lastOrderRef() }}</div>
+      <div class="pos-receipt__date">{{ now | date:'dd/MM/yyyy HH:mm' }}</div>
+    </div>
+    <div class="pos-receipt__divider">--------------------------------</div>
+    @for (line of receiptLines(); track line.cartId) {
+      <div class="pos-receipt__line">
+        <span>
+          {{ line.quantity }}× {{ line.itemName }}
+          @if (line.variant) { ({{ line.variant.name }}) }
+        </span>
+        <span>{{ fmt(line.lineTotal) }} DT</span>
+      </div>
+      @for (mod of line.modifiers; track mod.id) {
+        <div class="pos-receipt__line pos-receipt__line--mod">
+          <span>&nbsp;&nbsp;+ {{ mod.name }}</span>
+          <span></span>
+        </div>
+      }
+    }
+    <div class="pos-receipt__divider">--------------------------------</div>
+    <div class="pos-receipt__total">
+      <strong>TOTAL</strong>
+      <strong>{{ fmt(receiptSubtotal()) }} DT</strong>
+    </div>
+    <div class="pos-receipt__footer">Merci de votre visite!</div>
+  </div>
+}
