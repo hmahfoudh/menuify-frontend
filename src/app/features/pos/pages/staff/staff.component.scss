@@ -1,0 +1,379 @@
+:host {
+  --ink:      #0d0c0b;
+  --ink2:     #161412;
+  --ink3:     #1e1c18;
+  --ink4:     #282420;
+  --cream:    #f0ebe2;
+  --cream2:   #c8c0b0;
+  --fog:      #7a7268;
+  --gold:     #c9a96e;
+  --gold-bg:  rgba(201,169,110,0.10);
+  --gold-line:rgba(201,169,110,0.22);
+  --green:    #64c882;
+  --red:      #e07070;
+  --line:     rgba(210,180,120,0.12);
+  --line2:    rgba(210,180,120,0.24);
+  --r:        0.16s cubic-bezier(0.4,0,0.2,1);
+
+  display: block;
+  background: var(--ink);
+}
+
+.staff-page {
+  padding:     2rem 2.5rem;
+  max-width:   860px;
+  min-height:  100vh;
+  background:  var(--ink);
+  color:       var(--cream);
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.sp-header {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  margin-bottom:   2rem;
+  gap:             1rem;
+}
+
+.sp-title {
+  font-size:   1.4rem;
+  font-weight: 700;
+  color:       var(--cream);
+  margin:      0 0 0.25rem;
+}
+
+.sp-sub {
+  font-size: 0.82rem;
+  color:     var(--fog);
+  margin:    0;
+}
+
+.sp-btn-add {
+  padding:       8px 16px;
+  border-radius: 8px;
+  border:        1px solid var(--gold-line);
+  background:    var(--gold-bg);
+  color:         var(--gold);
+  font-size:     0.8rem;
+  font-weight:   600;
+  font-family:   inherit;
+  cursor:        pointer;
+  white-space:   nowrap;
+  transition:    all var(--r);
+  flex-shrink:   0;
+  &:hover { background: rgba(201,169,110,0.16); }
+}
+
+// ── Feedback ──────────────────────────────────────────────────────────────────
+.sp-toast {
+  margin-bottom: 1rem;
+  padding:       10px 14px;
+  border-radius: 8px;
+  background:    rgba(100,200,130,0.12);
+  border:        1px solid rgba(100,200,130,0.3);
+  color:         var(--green);
+  font-size:     0.8rem;
+  animation:     fadeIn 0.2s ease;
+}
+
+.sp-error {
+  margin-bottom: 1rem;
+  padding:       10px 14px;
+  border-radius: 8px;
+  background:    rgba(220,80,70,0.08);
+  border:        1px solid rgba(220,80,70,0.25);
+  color:         #f09090;
+  font-size:     0.8rem;
+}
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+
+// ── Loading / Empty ───────────────────────────────────────────────────────────
+.sp-loading {
+  display:flex; align-items:center; justify-content:center; height:200px;
+}
+.sp-spinner {
+  width:32px; height:32px;
+  border:3px solid var(--line);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:spin 0.7s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+
+.sp-empty {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             1rem;
+  padding:         4rem 2rem;
+  color:           var(--fog);
+  font-size:       0.85rem;
+
+  svg { opacity: 0.35; }
+}
+
+// ── Staff list ────────────────────────────────────────────────────────────────
+.sp-list { display: flex; flex-direction: column; gap: 8px; }
+
+.sp-card {
+  display:       flex;
+  align-items:   center;
+  gap:           1rem;
+  padding:       14px 16px;
+  background:    var(--ink2);
+  border:        1px solid var(--line2);
+  border-radius: 12px;
+  transition:    all var(--r);
+
+  &--inactive { opacity: 0.55; }
+  &:hover { border-color: var(--line2); }
+}
+
+.sp-card__avatar {
+  width:           44px;
+  height:          44px;
+  border-radius:   50%;
+  border:          2px solid;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       1.1rem;
+  font-weight:     700;
+  flex-shrink:     0;
+}
+
+.sp-card__info { flex: 1; min-width: 0; }
+
+.sp-card__name {
+  font-size:   0.9rem;
+  font-weight: 600;
+  color:       var(--cream);
+  margin-bottom: 4px;
+}
+
+.sp-card__meta { display: flex; align-items: center; gap: 0.5rem; }
+
+.sp-badge {
+  font-size:     0.62rem;
+  font-weight:   700;
+  padding:       2px 7px;
+  border-radius: 10px;
+  letter-spacing:0.04em;
+
+  &--active   { background:rgba(100,200,130,0.12); color:var(--green); border:1px solid rgba(100,200,130,0.3); }
+  &--inactive { background:rgba(120,116,108,0.12); color:var(--fog); border:1px solid var(--line2); }
+}
+
+.sp-card__date { font-size: 0.72rem; color: var(--fog); }
+
+.sp-card__actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+.sp-btn-icon {
+  width:           30px;
+  height:          30px;
+  border-radius:   7px;
+  border:          0.5px solid var(--line);
+  background:      transparent;
+  color:           var(--fog);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  cursor:          pointer;
+  transition:      all var(--r);
+
+  &:hover { background: var(--ink3); color: var(--cream); }
+  &--danger:hover { background:rgba(220,80,70,0.08); color:var(--red); border-color:rgba(220,80,70,0.25); }
+}
+
+// ── Slide-in panel ────────────────────────────────────────────────────────────
+.sp-panel-backdrop {
+  position: fixed; inset: 0; z-index: 40;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease;
+}
+
+.sp-panel {
+  position:       fixed;
+  top:            0; right: 0; bottom: 0;
+  width:          400px;
+  z-index:        50;
+  background:     var(--ink2);
+  border-left:    1px solid var(--line2);
+  display:        flex;
+  flex-direction: column;
+  animation:      slideIn 0.25s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+@keyframes slideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+
+.sp-panel__head {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         1.25rem 1.5rem;
+  border-bottom:   1px solid var(--line2);
+  flex-shrink:     0;
+}
+
+.sp-panel__title { font-size: 1rem; font-weight: 600; color: var(--cream); margin: 0; }
+
+.sp-panel__close {
+  width:32px; height:32px; border-radius:8px; border:0.5px solid var(--line);
+  background:transparent; color:var(--fog); cursor:pointer; font-size:0.75rem;
+  display:flex; align-items:center; justify-content:center;
+  &:hover { background:var(--ink3); }
+}
+
+.sp-panel__body {
+  flex:       1;
+  overflow-y: auto;
+  padding:    1.25rem 1.5rem;
+  display:    flex;
+  flex-direction: column;
+  gap:        1.25rem;
+}
+
+// Staff preview
+.sp-preview {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.5rem;
+  padding:        1rem;
+  background:     var(--ink3);
+  border-radius:  12px;
+  border:         1px solid var(--line2);
+}
+
+.sp-preview__avatar {
+  width:           56px; height:56px; border-radius:50%; border:2px solid;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; font-weight:700;
+}
+
+.sp-preview__name { font-size:0.8rem; font-weight:600; color:var(--cream); }
+
+// Form fields
+.sp-field { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.sp-field--inline {
+  flex-direction: row;
+  align-items:    center;
+  justify-content:space-between;
+}
+
+.sp-label {
+  font-size:   0.75rem;
+  font-weight: 600;
+  color:       var(--fog);
+  display:     flex;
+  align-items: center;
+  gap:         0.4rem;
+}
+
+.sp-label__hint { font-weight:400; font-size:0.68rem; color:var(--fog); }
+
+.sp-input {
+  width:         100%;
+  padding:       8px 10px;
+  border-radius: 8px;
+  border:        0.5px solid var(--line2);
+  background:    var(--ink3);
+  color:         var(--cream);
+  font-size:     0.85rem;
+  font-family:   inherit;
+  outline:       none;
+  transition:    border-color var(--r);
+  box-sizing:    border-box;
+
+  &::placeholder { color: var(--fog); }
+  &:focus { border-color: var(--gold-line); box-shadow: 0 0 0 3px rgba(201,169,110,0.08); }
+}
+
+.sp-input-wrap { position:relative; }
+.sp-toggle-pin {
+  position:  absolute; right:8px; top:50%; transform:translateY(-50%);
+  background:transparent; border:none; color:var(--fog);
+  font-size:0.72rem; cursor:pointer; font-family:inherit;
+  &:hover { color:var(--cream); }
+}
+
+.sp-field-hint { font-size:0.68rem; color:var(--fog); margin:0; }
+
+// Color swatches
+.sp-colors { display:flex; gap:8px; flex-wrap:wrap; }
+
+.sp-color-dot {
+  width:26px; height:26px; border-radius:50%; border:2px solid transparent;
+  cursor:pointer; transition:all var(--r);
+  &:hover { transform:scale(1.15); }
+  &--selected { border-color: var(--cream); transform:scale(1.15); }
+}
+
+// Toggle
+.sp-toggle {
+  position:       relative;
+  width:          40px; height:22px;
+  border-radius:  11px;
+  background:     var(--line2);
+  border:         none; cursor:pointer;
+  transition:     background var(--r);
+  flex-shrink:    0;
+
+  &--on { background: var(--gold); }
+}
+
+.sp-toggle__knob {
+  position:      absolute;
+  top:           3px; left:3px;
+  width:         16px; height:16px;
+  border-radius: 50%;
+  background:    white;
+  transition:    transform var(--r);
+
+  .sp-toggle--on & { transform: translateX(18px); }
+}
+
+.sp-panel-error {
+  font-size:  0.75rem;
+  color:      #f09090;
+  margin:     -0.5rem 0 0;
+  padding:    8px 12px;
+  background: rgba(220,80,70,0.08);
+  border:     1px solid rgba(220,80,70,0.2);
+  border-radius:7px;
+}
+
+// Panel footer
+.sp-panel__foot {
+  display:         flex;
+  justify-content: flex-end;
+  gap:             0.75rem;
+  padding:         1rem 1.5rem;
+  border-top:      1px solid var(--line2);
+  flex-shrink:     0;
+}
+
+.sp-btn-ghost {
+  padding:8px 16px; border-radius:8px; border:0.5px solid var(--line2);
+  background:transparent; color:var(--fog); font-family:inherit;
+  font-size:0.82rem; cursor:pointer; transition:all var(--r);
+  &:hover { background:var(--ink3); color:var(--cream); }
+}
+
+.sp-btn-primary {
+  padding:8px 20px; border-radius:8px; border:none; background:var(--gold);
+  color:#0d0c0b; font-family:inherit; font-size:0.82rem; font-weight:700;
+  cursor:pointer; transition:all var(--r); display:flex; align-items:center; gap:6px;
+  &:hover:not(:disabled) { background:#dab97e; }
+  &:disabled { opacity:0.45; cursor:not-allowed; }
+}
+
+.sp-btn-spinner {
+  width:14px; height:14px; border:2px solid rgba(13,12,11,0.3);
+  border-top-color:#0d0c0b; border-radius:50%; animation:spin 0.6s linear infinite;
+}

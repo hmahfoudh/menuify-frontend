@@ -10,6 +10,7 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { ErrorResponse } from '../../../core/models/api.models';
+import { LocalStorageService } from '../../../core/services/local-storage.service';
 
 // Shape of the 422 error response from the backend
 
@@ -27,6 +28,7 @@ export class RegisterComponent {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private localStorage = inject(LocalStorageService);
 
   step = signal<Step>(1);
   loading = signal(false);
@@ -122,7 +124,6 @@ export class RegisterComponent {
 
   private applyServerErrors(response: ErrorResponse): void {
     this.serverErrors.set(response);
-    console.log('Applying server errors', response);
     const errors = response.errors ?? {};
 
     // If any account-level errors exist, jump back to step 1
@@ -173,10 +174,10 @@ export class RegisterComponent {
     ).subscribe({
       next: res => {
         // Persist auth data exactly as login does
-        localStorage.setItem('accessToken', res.data.accessToken);
-        localStorage.setItem('refreshToken', res.data.refreshToken);
-        localStorage.setItem('currentUser', JSON.stringify(res.data.user));
-        localStorage.setItem('currentTenant', JSON.stringify(res.data.tenant));
+        this.localStorage.set('access_token', res.data.accessToken);
+        this.localStorage.set('refresh_token', res.data.refreshToken);
+        this.localStorage.setJson('currentUser', res.data.user);
+        this.localStorage.setJson('tenant', res.data.tenant);
         this.loading.set(false);
         this.router.navigate(['/dashboard']);
       },
@@ -184,12 +185,10 @@ export class RegisterComponent {
         this.loading.set(false);
 
         const body: ErrorResponse = err.error;
-        console.log('Registration error', body);
         if (err.status === 422 && body?.code === 'FIELD_VALIDATION_FAILED') {
 
           // Case 1: Field validation errors (MethodArgumentNotValidException)
           if (body.errors && Object.keys(body.errors).length > 0) {
-            console.log('Field validation errors:', body.errors);
             this.applyServerErrors(body);
             return;
           }

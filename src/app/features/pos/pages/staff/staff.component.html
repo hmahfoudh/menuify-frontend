@@ -1,0 +1,197 @@
+<div class="staff-page">
+
+  <!-- Header -->
+  <div class="sp-header">
+    <div>
+      <h1 class="sp-title">Staff</h1>
+      <p class="sp-sub">Manage who can access the POS and set their PINs</p>
+    </div>
+    <button class="sp-btn-add" (click)="openCreate()" type="button">
+      + Add staff member
+    </button>
+  </div>
+
+  <!-- Success toast -->
+  @if (success()) {
+    <div class="sp-toast">{{ success() }}</div>
+  }
+
+  <!-- Error -->
+  @if (error() && !panelOpen()) {
+    <div class="sp-error">{{ error() }}</div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="sp-loading">
+      <div class="sp-spinner"></div>
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (!loading() && staff().length === 0) {
+    <div class="sp-empty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      <p>No staff members yet</p>
+      <button class="sp-btn-add" (click)="openCreate()" type="button">
+        Add your first staff member
+      </button>
+    </div>
+  }
+
+  <!-- Staff list -->
+  @if (!loading() && staff().length > 0) {
+    <div class="sp-list">
+      @for (s of staff(); track s.id) {
+        <div class="sp-card" [class.sp-card--inactive]="!s.active">
+          <div class="sp-card__avatar"
+               [style.background]="(s.color ?? '#c9a96e') + '22'"
+               [style.border-color]="(s.color ?? '#c9a96e') + '55'">
+            <span [style.color]="s.color ?? '#c9a96e'">{{ initial(s.name) }}</span>
+          </div>
+          <div class="sp-card__info">
+            <div class="sp-card__name">{{ s.name }}</div>
+            <div class="sp-card__meta">
+              @if (!s.active) {
+                <span class="sp-badge sp-badge--inactive">Deactivated</span>
+              } @else {
+                <span class="sp-badge sp-badge--active">Active</span>
+              }
+              <span class="sp-card__date">
+                Added {{ s.createdAt | date:'dd MMM yyyy' }}
+              </span>
+            </div>
+          </div>
+          <div class="sp-card__actions">
+            <button class="sp-btn-icon" (click)="openEdit(s)" type="button"
+                    title="Edit">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="sp-btn-icon sp-btn-icon--danger"
+                    (click)="delete(s.id)" type="button" title="Remove">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                <path d="M10 11v6M14 11v6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>
+
+<!-- ── SLIDE-IN PANEL ──────────────────────────────────────────────────────── -->
+@if (panelOpen()) {
+  <div class="sp-panel-backdrop" (click)="closePanel()"></div>
+  <div class="sp-panel">
+
+    <div class="sp-panel__head">
+      <h2 class="sp-panel__title">
+        {{ panelMode() === 'create' ? 'Add staff member' : 'Edit staff member' }}
+      </h2>
+      <button class="sp-panel__close" (click)="closePanel()" type="button">✕</button>
+    </div>
+
+    <div class="sp-panel__body">
+
+      <!-- Preview -->
+      <div class="sp-preview">
+        <div class="sp-preview__avatar"
+             [style.background]="fColor() + '22'"
+             [style.border-color]="fColor() + '88'">
+          <span [style.color]="fColor()">
+            {{ fName() ? fName().charAt(0).toUpperCase() : '?' }}
+          </span>
+        </div>
+        <span class="sp-preview__name">{{ fName() || 'Name' }}</span>
+      </div>
+
+      <!-- Name -->
+      <div class="sp-field">
+        <label class="sp-label">Name</label>
+        <input type="text" class="sp-input"
+               [value]="fName()"
+               (input)="setName($any($event.target).value)"
+               placeholder="e.g. Ahmed">
+      </div>
+
+      <!-- PIN -->
+      <div class="sp-field">
+        <label class="sp-label">
+          PIN
+          @if (panelMode() === 'edit') {
+            <span class="sp-label__hint">leave blank to keep current PIN</span>
+          }
+        </label>
+        <div class="sp-input-wrap">
+          <input [type]="showPin() ? 'text' : 'password'"
+                 class="sp-input"
+                 [value]="fPin()"
+                 (input)="setPin($any($event.target).value)"
+                 [placeholder]="pinPlaceholder()"
+                 maxlength="4"
+                 inputmode="numeric">
+          <button class="sp-toggle-pin" (click)="toggleShowPin()" type="button">
+            {{ showPin() ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+        <p class="sp-field-hint">4 digits only — staff enter this on the POS login screen</p>
+      </div>
+
+      <!-- Color -->
+      <div class="sp-field">
+        <label class="sp-label">Color</label>
+        <div class="sp-colors">
+          @for (c of presetColors; track c) {
+            <button class="sp-color-dot"
+                    [style.background]="c"
+                    [class.sp-color-dot--selected]="fColor() === c"
+                    (click)="setColor(c)"
+                    type="button">
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Active toggle -->
+      <div class="sp-field sp-field--inline">
+        <span class="sp-label">Active</span>
+        <button class="sp-toggle" [class.sp-toggle--on]="fActive()"
+                (click)="toggleActive()" type="button">
+          <span class="sp-toggle__knob"></span>
+        </button>
+      </div>
+
+      <!-- Error -->
+      @if (error()) {
+        <p class="sp-panel-error">{{ error() }}</p>
+      }
+
+    </div>
+
+    <div class="sp-panel__foot">
+      <button class="sp-btn-ghost" (click)="closePanel()" type="button">Cancel</button>
+      <button class="sp-btn-primary"
+              [disabled]="saving() || !fName().trim()"
+              (click)="save()"
+              type="button">
+        @if (saving()) { <span class="sp-btn-spinner"></span> }
+        {{ panelMode() === 'create' ? 'Create' : 'Save changes' }}
+      </button>
+    </div>
+
+  </div>
+}

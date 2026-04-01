@@ -54,30 +54,30 @@ export interface DayHours {
 }
 
 export type WeekDay =
-  'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+  'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
 
 export type OpeningHoursMap = Record<WeekDay, DayHours>;
 
 export const DAY_LABELS: Record<WeekDay, string> = {
-  mon: 'Monday',
-  tue: 'Tuesday',
-  wed: 'Wednesday',
-  thu: 'Thursday',
-  fri: 'Friday',
-  sat: 'Saturday',
-  sun: 'Sunday'
+  monday: 'Monday',
+  tuesday: 'Tuesday',
+  wednesday: 'Wednesday',
+  thursday: 'Thursday',
+  friday: 'Friday',
+  saturday: 'Saturday',
+  sunday: 'Sunday'
 };
 
-export const DAYS: WeekDay[] = ['mon','tue','wed','thu','fri','sat','sun'];
+export const DAYS: WeekDay[] = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
 
 export const DEFAULT_HOURS: OpeningHoursMap = {
-  mon: { open: true,  from: '08:00', to: '23:00' },
-  tue: { open: true,  from: '08:00', to: '23:00' },
-  wed: { open: true,  from: '08:00', to: '23:00' },
-  thu: { open: true,  from: '08:00', to: '23:00' },
-  fri: { open: true,  from: '08:00', to: '23:00' },
-  sat: { open: true,  from: '08:00', to: '00:00' },
-  sun: { open: false, from: '09:00', to: '22:00' },
+  monday: { open: true,  from: '08:00', to: '23:00' },
+  tuesday: { open: true,  from: '08:00', to: '23:00' },
+  wednesday: { open: true,  from: '08:00', to: '23:00' },
+  thursday: { open: true,  from: '08:00', to: '23:00' },
+  friday: { open: true,  from: '08:00', to: '23:00' },
+  saturday: { open: true,  from: '08:00', to: '00:00' },
+  sunday: { open: false, from: '09:00', to: '22:00' },
 };
 
 export const LOCALES = [

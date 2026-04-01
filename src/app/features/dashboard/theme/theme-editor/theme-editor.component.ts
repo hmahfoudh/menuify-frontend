@@ -12,8 +12,8 @@ import {
 } from '../models/theme.models';
 import { debounceTime, Subject } from 'rxjs';
 import { takeUntil }             from 'rxjs/operators';
-import { AuthService } from '../../../../core/services/auth.service';
 import { TrustedUrlPipe } from '../pipes/trusted-url.pipe';
+import { AuthService } from '../../../../core/services/auth.service';
 
 type EditorTab = 'template' | 'preset' | 'tokens' | 'css';
 
@@ -55,7 +55,7 @@ export class ThemeEditorComponent implements OnInit, OnDestroy {
 
   previewUrl = computed(() => {
     //TO DO: this should ideally come from the backend as part of the theme info, to handle custom domains properly
-    return `http://blackrabbit.localhost:4200`
+    return `https://blackrabbit.menuify.tn`
     // const t = this.tenant();
     // if (!t) return '';
     // return t.customDomain
