@@ -1,6 +1,6 @@
-import { inject }        from '@angular/core';
+import { inject } from '@angular/core';
 import { CanActivateFn } from '@angular/router';
-import { Router }        from '@angular/router';
+import { Router } from '@angular/router';
 import { LocalStorageService } from '../services/local-storage.service';
 
 /**
@@ -19,7 +19,7 @@ import { LocalStorageService } from '../services/local-storage.service';
 export const ownerGuard: CanActivateFn = () => {
   const localStorage = inject(LocalStorageService);
   const router = inject(Router);
-  const token  = localStorage.get('access_token');
+  const token = localStorage.get('access_token');
 
   if (!token) return router.createUrlTree(['/auth/login']);
 
@@ -32,10 +32,16 @@ export const ownerGuard: CanActivateFn = () => {
       return router.createUrlTree(['/auth/login']);
     }
 
-    // Detect staff token via explicit discriminator OR roles array
     const roles: string[] = Array.isArray(payload.roles) ? payload.roles : [];
+
+    // Super admins belong in /admin, not /dashboard
+    if (roles.includes('ROLE_SUPER_ADMIN')) {
+      return router.createUrlTree(['/admin']);
+    }
+
+    // Staff tokens belong in /pos, not /dashboard
     const isStaff = payload.tokenType === 'STAFF'
-      || (roles.includes('ROLE_STAFF') && !roles.includes('ROLE_OWNER') && !roles.includes('ROLE_SUPER_ADMIN'));
+      || (roles.includes('ROLE_STAFF') && !roles.includes('ROLE_OWNER'));
 
     if (isStaff) {
       return router.createUrlTree(['/pos']);

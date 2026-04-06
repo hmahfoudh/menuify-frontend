@@ -7,6 +7,8 @@ import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../../core/services/auth.service';
 import { OrderNotificationService } from '../../orders/services/order-notification.service';
 import { EmailVerificationBannerComponent } from '../../../../shared/components/email-verification-banner/email-verification-banner.component';
+import { ImpersonationBannerComponent } from '../../../../shared/components/impersonation-banner/impersonation-banner.component';
+import { LocalStorageService } from '../../../../core/services/local-storage.service';
 
 export interface NavItem {
   label: string;
@@ -19,7 +21,7 @@ export interface NavItem {
 @Component({
   selector: 'app-dashboard-shell',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, EmailVerificationBannerComponent],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, EmailVerificationBannerComponent, ImpersonationBannerComponent],
   templateUrl: './dashboard-shell.component.html',
   styleUrls: ['./dashboard-shell.component.scss']
 })
@@ -27,6 +29,7 @@ export class DashboardShellComponent implements OnInit {
 
   private auth = inject(AuthService);
   private orderNotif = inject(OrderNotificationService);
+  private localStorage = inject(LocalStorageService);
 
   // Exposed to template for sidebar badge
   pendingOrderCount = this.orderNotif.pendingCount;
@@ -99,6 +102,16 @@ export class DashboardShellComponent implements OnInit {
       icon: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z'
     }
   ];
+
+  public isSuperAdmin = computed(() => {
+    try {
+      const token = this.localStorage.get('access_token');
+      if (!token) return false;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const roles: string[] = Array.isArray(payload.roles) ? payload.roles : [];
+      return roles.includes('ROLE_SUPER_ADMIN');
+    } catch { return false; }
+  });
 
   // ── Page title from route ───────────────────────────────────────────────────
   ngOnInit() {

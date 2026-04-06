@@ -1,5 +1,6 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser }               from '@angular/common';
+import { DOCUMENT }                        from '@angular/common';
 
 export type AppContext = 'dashboard' | 'public-menu';
 
@@ -9,69 +10,40 @@ export class SubdomainService {
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   /**
-   * Returns the raw subdomain from window.location.hostname.
-   *
-   * blackrabbit.menuify.tn  → 'blackrabbit'
-   * app.menuify.tn          → 'app'
-   * localhost               → 'localhost'
+   * DOCUMENT is available in both browser and SSR contexts.
+   * In SSR (Angular 17/18), Angular sets document.location.href
+   * from the incoming request URL — so we can read the hostname
+   * server-side without needing the REQUEST token (Angular 19+).
    */
+  private document = inject(DOCUMENT);
+
   getSubdomain(): string {
-    if (!this.isBrowser) return '';
-    const host  = window.location.hostname;
+    const host  = this.getHost();
     const parts = host.split('.');
-    // Need at least 3 parts for a real subdomain (sub.domain.tld).
-    // If only 2 parts (e.g. menuify.tn) there is no subdomain — treat as bare root.
     return parts.length >= 3 ? parts[0] : '';
   }
 
-  /**
-   * Determines which app to render based on the subdomain.
-   *
-   * 'app'        → dashboard (owner interface)
-   * 'localhost'  → dashboard (local development default)
-   * anything else → public menu page (tenant subdomain)
-   *
-   * Override with ?context=public in the URL for local
-   * testing of the public menu page on localhost.
-   */
   getContext(): AppContext {
-    if (!this.isBrowser) return 'dashboard'; // SSR always renders dashboard
-
-    // Local dev override: localhost?context=public
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('context') === 'public') return 'public-menu';
-    if (params.get('context') === 'dashboard') return 'dashboard';
+    // Local dev override — browser only
+    if (this.isBrowser) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('context') === 'public')    return 'public-menu';
+      if (params.get('context') === 'dashboard') return 'dashboard';
+    }
 
     const sub = this.getSubdomain();
-
-    // These subdomains (and the bare root domain) always serve the dashboard
     const dashboardSubdomains = ['app', 'dashboard', 'admin', 'localhost', ''];
-    if (dashboardSubdomains.includes(sub)) return 'dashboard';
-
-    // Everything else is a tenant subdomain → public menu
-    return 'public-menu';
+    return dashboardSubdomains.includes(sub) ? 'dashboard' : 'public-menu';
   }
 
-  /**
-   * Returns true if the current context is the public menu page.
-   */
-  isPublicMenu(): boolean {
-    return this.getContext() === 'public-menu';
-  }
+  isPublicMenu():      boolean { return this.getContext() === 'public-menu'; }
+  isDashboard():       boolean { return this.getContext() === 'dashboard'; }
+  isTenantSubdomain(): boolean { return this.getContext() === 'public-menu'; }
 
-  /**
-   * Returns true if running on the dashboard subdomain.
-   */
-  isDashboard(): boolean {
-    return this.getContext() === 'dashboard';
-  }
-
-  /**
-   * True when running on a tenant subdomain — both the public menu
-   * AND the POS live here (blackrabbit.menuify.tn/menu and /pos).
-   * Alias for isPublicMenu() — kept explicit for routing clarity.
-   */
-  isTenantSubdomain(): boolean {
-    return this.getContext() === 'public-menu';
+  private getHost(): string {
+    // Works in both browser and SSR — Angular injects DOCUMENT with the
+    // correct location in both contexts. In SSR, Angular 17/18 populates
+    // document.location from the incoming request URL automatically.
+    return this.document.location?.hostname ?? '';
   }
 }
