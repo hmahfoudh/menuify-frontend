@@ -11,7 +11,7 @@ export const routes: Routes = [
   // The public menu page is a single-page app — it handles its own internal
   // state (selected category, modals, cart) without routing.
   {
-    path: '',
+    path: 'menu',
     canActivate: [() => inject(SubdomainService).isDashboard() ? true : inject(SubdomainService).isPublicMenu()],
     loadComponent: () => import('./features/public/menu-page/menu-page.component').then(m => m.MenuPageComponent),
     // Only activate this route on public-menu subdomains
@@ -25,6 +25,13 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/auth/auth.routes')
         .then(m => m.AUTH_ROUTES),
+  },
+  {
+    path: 'admin',
+    canMatch: [() => inject(SubdomainService).isDashboard()],
+    loadChildren: () =>
+      import('./features/admin/admin.routes')
+        .then(m => m.ADMIN_ROUTES),
   },
 
   // ── Dashboard (owner interface) ────────────────────────────────────────────
@@ -98,18 +105,18 @@ export const routes: Routes = [
   // Accessible by both OWNER (via main JWT) and STAFF (via PIN JWT).
   // The posGuard handles authentication. Staff login screen is at /pos/login.
   {
-    path:         'pos',
-    canMatch:     [() => inject(SubdomainService).isTenantSubdomain()],
+    path: 'pos',
+    canMatch: [() => inject(SubdomainService).isTenantSubdomain()],
     loadChildren: () =>
       import('./features/pos/pos.routes')
         .then(m => m.POS_ROUTES),
   },
- 
+
   // ── POS — dashboard subdomain (owner quick access) ──────────────────────────
   // app.menuify.tn/pos  → owner uses their existing JWT, skips staff login
   {
-    path:         'pos',
-    canMatch:     [() => inject(SubdomainService).isDashboard()],
+    path: 'pos',
+    canMatch: [() => inject(SubdomainService).isDashboard()],
     loadChildren: () =>
       import('./features/pos/pos.routes')
         .then(m => m.POS_ROUTES),
@@ -117,25 +124,21 @@ export const routes: Routes = [
 
 
   // ── Default redirects ──────────────────────────────────────────────────────
-  // Dashboard subdomain: redirect root to /dashboard
+  // Dashboard subdomain: redirect unknown paths → /dashboard
+  // (root '' is handled by the dashboard route's own child redirect)
   {
-    path: '',
-    redirectTo: 'dashboard',
+    path:      '**',
     pathMatch: 'full',
-    canMatch: [() => inject(SubdomainService).isDashboard()],
+    redirectTo:'dashboard',
+    canMatch:  [() => inject(SubdomainService).isDashboard()],
   },
 
-  // Catch-all on dashboard: redirect unknown paths to /dashboard
+  // Default for everything else (tenant subdomains, unknown hosts):
+  // redirect to '' which matches the public menu route.
+  // This also prevents the SSR flash — on slow connections the server
+  // renders '' which matches the public menu canMatch, not the login page.
   {
-    path: '**',
-    redirectTo: 'dashboard',
-    canMatch: [() => inject(SubdomainService).isDashboard()],
-  },
-
-  // Catch-all on public menu: redirect everything to root
-  // (the menu page handles its own internal navigation via signals)
-  {
-    path: '**',
-    redirectTo: '',
+    path:      '**',
+    redirectTo:'menu',
   },
 ];
