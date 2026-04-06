@@ -6,6 +6,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet, Router, NavigationEnd } fro
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../../../../core/services/auth.service';
 import { OrderNotificationService } from '../../orders/services/order-notification.service';
+import { EmailVerificationBannerComponent } from '../../../../shared/components/email-verification-banner/email-verification-banner.component';
 
 export interface NavItem {
   label: string;
@@ -18,7 +19,7 @@ export interface NavItem {
 @Component({
   selector: 'app-dashboard-shell',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, EmailVerificationBannerComponent],
   templateUrl: './dashboard-shell.component.html',
   styleUrls: ['./dashboard-shell.component.scss']
 })

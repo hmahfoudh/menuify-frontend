@@ -176,7 +176,7 @@ export class RegisterComponent {
         // Persist auth data exactly as login does
         this.localStorage.set('access_token', res.data.accessToken);
         this.localStorage.set('refresh_token', res.data.refreshToken);
-        this.localStorage.setJson('currentUser', res.data.user);
+        this.localStorage.setJson('user', res.data.user);
         this.localStorage.setJson('tenant', res.data.tenant);
         this.loading.set(false);
         this.router.navigate(['/dashboard']);
