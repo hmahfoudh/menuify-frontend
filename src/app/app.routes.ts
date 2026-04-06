@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { SubdomainService } from './core/services/subdomain.service';
 import { authGuard } from './core/guards/auth.guard';
 import { ownerGuard } from './core/guards/owner.guard';
+import { superAdminGuard } from './core/guards/super-admin.guard';
 
 export const routes: Routes = [
 
@@ -26,15 +27,21 @@ export const routes: Routes = [
       import('./features/auth/auth.routes')
         .then(m => m.AUTH_ROUTES),
   },
+  {
+    path:        'admin',
+    canMatch:    [() => inject(SubdomainService).isDashboard()],
+    canActivate: [authGuard, superAdminGuard],
+    loadChildren: () =>
+      import('./features/admin/admin.routes')
+        .then(m => m.ADMIN_ROUTES),
+  },
 
   // ── Dashboard (owner interface) ────────────────────────────────────────────
   {
     path: 'dashboard',
     canMatch: [() => inject(SubdomainService).isDashboard()],
     canActivate: [authGuard, ownerGuard],
-    loadComponent: () =>
-      import('./features/dashboard/dashboard/dashboard-shell/dashboard-shell.component')
-        .then(m => m.DashboardShellComponent),
+    loadComponent: () =>import('./features/dashboard/dashboard/dashboard-shell/dashboard-shell.component').then(m => m.DashboardShellComponent),
     children: [
       { path: '', redirectTo: 'menu', pathMatch: 'full' },
       {
@@ -98,18 +105,18 @@ export const routes: Routes = [
   // Accessible by both OWNER (via main JWT) and STAFF (via PIN JWT).
   // The posGuard handles authentication. Staff login screen is at /pos/login.
   {
-    path:         'pos',
-    canMatch:     [() => inject(SubdomainService).isTenantSubdomain()],
+    path: 'pos',
+    canMatch: [() => inject(SubdomainService).isTenantSubdomain()],
     loadChildren: () =>
       import('./features/pos/pos.routes')
         .then(m => m.POS_ROUTES),
   },
- 
+
   // ── POS — dashboard subdomain (owner quick access) ──────────────────────────
   // app.menuify.tn/pos  → owner uses their existing JWT, skips staff login
   {
-    path:         'pos',
-    canMatch:     [() => inject(SubdomainService).isDashboard()],
+    path: 'pos',
+    canMatch: [() => inject(SubdomainService).isDashboard()],
     loadChildren: () =>
       import('./features/pos/pos.routes')
         .then(m => m.POS_ROUTES),

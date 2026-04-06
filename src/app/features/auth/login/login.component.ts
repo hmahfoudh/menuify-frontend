@@ -41,16 +41,18 @@ export class LoginComponent {
     this.loading.set(true);
     this.error.set(null);
     this.authService.login(this.form.value).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => {
+        try{
+          this.router.navigate(['/dashboard']);
+        }catch (error) {
+          console.error('Error occurred while navigating to dashboard:', error);
+        }
+        this.loading.set(false);
+      },
       error: err => {
         this.loading.set(false);
         this.error.set(err.error?.message || 'Login failed. Please try again.');
       }
     });
-    // TODO: inject AuthService and call authService.login(this.form.value)
-    setTimeout(() => {
-      this.loading.set(false);
-      this.router.navigate(['/dashboard']);
-    }, 1200);
   }
 }

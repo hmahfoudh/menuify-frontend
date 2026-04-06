@@ -1,0 +1,373 @@
+<div class="admin-root">
+
+  <!-- ── TOPBAR ─────────────────────────────────────────────────────────── -->
+  <header class="admin-topbar">
+    <div class="admin-topbar__brand">
+      <div class="admin-brand-dot"></div>
+      <span>Menuify</span>
+      <span class="admin-badge">Super Admin</span>
+    </div>
+    <div class="admin-topbar__nav">
+      <button class="admin-nav-btn"
+              [class.admin-nav-btn--active]="view() === 'tenants'"
+              (click)="showTenants()" type="button">
+        Tenants
+      </button>
+      <button class="admin-nav-btn"
+              [class.admin-nav-btn--active]="view() === 'create'"
+              (click)="showCreate()" type="button">
+        + New tenant
+      </button>
+    </div>
+    <button class="admin-logout" (click)="logout()" type="button">Sign out</button>
+  </header>
+
+  <!-- ── SUCCESS TOAST ──────────────────────────────────────────────────── -->
+  @if (success()) {
+    <div class="admin-toast">{{ success() }}</div>
+  }
+
+  <!-- ── STATS BAR ──────────────────────────────────────────────────────── -->
+  @if (stats(); as s) {
+    <div class="admin-stats">
+      <div class="stat-card">
+        <div class="stat-card__val">{{ s.totalTenants }}</div>
+        <div class="stat-card__label">Total tenants</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__val stat-card__val--green">{{ s.activeTenants }}</div>
+        <div class="stat-card__label">Active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__val stat-card__val--amber">{{ s.tenantsOnTrial }}</div>
+        <div class="stat-card__label">On trial</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__val stat-card__val--red">{{ s.expiredTrials }}</div>
+        <div class="stat-card__label">Expired trials</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__val">{{ s.totalOrders }}</div>
+        <div class="stat-card__label">Total orders</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__val stat-card__val--blue">{{ s.ordersToday }}</div>
+        <div class="stat-card__label">Orders today</div>
+      </div>
+    </div>
+  }
+
+  <div class="admin-body">
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         TENANTS VIEW
+    ══════════════════════════════════════════════════════════════════ -->
+    @if (view() === 'tenants') {
+      <div class="admin-tenants" [class.admin-tenants--split]="selected()">
+
+        <!-- Tenant list -->
+        <div class="tenant-list-col">
+          <div class="tenant-list-head">
+            <input type="text" class="admin-search"
+                   placeholder="Search by name, email or subdomain…"
+                   [value]="searchQuery()"
+                   (input)="setSearch($any($event.target).value)">
+            <span class="tenant-count">{{ filteredTenants().length }} tenants</span>
+          </div>
+
+          @if (loading()) {
+            <div class="admin-loading"><div class="admin-spinner"></div></div>
+          }
+
+          <div class="tenant-list">
+            @for (t of filteredTenants(); track t.id) {
+              <div class="tenant-row"
+                   [class.tenant-row--selected]="selected()?.id === t.id"
+                   [class.tenant-row--inactive]="!t.active"
+                   (click)="selectTenant(t)">
+
+                <div class="tenant-row__avatar">
+                  {{ t.name.charAt(0).toUpperCase() }}
+                </div>
+
+                <div class="tenant-row__main">
+                  <div class="tenant-row__name">{{ t.name }}</div>
+                  <div class="tenant-row__meta">
+                    {{ t.ownerEmail ?? '—' }} · {{ t.subdomain }}.menuify.tn
+                  </div>
+                </div>
+
+                <div class="tenant-row__badges">
+                  <span class="badge" [class]="'badge--' + t.plan.toLowerCase()">
+                    {{ planMeta[t.plan].label }}
+                  </span>
+                  @if (!t.active) {
+                    <span class="badge badge--inactive">Inactive</span>
+                  } @else if (t.trialExpired) {
+                    <span class="badge badge--danger">Expired</span>
+                  } @else if (t.onTrial) {
+                    <span class="badge badge--warning">{{ t.daysRemaining }}d left</span>
+                  }
+                </div>
+
+                <div class="tenant-row__stats">
+                  <span>{{ t.orderCount }} orders</span>
+                </div>
+
+              </div>
+            }
+
+            @if (!loading() && filteredTenants().length === 0) {
+              <div class="admin-empty">No tenants found</div>
+            }
+          </div>
+        </div>
+
+        <!-- Detail panel -->
+        @if (selected(); as t) {
+          <div class="tenant-detail">
+
+            <div class="detail-head">
+              <div>
+                <h2 class="detail-title">{{ t.name }}</h2>
+                <p class="detail-sub">{{ t.subdomain }}.menuify.tn</p>
+              </div>
+              <button class="detail-close" (click)="closePanel()" type="button">✕</button>
+            </div>
+
+            <!-- Owner info -->
+            <div class="detail-section">
+              <div class="detail-section__label">Owner</div>
+              <div class="detail-row">
+                <span class="detail-row__key">Name</span>
+                <span>{{ t.ownerName ?? '—' }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-row__key">Email</span>
+                <span>{{ t.ownerEmail ?? '—' }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-row__key">Verified</span>
+                <span [class]="t.ownerEmailVerified ? 'text-green' : 'text-amber'">
+                  {{ t.ownerEmailVerified ? '✓ Yes' : '✗ No' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Plan & trial -->
+            <div class="detail-section">
+              <div class="detail-section__label">Plan & Trial</div>
+              <div class="detail-row">
+                <span class="detail-row__key">Plan</span>
+                <span class="badge" [class]="'badge--' + t.plan.toLowerCase()">
+                  {{ planMeta[t.plan].label }}
+                </span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-row__key">Trial</span>
+                <span class="badge" [class]="trialClass(t)">{{ trialLabel(t) }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-row__key">Orders</span>
+                <span>{{ t.orderCount }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-row__key">Menu items</span>
+                <span>{{ t.menuItemCount }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-row__key">Created</span>
+                <span>{{ t.createdAt | date:'dd MMM yyyy' }}</span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="detail-section">
+              <div class="detail-section__label">Actions</div>
+
+              <!-- Extend trial -->
+              @if (!extending()) {
+                <button class="detail-action-btn" (click)="extending.set(true)" type="button">
+                  Extend trial
+                </button>
+              } @else {
+                <div class="detail-inline-form">
+                  <input type="number" class="detail-input"
+                         [value]="extendDays()"
+                         (input)="setExtendDays($any($event.target).value)"
+                         min="1" max="365">
+                  <span class="detail-inline-form__label">days</span>
+                  <button class="detail-action-btn detail-action-btn--primary"
+                          [disabled]="actioning()"
+                          (click)="submitExtend()" type="button">
+                    Confirm
+                  </button>
+                  <button class="detail-action-btn"
+                          (click)="extending.set(false)" type="button">
+                    Cancel
+                  </button>
+                </div>
+              }
+
+              <!-- Change plan -->
+              @if (!changingPlan()) {
+                <button class="detail-action-btn" (click)="changingPlan.set(true)" type="button">
+                  Change plan
+                </button>
+              } @else {
+                <div class="detail-inline-form">
+                  <select class="detail-input"
+                          [value]="newPlan()"
+                          (change)="setNewPlan($any($event.target).value)">
+                    @for (p of plans; track p) {
+                      <option [value]="p">{{ planMeta[p].label }}</option>
+                    }
+                  </select>
+                  <button class="detail-action-btn detail-action-btn--primary"
+                          [disabled]="actioning()"
+                          (click)="submitPlanChange()" type="button">
+                    Confirm
+                  </button>
+                  <button class="detail-action-btn"
+                          (click)="changingPlan.set(false)" type="button">
+                    Cancel
+                  </button>
+                </div>
+              }
+
+              <!-- Toggle active -->
+              <button class="detail-action-btn"
+                      [class.detail-action-btn--danger]="t.active"
+                      [disabled]="actioning()"
+                      (click)="toggleActive(t)" type="button">
+                {{ t.active ? 'Deactivate tenant' : 'Activate tenant' }}
+              </button>
+
+              <!-- Impersonate -->
+              <button class="detail-action-btn detail-action-btn--impersonate"
+                      [disabled]="impersonating() || !t.active"
+                      (click)="impersonate(t)" type="button">
+                @if (impersonating()) { Logging in… }
+                @else { Log in as owner }
+              </button>
+            </div>
+
+          </div>
+        }
+
+      </div>
+    }
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         CREATE TENANT VIEW
+    ══════════════════════════════════════════════════════════════════ -->
+    @if (view() === 'create') {
+      <div class="create-view">
+        <div class="create-card">
+
+          <h2 class="create-title">New tenant</h2>
+
+          @if (formError()) {
+            <div class="form-error">{{ formError() }}</div>
+          }
+
+          <div class="form-grid">
+
+            <div class="form-section">
+              <div class="form-section__label">Restaurant</div>
+
+              <div class="field">
+                <label class="field-label">Name *</label>
+                <input type="text" class="field-input"
+                       [value]="fName()"
+                       (input)="setName($any($event.target).value)"
+                       placeholder="Black Rabbit Café">
+              </div>
+              <div class="field">
+                <label class="field-label">Slug *</label>
+                <input type="text" class="field-input"
+                       [value]="fSlug()"
+                       (input)="setSlug($any($event.target).value)"
+                       placeholder="black-rabbit">
+              </div>
+              <div class="field">
+                <label class="field-label">Subdomain *</label>
+                <div class="field-suffix-wrap">
+                  <input type="text" class="field-input field-input--suffix"
+                         [value]="fSubdomain()"
+                         (input)="setSubdomain($any($event.target).value)"
+                         placeholder="blackrabbit">
+                  <span class="field-suffix">.menuify.tn</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section__label">Owner account</div>
+
+              <div class="field">
+                <label class="field-label">Full name</label>
+                <input type="text" class="field-input"
+                       [value]="fOwnerName()"
+                       (input)="setOwnerName($any($event.target).value)"
+                       placeholder="Ahmed Ben Ali">
+              </div>
+              <div class="field">
+                <label class="field-label">Email *</label>
+                <input type="email" class="field-input"
+                       [value]="fOwnerEmail()"
+                       (input)="setOwnerEmail($any($event.target).value)"
+                       placeholder="owner@restaurant.tn">
+              </div>
+              <div class="field">
+                <label class="field-label">Password *</label>
+                <input type="password" class="field-input"
+                       [value]="fOwnerPass()"
+                       (input)="setOwnerPass($any($event.target).value)"
+                       placeholder="Min. 8 characters">
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="form-section__label">Plan & Trial</div>
+
+              <div class="field">
+                <label class="field-label">Plan</label>
+                <select class="field-input"
+                        [value]="fPlan()"
+                        (change)="setPlan($any($event.target).value)">
+                  @for (p of plans; track p) {
+                    <option [value]="p">{{ planMeta[p].label }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Trial days</label>
+                <input type="number" class="field-input"
+                       [value]="fTrialDays()"
+                       (input)="setTrialDays($any($event.target).value)"
+                       min="1" max="365">
+              </div>
+            </div>
+
+          </div>
+
+          <div class="create-foot">
+            <button class="btn-ghost" (click)="showTenants()" type="button">
+              Cancel
+            </button>
+            <button class="btn-primary"
+                    [disabled]="saving()"
+                    (click)="submitCreate()" type="button">
+              @if (saving()) { <span class="btn-spinner"></span> }
+              Create tenant
+            </button>
+          </div>
+
+        </div>
+      </div>
+    }
+
+  </div>
+
+</div>

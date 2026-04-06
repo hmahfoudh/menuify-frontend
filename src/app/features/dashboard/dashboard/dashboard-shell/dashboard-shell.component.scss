@@ -701,3 +701,8 @@
 // Hide the label when sidebar is collapsed
 .sidebar-collapsed .push-prompt-label { display: none; }
 .sidebar-collapsed .push-prompt-btn   { justify-content: center; }
+
+.nav-link--admin {
+  color: var(--gold) !important;
+  &:hover { background: var(--gold-bg) !important; }
+}
