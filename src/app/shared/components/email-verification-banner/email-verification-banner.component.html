@@ -1,0 +1,27 @@
+@if (visible()) {
+<div class="evb">
+    <div class="evb__icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4
+                     c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+        </svg>
+    </div>
+    <p class="evb__text">
+        Please verify your email address to secure your account.
+        <button class="evb__resend" [disabled]="sending()" (click)="resend()" type="button">
+            @if (sending()) { Sending… }
+            @else if (sent()) { ✓ Email sent }
+            @else { Resend verification email }
+        </button>
+    </p>
+    <button class="evb__dismiss" (click)="dismiss()" type="button" title="Dismiss for this session">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+    </button>
+</div>
+}

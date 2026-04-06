@@ -1,0 +1,350 @@
+// Shared styles for forgot-password, reset-password, and verify-email
+// Copy this content into each component's .scss file
+// All three screens reuse the login page design language
+
+:host {
+  --ink:        #0d0c0b;
+  --ink-2:      #161412;
+  --ink-3:      #211e1a;
+  --ink-4:      #2c2822;
+  --line:       rgba(210, 180, 120, 0.10);
+  --line-2:     rgba(210, 180, 120, 0.22);
+  --gold:       #c9a96e;
+  --gold-hi:    #e0c28a;
+  --gold-lo:    rgba(201, 169, 110, 0.18);
+  --cream:      #f0ebe2;
+  --cream-2:    #d4ccc0;
+  --fog:        #7a7268;
+  --fog-2:      #5a5450;
+  --green:      #64c882;
+  --green-bg:   rgba(100, 200, 130, 0.12);
+  --red:        rgba(220, 80, 70, 0.85);
+  --red-bg:     rgba(220, 80, 70, 0.08);
+  --radius:     14px;
+  --r:          0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ── Root layout ───────────────────────────────────────────────────────────────
+.auth-root {
+  position:        relative;
+  min-height:      100vh;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  background:      var(--ink);
+  overflow:        hidden;
+  padding:         2rem 1rem;
+}
+
+.bg-glow {
+  position:      absolute;
+  width:         600px;
+  height:        600px;
+  border-radius: 50%;
+  pointer-events:none;
+  filter:        blur(120px);
+  opacity:       0.045;
+  background:    var(--gold);
+
+  &--tl { top: -200px; left: -200px; }
+  &--br { bottom: -200px; right: -200px; }
+}
+
+// ── Brand ─────────────────────────────────────────────────────────────────────
+.brand {
+  position:    absolute;
+  top:         1.5rem;
+  left:        1.5rem;
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  text-decoration: none;
+  color:       var(--cream);
+}
+.brand-icon {
+  width:           32px;
+  height:          32px;
+  border-radius:   8px;
+  background:      var(--gold-lo);
+  border:          1px solid var(--line-2);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  color:           var(--gold);
+}
+.brand-name { font-size: 0.9rem; font-weight: 700; }
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+.card-wrap { width: 100%; max-width: 420px; }
+
+.card {
+  background:    var(--ink-2);
+  border:        1px solid var(--line-2);
+  border-radius: var(--radius);
+  padding:       2rem;
+}
+
+.card-eyebrow {
+  font-size:      0.68rem;
+  font-weight:    700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color:          var(--gold);
+  margin-bottom:  0.5rem;
+}
+
+.card-title {
+  font-size:      1.4rem;
+  font-weight:    700;
+  color:          var(--cream);
+  letter-spacing: -0.02em;
+  margin:         0 0 0.4rem;
+}
+
+.card-sub {
+  font-size:   0.82rem;
+  color:       var(--fog);
+  margin:      0 0 1.5rem;
+
+  strong { color: var(--cream-2); font-weight: 600; }
+}
+
+.card-head { margin-bottom: 1.5rem; }
+
+// ── Form fields ───────────────────────────────────────────────────────────────
+.field { margin-bottom: 1.1rem; }
+
+.field-label {
+  display:       block;
+  font-size:     0.72rem;
+  font-weight:   600;
+  color:         var(--cream-2);
+  margin-bottom: 0.4rem;
+  letter-spacing:0.04em;
+}
+
+.field-input-wrap { position: relative; }
+
+.field-icon {
+  position:  absolute;
+  left:      12px;
+  top:       50%;
+  transform: translateY(-50%);
+  color:     var(--fog);
+  pointer-events: none;
+}
+
+.field-input {
+  width:         100%;
+  padding:       10px 12px 10px 36px;
+  background:    var(--ink-3);
+  border:        1px solid var(--line-2);
+  border-radius: 9px;
+  color:         var(--cream);
+  font-size:     0.88rem;
+  font-family:   inherit;
+  outline:       none;
+  transition:    border-color var(--r), box-shadow var(--r);
+  box-sizing:    border-box;
+
+  &::placeholder { color: var(--fog-2); }
+  &:focus {
+    border-color: var(--gold);
+    box-shadow:   0 0 0 3px rgba(201,169,110,0.10);
+  }
+
+  &--padded-right { padding-right: 42px; }
+}
+
+.toggle-pass {
+  position:        absolute;
+  right:           10px;
+  top:             50%;
+  transform:       translateY(-50%);
+  background:      transparent;
+  border:          none;
+  color:           var(--fog);
+  cursor:          pointer;
+  padding:         4px;
+  transition:      color var(--r);
+  &:hover { color: var(--cream); }
+}
+
+// ── Password strength ─────────────────────────────────────────────────────────
+.strength-bar {
+  display:     flex;
+  align-items: center;
+  gap:         0.6rem;
+  margin-top:  6px;
+}
+.strength-track {
+  flex:          1;
+  height:        3px;
+  background:    var(--ink-4);
+  border-radius: 2px;
+  overflow:      hidden;
+}
+.strength-fill {
+  height:        100%;
+  border-radius: 2px;
+  width:         0;
+  transition:    width 0.3s, background 0.3s;
+
+  &.strength--1 { width: 33%; background: #e07070; }
+  &.strength--2 { width: 66%; background: var(--gold); }
+  &.strength--3 { width: 100%; background: var(--green); }
+}
+.strength-label {
+  font-size:  0.65rem;
+  font-weight:600;
+  width:      40px;
+  text-align: right;
+  &--1 { color: #e07070; }
+  &--2 { color: var(--gold); }
+  &--3 { color: var(--green); }
+}
+
+// ── Submit button ─────────────────────────────────────────────────────────────
+.btn-submit {
+  width:         100%;
+  padding:       11px;
+  margin-top:    0.5rem;
+  background:    var(--gold);
+  color:         var(--ink);
+  border:        none;
+  border-radius: 9px;
+  font-size:     0.9rem;
+  font-weight:   700;
+  font-family:   inherit;
+  cursor:        pointer;
+  transition:    all var(--r);
+  display:       flex;
+  align-items:   center;
+  justify-content:center;
+  gap:           0.5rem;
+
+  &:hover:not(:disabled) { background: var(--gold-hi); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}
+
+// ── Spinner ───────────────────────────────────────────────────────────────────
+.spinner {
+  width:         16px;
+  height:        16px;
+  border:        2px solid rgba(13,12,11,0.3);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation:     spin 0.6s linear infinite;
+}
+.spinner-lg {
+  width:         36px;
+  height:        36px;
+  border:        3px solid var(--line-2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation:     spin 0.7s linear infinite;
+  margin:        0 auto 1rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Alert ─────────────────────────────────────────────────────────────────────
+.alert-error {
+  display:       flex;
+  align-items:   center;
+  gap:           0.5rem;
+  padding:       10px 12px;
+  margin-bottom: 1rem;
+  background:    var(--red-bg);
+  border:        1px solid rgba(220,80,70,0.25);
+  border-radius: 8px;
+  color:         #f09090;
+  font-size:     0.8rem;
+}
+
+// ── Card footer ───────────────────────────────────────────────────────────────
+.card-footer {
+  margin-top:  1.25rem;
+  font-size:   0.78rem;
+  color:       var(--fog);
+  text-align:  center;
+}
+.link-accent {
+  color:           var(--gold);
+  text-decoration: none;
+  font-weight:     600;
+  transition:      color var(--r);
+  &:hover { color: var(--gold-hi); }
+}
+.btn-back-link {
+  display:    inline-block;
+  margin-top: 1rem;
+  color:      var(--fog);
+  font-size:  0.8rem;
+  text-decoration:none;
+  transition: color var(--r);
+  &:hover { color: var(--cream); }
+}
+
+// ── Sent / success / error states ─────────────────────────────────────────────
+.sent-state,
+.state-loading,
+.state-invalid,
+.state-success,
+.ve-state {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  text-align:     center;
+  gap:            0.85rem;
+  padding:        0.5rem 0;
+}
+
+.sent-icon {
+  width:           56px;
+  height:          56px;
+  border-radius:   50%;
+  background:      var(--gold-lo);
+  border:          1px solid var(--line-2);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  color:           var(--gold);
+}
+
+.ve-icon {
+  width:           56px;
+  height:          56px;
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+
+  &--success {
+    background: var(--green-bg);
+    border:     1px solid rgba(100,200,130,0.3);
+    color:      var(--green);
+  }
+  &--error {
+    background: var(--red-bg);
+    border:     1px solid rgba(220,80,70,0.25);
+    color:      #f09090;
+  }
+}
+
+.sent-body,
+.state-body,
+.ve-body {
+  font-size:   0.85rem;
+  color:       var(--fog);
+  line-height: 1.6;
+  max-width:   320px;
+
+  strong { color: var(--cream-2); font-weight: 600; }
+}
+
+.sent-hint,
+.state-hint,
+.ve-hint {
+  font-size: 0.75rem;
+  color:     var(--fog-2);
+}

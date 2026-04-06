@@ -35,6 +35,7 @@ export interface UserResponse {
   email:     string;
   fullName:  string;
   avatarUrl: string | null;
+  emailVerified: boolean;
   role:      'SUPER_ADMIN' | 'OWNER' | 'STAFF' | 'VIEWER';
   createdAt: string;
 }
