@@ -4,40 +4,31 @@ import { Router }  from '@angular/router';
 import { SubdomainService } from './core/services/subdomain.service';
 import { authGuard }  from './core/guards/auth.guard';
 import { ownerGuard } from './core/guards/owner.guard';
+import { superAdminGuard } from './core/guards/super-admin.guard';
 
 export const routes: Routes = [
 
   // ── Landing page — bare domain (menuify.tn) ──────────────────────────────────
   {
     path:          '',
-    canMatch:      [() => inject(SubdomainService).isLanding()],
-    loadComponent: () =>
-      import('./features/landing/landing/landing.component')
-        .then(m => m.LandingComponent),
+    loadComponent: () =>import('./features/landing/landing/landing.component').then(m => m.LandingComponent),
   },
 
   // ── Public menu — tenant subdomains (blackrabbit.menuify.tn) ─────────────────
   {
-    path:          '',
-    canMatch:      [() => inject(SubdomainService).isPublicMenu()],
-    loadComponent: () =>
-      import('./features/public/menu-page/menu-page.component')
-        .then(m => m.MenuPageComponent),
+    path:          'menu',
+    loadComponent: () =>import('./features/public/menu-page/menu-page.component').then(m => m.MenuPageComponent),
   },
 
   // ── POS — tenant subdomain ───────────────────────────────────────────────────
   {
-    path:     'pos',
-    canMatch: [() => inject(SubdomainService).isTenantSubdomain()],
-    loadChildren: () =>
-      import('./features/pos/pos.routes')
-        .then(m => m.POS_ROUTES),
+    path:     'dashboard/pos',
+    loadChildren: () =>import('./features/pos/pos.routes').then(m => m.POS_ROUTES),
   },
 
   // ── Auth pages ───────────────────────────────────────────────────────────────
   {
     path:         'auth',
-    canMatch:     [() => inject(SubdomainService).isDashboard()],
     loadChildren: () =>
       import('./features/auth/auth.routes')
         .then(m => m.AUTH_ROUTES),
@@ -46,37 +37,16 @@ export const routes: Routes = [
   // ── Admin panel ──────────────────────────────────────────────────────────────
   {
     path:     'admin',
-    canMatch: [() => inject(SubdomainService).isDashboard()],
-    canActivate: [() => {
-      const router = inject(Router);
-      const token  = localStorage.getItem('accessToken');
-      if (!token) return router.createUrlTree(['/auth/login']);
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.exp * 1000 < Date.now()) {
-          localStorage.removeItem('accessToken');
-          return router.createUrlTree(['/auth/login']);
-        }
-        const roles: string[] = Array.isArray(payload.roles) ? payload.roles : [];
-        if (roles.includes('ROLE_SUPER_ADMIN')) return true;
-        return router.createUrlTree(['/dashboard']);
-      } catch {
-        return router.createUrlTree(['/auth/login']);
-      }
-    }],
-    loadChildren: () =>
-      import('./features/admin/admin.routes')
-        .then(m => m.ADMIN_ROUTES),
+    canActivate: [authGuard, superAdminGuard],
+    loadChildren: () =>import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
   },
 
   // ── Dashboard ────────────────────────────────────────────────────────────────
   {
     path:          'dashboard',
-    canMatch:      [() => inject(SubdomainService).isDashboard()],
     canActivate:   [authGuard, ownerGuard],
     loadComponent: () =>
-      import('./features/dashboard/dashboard/dashboard-shell/dashboard-shell.component')
-        .then(m => m.DashboardShellComponent),
+      import('./features/dashboard/dashboard/dashboard-shell/dashboard-shell.component').then(m => m.DashboardShellComponent),
     children: [
       { path: '', redirectTo: 'menu', pathMatch: 'full' },
       { path: 'menu',          loadChildren:  () => import('./features/dashboard/menu/menu.routes').then(m => m.MENU_ROUTES) },
@@ -94,18 +64,14 @@ export const routes: Routes = [
   // ── POS — dashboard subdomain (owner quick access) ───────────────────────────
   {
     path:     'pos',
-    canMatch: [() => inject(SubdomainService).isDashboard()],
-    loadChildren: () =>
-      import('./features/pos/pos.routes')
-        .then(m => m.POS_ROUTES),
+    loadChildren: () =>import('./features/pos/pos.routes').then(m => m.POS_ROUTES),
   },
 
   // ── Default redirects ─────────────────────────────────────────────────────────
   // Dashboard unknown paths → /dashboard
   {
     path:      '**',
-    redirectTo:'dashboard',
-    canMatch:  [() => inject(SubdomainService).isDashboard()],
+    redirectTo:'',
   },
 
   // Everything else (tenant subdomains, unknown) → public menu root
