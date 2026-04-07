@@ -1,0 +1,86 @@
+{
+  "nav": {
+    "features": "Fonctionnalités",
+    "pricing":  "Tarifs",
+    "contact":  "Contact",
+    "about":    "À propos",
+    "signin":   "Connexion",
+    "signup":   "Essai gratuit"
+  },
+  "hero": {
+    "tag":    "La plateforme de menu digital pour les restaurants tunisiens",
+    "title1": "Votre menu,",
+    "title2": "digitalisé en minutes.",
+    "sub":    "Créez un menu digital élégant, recevez des commandes en temps réel et gérez votre restaurant — le tout depuis une seule plateforme.",
+    "cta1":   "Commencer gratuitement",
+    "cta2":   "Voir une démo",
+    "trust":  "Rejoint par {{count}}+ restaurants"
+  },
+  "stats": {
+    "restaurants": "Restaurants",
+    "orders":      "Commandes",
+    "satisfaction":"Satisfaction"
+  },
+  "directory": {
+    "title":  "Nos restaurants",
+    "sub":    "Parcourez les restaurants qui font confiance à Menuify",
+    "search": "Rechercher un restaurant ou une ville…",
+    "empty":  "Aucun restaurant trouvé",
+    "visit":  "Voir le menu",
+    "showAll":"Voir tous les restaurants ({{count}})"
+  },
+  "features": {
+    "title":      "Tout ce dont vous avez besoin",
+    "sub":        "Une plateforme complète pour digitaliser votre restaurant",
+    "menu":       "Menu digital",
+    "realtime":   "Commandes en temps réel",
+    "pos":        "POS intégré",
+    "analytics":  "Analytics avancés",
+    "qr":         "QR codes",
+    "theme":      "Thème personnalisé"
+  },
+  "how": {
+    "title":   "Comment ça marche",
+    "step1":   { "title": "Créez votre compte",    "desc": "Inscrivez-vous en 2 minutes, configurez votre restaurant et importez votre menu." },
+    "step2":   { "title": "Générez votre QR code", "desc": "Imprimez le QR code et placez-le sur vos tables. Vos clients scannent et commandent." },
+    "step3":   { "title": "Gérez en temps réel",   "desc": "Recevez les commandes, suivez-les depuis votre tableau de bord et gérez votre POS." }
+  },
+  "pricing": {
+    "title":   "Des tarifs simples et transparents",
+    "sub":     "Commencez gratuitement pendant 14 jours. Sans carte bancaire.",
+    "popular": "Le plus populaire",
+    "cta":     "Commencer",
+    "starter": {
+      "price":    "29 DT/mois",
+      "features": ["Menu digital jusqu'à 30 articles", "5 catégories", "QR code basique", "Commandes WhatsApp", "14 jours d'essai gratuit"]
+    },
+    "standard": {
+      "price":    "59 DT/mois",
+      "features": ["Articles et catégories illimités", "Couleurs personnalisées", "Analytics de base", "2 membres du staff", "POS intégré", "Commandes en temps réel"]
+    },
+    "premium": {
+      "price":    "99 DT/mois",
+      "features": ["Tout le plan Standard", "Domaine personnalisé", "Analytics avancés", "Staff illimité", "CSS personnalisé", "Support prioritaire"]
+    }
+  },
+  "contact": {
+    "title":   "Prêt à digitaliser votre restaurant ?",
+    "sub":     "Une question ? Notre équipe vous répond dans les 24h.",
+    "name":    "Votre nom",
+    "email":   "Votre email",
+    "resto":   "Nom du restaurant (optionnel)",
+    "message": "Votre message",
+    "send":    "Envoyer",
+    "sent":    "Message envoyé ! Nous vous répondrons sous 24h.",
+    "error":   "Erreur d'envoi. Réessayez.",
+    "address": "Tunisie"
+  },
+  "footer": {
+    "tagline": "Le menu digital pensé pour la Tunisie.",
+    "rights":  "© 2026 Menuify. Tous droits réservés.",
+    "about":   "À propos",
+    "contact": "Contact",
+    "privacy": "Confidentialité",
+    "terms":   "CGU"
+  }
+}
