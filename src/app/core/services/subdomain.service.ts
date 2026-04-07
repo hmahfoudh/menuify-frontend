@@ -1,21 +1,14 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser }               from '@angular/common';
-import { DOCUMENT }                        from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
+import { DOCUMENT }          from '@angular/common';
 
-export type AppContext = 'dashboard' | 'public-menu';
+export type AppContext = 'dashboard' | 'public-menu' | 'landing';
 
 @Injectable({ providedIn: 'root' })
 export class SubdomainService {
 
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-
-  /**
-   * DOCUMENT is available in both browser and SSR contexts.
-   * In SSR (Angular 17/18), Angular sets document.location.href
-   * from the incoming request URL — so we can read the hostname
-   * server-side without needing the REQUEST token (Angular 19+).
-   */
-  private document = inject(DOCUMENT);
+  private document  = inject(DOCUMENT);
 
   getSubdomain(): string {
     const host  = this.getHost();
@@ -24,26 +17,34 @@ export class SubdomainService {
   }
 
   getContext(): AppContext {
-    // Local dev override — browser only
     if (this.isBrowser) {
       const params = new URLSearchParams(window.location.search);
       if (params.get('context') === 'public')    return 'public-menu';
       if (params.get('context') === 'dashboard') return 'dashboard';
+      if (params.get('context') === 'landing')   return 'landing';
     }
 
-    const sub = this.getSubdomain();
-    const dashboardSubdomains = ['app', 'dashboard', 'admin', 'localhost', ''];
-    return dashboardSubdomains.includes(sub) ? 'dashboard' : 'public-menu';
+    const sub  = this.getSubdomain();
+    const host = this.getHost();
+
+    // Bare domain (menuify.tn) or www.menuify.tn → landing page
+    if (sub === '' || sub === 'www') return 'landing';
+
+    // Dashboard subdomains
+    const dashboardSubdomains = ['app', 'dashboard', 'admin', 'localhost'];
+    if (dashboardSubdomains.includes(sub)) return 'dashboard';
+
+    // Everything else is a tenant subdomain → public menu
+    return 'public-menu';
   }
 
-  isPublicMenu():      boolean { return this.getContext() === 'public-menu'; }
-  isDashboard():       boolean { return this.getContext() === 'dashboard'; }
-  isTenantSubdomain(): boolean { return this.getContext() === 'public-menu'; }
+  isLanding():        boolean { return this.getContext() === 'landing'; }
+  isPublicMenu():     boolean { return this.getContext() === 'public-menu'; }
+  isDashboard():      boolean { return this.getContext() === 'dashboard'; }
+  isTenantSubdomain():boolean { return this.getContext() === 'public-menu'; }
 
   private getHost(): string {
-    // Works in both browser and SSR — Angular injects DOCUMENT with the
-    // correct location in both contexts. In SSR, Angular 17/18 populates
-    // document.location from the incoming request URL automatically.
+    if (this.isBrowser) return window.location.hostname;
     return this.document.location?.hostname ?? '';
   }
 }
