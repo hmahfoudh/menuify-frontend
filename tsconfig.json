@@ -13,6 +13,7 @@
     "sourceMap": true,
     "declaration": false,
     "experimentalDecorators": true,
+    "ignoreDeprecations": "5.0",
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "ES2022",
