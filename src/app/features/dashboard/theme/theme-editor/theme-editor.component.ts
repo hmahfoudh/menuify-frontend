@@ -54,13 +54,11 @@ export class ThemeEditorComponent implements OnInit, OnDestroy {
   tenant = this.auth.currentTenant;
 
   previewUrl = computed(() => {
-    //TO DO: this should ideally come from the backend as part of the theme info, to handle custom domains properly
-    return `https://blackrabbit.menuify.tn`
-    // const t = this.tenant();
-    // if (!t) return '';
-    // return t.customDomain
-    //   ? `https://${t.customDomain}`
-    //   : `https://${t.subdomain}.menuify.tn`;
+    const t = this.tenant();
+    if (!t) return '';
+    return t.customDomain
+      ? `https://${t.customDomain}/menu`
+      : `https://${t.subdomain}.menuify.tn/menu`;
   });
 
   tabs: { id: EditorTab; label: string }[] = [
