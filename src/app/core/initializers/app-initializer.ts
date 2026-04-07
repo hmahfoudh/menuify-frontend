@@ -39,7 +39,7 @@ export function initApp(): () => Promise<void> {
     }
 
     // ── Public menu context ────────────────────────────────────────────────
-    // On a tenant subdomain (e.g. blackrabbit.edsolutions.tn):
+    // On a tenant subdomain (e.g. blackrabbit.menuify.tn):
     //   1. Read subdomain from window.location.hostname
     //   2. Fetch the public menu — backend resolves tenant via X-Tenant-Subdomain
     //   3. Extract tenant info and store in localStorage
