@@ -8,6 +8,7 @@ import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-transl
 import { environment } from '../../../../environments/environment';
 import { FEATURE_ICONS, FEATURE_KEYS, Lang, PLANS, PublicTenant } from '../models/landing.models';
 import { RouterLink } from "@angular/router";
+import { MetaTagsService } from '../../../shared/services/meta-tags.service';
 
 
 
@@ -22,6 +23,7 @@ export class LandingComponent implements OnInit {
 
   private http = inject(HttpClient);
   private translate = inject(TranslateService);
+  private metaTagsService = inject(MetaTagsService);
 
   // ── Language ─────────────────────────────────────────────────────────────────
   currentLang = signal<Lang>('fr');
@@ -68,6 +70,27 @@ export class LandingComponent implements OnInit {
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.loadTenants();
+    this.setSeoTags();
+    this.translate.onLangChange.subscribe(() => {
+      this.setSeoTags();
+    });
+  }
+
+  private setSeoTags() {
+    this.translate.get([
+      'seo.title',
+      'seo.description',
+      'seo.ogTitle',
+      'seo.ogDescription'
+    ]).subscribe(translations => {
+      this.metaTagsService.setCustomMetaTags({
+        title: translations['seo.title'],
+        description: translations['seo.description'],
+        ogTitle: translations['seo.ogTitle'],
+        ogDescription: translations['seo.ogDescription']
+      });
+      console.log(this.metaTagsService.getCurrentMetaConfig());
+    });
   }
 
   @HostListener('window:scroll')

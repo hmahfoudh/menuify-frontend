@@ -21,8 +21,8 @@ export const appConfig: ApplicationConfig = {
         provideAnimationsAsync(),
         provideTranslateService({
             loader: provideTranslateHttpLoader({ prefix: './assets/i18n/',suffix: '.json' }),
-            fallbackLang: 'en',
-            lang: 'en'
+            fallbackLang: 'fr',
+            lang: 'fr'
         }),
         providePrimeNG({
             theme: {

@@ -8,6 +8,8 @@ import { filter } from 'rxjs/operators';
 interface MetaTagConfig {
   title: string;
   description: string;
+  ogTitle?: string;
+  ogDescription?: string;
   image?: string;
   url?: string;
   type?: string;
