@@ -17,6 +17,6 @@ export class TrustedUrlPipe implements PipeTransform {
   private sanitizer = inject(DomSanitizer);
 
   transform(url: string): SafeResourceUrl {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url+'/menu');
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 }
