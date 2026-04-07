@@ -8,7 +8,8 @@
 
   <!-- Viewport & Basic Meta Tags -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Manage your restaurant menu with QR codes, receive orders in real-time, and track customer orders. Free digital menu solution for modern restaurants.">
+  <meta name="description"
+    content="Manage your restaurant menu with QR codes, receive orders in real-time, and track customer orders. Free digital menu solution for modern restaurants.">
   <meta name="theme-color" content="#ffffff">
   <meta name="robots" content="index, follow">
   <meta name="language" content="English">
@@ -19,7 +20,8 @@
 
   <!-- Open Graph Tags (for social media) -->
   <meta property="og:title" content="Menuify - Digital Menu Platform for Restaurants">
-  <meta property="og:description" content="Manage your restaurant menu with QR codes, receive orders in real-time, and track customer orders.">
+  <meta property="og:description"
+    content="Manage your restaurant menu with QR codes, receive orders in real-time, and track customer orders.">
   <meta property="og:url" content="https://menuify.tn/">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://menuify.tn/assets/og-image.png">
@@ -43,7 +45,9 @@
   <!-- Font Preconnect & Loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
 
   <!-- DNS Prefetch for API -->
   <link rel="dns-prefetch" href="https://api.menuify.tn/api/public/tenants">
@@ -71,20 +75,41 @@
 
   <!-- JSON-LD Structured Data (SoftwareApplication) -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Menuify",
-    "description": "Digital menu platform for restaurants with QR codes and order tracking",
-    "url": "https://menuify.tn",
-    "screenshot": "https://menuify.tn/assets/screenshot.png",
-    "applicationCategory": "BusinessApplication",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "TND"
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Menuify",
+      "url": "https://menuify.tn",
+      "description": "Digital menu platform for restaurants with QR codes and real-time order tracking",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "browserRequirements": "Requires JavaScript. Works on Chrome, Firefox, Safari, Edge",
+      "screenshot": "https://menuify.tn/assets/brand/screenshot.png",
+
+      "image": "https://menuify.tn/assets/brand/screenshot.png",
+
+      "inLanguage": ["en", "fr", "ar"],
+      "availableOnDevice": "Desktop, Tablet, Mobile",
+
+      "offers": {
+        "@type": "Offer",
+        "price": "25",
+        "priceCurrency": "TND",
+        "availability": "https://schema.org/InStock"
+      },
+
+      "featureList": [
+        "QR code menu access",
+        "Real-time order tracking",
+        "Restaurant management dashboard"
+      ],
+
+      "provider": {
+        "@type": "Organization",
+        "name": "EDSolutions",
+        "url": "https://edsolutions.tn"
+      }
     }
-  }
   </script>
 
 </head>
