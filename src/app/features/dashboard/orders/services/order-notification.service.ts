@@ -186,8 +186,8 @@ export class OrderNotificationService implements OnDestroy {
 
     const notif = new Notification(title, {
       body,
-      icon:  '/favicon.ico',
-      badge: '/favicon.ico',
+      icon:  '/assets/brand/favicon.ico',
+      badge: '/assets/brand/favicon.ico',
       tag:   'menuify-new-order',   // replaces previous unread notification
       requireInteraction: false,
     });
