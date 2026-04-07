@@ -89,7 +89,6 @@ export class LandingComponent implements OnInit {
         ogTitle: translations['seo.ogTitle'],
         ogDescription: translations['seo.ogDescription']
       });
-      console.log(this.metaTagsService.getCurrentMetaConfig());
     });
   }
 
