@@ -94,7 +94,7 @@ export class LandingComponent implements OnInit {
 
   setSearch(v: string): void { this.searchQuery.set(v); this.showAll.set(false); }
   openMenu(subdomain: string): void {
-    window.open(`https://${subdomain}.meniufy.tn/menu`, '_blank');
+    window.open(`https://${subdomain}.menuify.tn/menu`, '_blank');
   }
   tenantInitial(name: string): string { return name.charAt(0).toUpperCase(); }
 
