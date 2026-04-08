@@ -346,6 +346,21 @@
                   {{ ic }}
                 </button>
               }
+              <div class="icon-picker-custom">
+                <input class="icon-picker-custom-input"
+                       type="text"
+                       [value]="customIconInput()"
+                       (input)="setCustomIconInput($any($event.target).value)"
+                       (keydown.enter)="confirmCustomIcon()"
+                       placeholder="Paste emoji…"
+                       maxlength="4">
+                <button class="icon-picker-custom-btn"
+                        (click)="confirmCustomIcon()"
+                        [disabled]="!customIconInput().trim()"
+                        type="button">
+                  Use
+                </button>
+              </div>
             </div>
           }
 

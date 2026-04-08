@@ -653,6 +653,46 @@
   animation:             fadeIn 0.15s ease;
 }
 
+.icon-picker-custom {
+  grid-column:     1 / -1;
+  display:         flex;
+  align-items:     center;
+  gap:             6px;
+  margin-top:      4px;
+  padding-top:     6px;
+  border-top:      1px solid var(--line);
+}
+
+.icon-picker-custom-input {
+  flex:            1;
+  height:          32px;
+  padding:         0 8px;
+  border:          1px solid var(--line);
+  border-radius:   6px;
+  background:      var(--ink-2);
+  color:           var(--ink-hi);
+  font-size:       1.1rem;
+  outline:         none;
+  &:focus { border-color: var(--gold-line); }
+  &::placeholder { font-size: 0.75rem; color: var(--ink-lo); }
+}
+
+.icon-picker-custom-btn {
+  height:          32px;
+  padding:         0 10px;
+  border:          1px solid var(--line);
+  border-radius:   6px;
+  background:      var(--ink-4);
+  color:           var(--ink-hi);
+  font-size:       0.75rem;
+  font-weight:     500;
+  cursor:          pointer;
+  white-space:     nowrap;
+  transition:      all var(--r);
+  &:hover:not(:disabled) { border-color: var(--gold-line); background: var(--gold-lo); }
+  &:disabled { opacity: 0.4; cursor: default; }
+}
+
 .icon-picker-btn {
   width:         32px;
   height:        32px;

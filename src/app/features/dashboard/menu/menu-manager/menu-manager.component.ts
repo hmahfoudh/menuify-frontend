@@ -47,7 +47,8 @@ export class MenuManagerComponent implements OnInit {
   catName        = signal('');
   catIcon        = signal('');
   catVisible     = signal(true);
-  showIconPicker = signal(false);
+  showIconPicker   = signal(false);
+  customIconInput  = signal('');
 
   // ── Item form ────────────────────────────────────────────────────────────
   editingItem    = signal<ItemResponse | null>(null);
@@ -221,10 +222,17 @@ export class MenuManagerComponent implements OnInit {
   pickIcon(icon: string) {
     this.catIcon.set(icon);
     this.showIconPicker.set(false);
+    this.customIconInput.set('');
   }
 
   toggleIconPicker() {
     this.showIconPicker.update(v => !v);
+    if (!this.showIconPicker()) this.customIconInput.set('');
+  }
+
+  confirmCustomIcon() {
+    const v = this.customIconInput().trim();
+    if (v) this.pickIcon(v);
   }
 
   // ── Drag-to-reorder categories ────────────────────────────────────────────
@@ -763,8 +771,9 @@ export class MenuManagerComponent implements OnInit {
     return p.toFixed(3) + ' DT';
   }
 
-  setCatName(v: string)      { this.catName.set(v); }
-  setCatIcon(v: string)      { this.catIcon.set(v); }
+  setCatName(v: string)           { this.catName.set(v); }
+  setCatIcon(v: string)           { this.catIcon.set(v); }
+  setCustomIconInput(v: string)   { this.customIconInput.set(v); }
   toggleCatVisible()         { this.catVisible.update(v => !v); }
   setItemName(v: string)     { this.itemName.set(v); }
   setItemDesc(v: string)     { this.itemDesc.set(v); }
