@@ -15,8 +15,8 @@ export class AppComponent implements OnInit{
   private translate = inject(TranslateService);
 
   constructor(private metaTagsService: MetaTagsService) {
-    this.translate.addLangs(['fr', 'en', 'ar']);
-    this.translate.setFallbackLang('en');
+    this.translate.addLangs(['fr', 'ar', 'en']);
+    this.translate.setFallbackLang('ar');
     this.translate.use('fr');
   }
 
