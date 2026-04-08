@@ -92,17 +92,18 @@ export class MetaTagsService {
       pattern: /^\/$/,
       priority: 100,
       config: {
-        title: 'Menuify - Digital Menu Platform for Restaurants',
+        title: 'Menuify - Plateforme de menus numériques pour les restaurants',
         description:
-          'Manage your restaurant menu with QR codes, receive orders in real-time, and track customer orders. Free digital menu solution for modern restaurants.',
+          'Gérez votre menu de restaurant & café avec des codes QR, recevez les commandes en temps réel et suivez les commandes des clients. Solution de menu numérique gratuite pour les restaurants modernes.',
         ogType: 'website',
         robots: 'index,follow',
         keywords: [
-          'digital menu',
-          'restaurant menu',
-          'QR code',
-          'online ordering',
-          'food ordering',
+          'menu numérique',
+          'menu digital',
+          'menu restaurant',
+          'code QR',
+          'menu café',
+          'gestion de restaurant',
         ],
       },
     },
@@ -460,14 +461,14 @@ export class MetaTagsService {
 
     const keywordString = translations[translationKeys.keywordsKey || ''] || '';
     const keywords = this.parseKeywords(keywordString);
-    console.log('Parsed keywords:', translations);
+
     this.setCustomMetaTags({
       title: translations[translationKeys.titleKey],
       description: translations[translationKeys.descriptionKey],
       ogTitle: translations[translationKeys.ogTitleKey || translationKeys.titleKey],
       ogDescription: translations[translationKeys.ogDescriptionKey || translationKeys.descriptionKey],
       keywords: keywords.length > 0 ? keywords : undefined,
-      language: this.translate.getCurrentLang() || 'en',
+      language: this.translate.getCurrentLang() || 'fr',
       robots: 'index,follow',
       ogType: 'website',
     });
