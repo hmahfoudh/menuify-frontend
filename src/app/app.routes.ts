@@ -1,7 +1,4 @@
 import { Routes } from '@angular/router';
-import { inject }  from '@angular/core';
-import { Router }  from '@angular/router';
-import { SubdomainService } from './core/services/subdomain.service';
 import { authGuard }  from './core/guards/auth.guard';
 import { ownerGuard } from './core/guards/owner.guard';
 import { superAdminGuard } from './core/guards/super-admin.guard';

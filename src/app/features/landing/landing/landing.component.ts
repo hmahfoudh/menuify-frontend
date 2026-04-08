@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { TranslateDirective, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
 import { FEATURE_ICONS, FEATURE_KEYS, Lang, PLANS, PublicTenant } from '../models/landing.models';
 import { RouterLink } from "@angular/router";
@@ -68,28 +68,10 @@ export class LandingComponent implements OnInit {
   readonly plans = PLANS;
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
-  ngOnInit(): void {
-    this.loadTenants();
-    this.setSeoTags();
-    this.translate.onLangChange.subscribe(() => {
-      this.setSeoTags();
-    });
-  }
 
-  private setSeoTags() {
-    this.translate.get([
-      'seo.title',
-      'seo.description',
-      'seo.ogTitle',
-      'seo.ogDescription'
-    ]).subscribe(translations => {
-      this.metaTagsService.setCustomMetaTags({
-        title: translations['seo.title'],
-        description: translations['seo.description'],
-        ogTitle: translations['seo.ogTitle'],
-        ogDescription: translations['seo.ogDescription']
-      });
-    });
+  ngOnInit(): void {
+    // Load tenants directory
+    this.loadTenants();
   }
 
   @HostListener('window:scroll')
@@ -97,9 +79,8 @@ export class LandingComponent implements OnInit {
 
   // ── Language ──────────────────────────────────────────────────────────────────
   setLang(lang: Lang): void {
-    this.currentLang.set(lang);
+    this.currentLang.set(lang); // This triggers the effect → meta tags update automatically
     this.translate.use(lang);
-
     // Update document dir for RTL support
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
