@@ -4,7 +4,7 @@ export interface QrCodeResponse {
   label:        string | null;
   tableNumber:  string | null;
   targetUrl:    string;
-  imageUrlPng:  string | null;
+  imageUrlPng:  string;
   imageUrlSvg:  string | null;
   colorDark:    string;
   colorLight:   string;

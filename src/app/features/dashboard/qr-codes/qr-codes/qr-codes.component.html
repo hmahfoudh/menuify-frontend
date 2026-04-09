@@ -110,9 +110,18 @@
       @for (qr of qrCodes(); track qr.id; let i = $index) {
         <div class="qr-card" [style.animation-delay]="(i * 0.05) + 's'">
 
-          <!-- QR canvas — rendered by ngAfterViewChecked via qrcode library -->
+          <!-- QR preview — rendered by angularx-qrcode -->
           <div class="qr-img-wrap" (click)="openPreview(qr)">
-            <canvas #qrCanvas class="qr-canvas"></canvas>
+            <qrcode
+              [qrdata]="qr.targetUrl"
+              [width]="160"
+              [errorCorrectionLevel]="'H'"
+              [colorDark]="qr.colorDark || '#000000'"
+              [colorLight]="qr.colorLight || '#ffffff'"
+              [imageSrc]="qr.embedLogo && tenant()?.logoUrl ? tenant()!.logoUrl! : ''"
+              [imageHeight]="35"
+              [imageWidth]="35"
+            ></qrcode>
             <!-- Hover overlay -->
             <div class="qr-overlay">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -156,7 +165,7 @@
               </svg>
             </button>
 
-            <!-- Download PNG — generated client-side by qrcode library -->
+            <!-- Download PNG -->
             <button class="action-btn" title="Download PNG"
                     (click)="downloadPng(qr)" type="button">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
@@ -168,7 +177,7 @@
               PNG
             </button>
 
-            <!-- Download SVG — generated client-side by qrcode library -->
+            <!-- Download SVG -->
             <button class="action-btn" title="Download SVG"
                     (click)="downloadSvg(qr)" type="button">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
@@ -319,7 +328,7 @@
           <div class="url-preview">
             <span class="url-preview-label">Scans will open</span>
             <code class="url-preview-url">
-              https://{{ tenant()!.subdomain }}.menuify.tn
+              https://{{ tenant()!.subdomain }}.menuify.tn/menu
               @if (form.value.tableNumber) {
                 ?table={{ form.value.tableNumber }}
               }
@@ -355,9 +364,18 @@
           </svg>
         </button>
 
-        <!-- QR canvas — rendered at 280px for the preview modal -->
+        <!-- QR preview — rendered by angularx-qrcode -->
         <div class="modal-qr-wrap">
-          <canvas #previewCanvas class="modal-qr-canvas"></canvas>
+          <qrcode
+            [qrdata]="qr.targetUrl"
+            [width]="280"
+            [errorCorrectionLevel]="'H'"
+            [colorDark]="qr.colorDark || '#000000'"
+            [colorLight]="qr.colorLight || '#ffffff'"
+            [imageSrc]="qr.embedLogo && tenant()?.logoUrl ? tenant()!.logoUrl! : ''"
+            [imageHeight]="60"
+            [imageWidth]="60"
+          ></qrcode>
         </div>
 
         <!-- Info -->
