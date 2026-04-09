@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule }        from '@angular/forms';
+import { QRCodeComponent, QRCodeModule }    from 'angularx-qrcode';
 import { PublicMenuService }  from '../services/public-menu.service';
 import { CartService }        from '../services/cart.service';
 import { ThemeInjectorService } from '../services/theme-injector.service';
@@ -26,10 +27,16 @@ import { forkJoin } from 'rxjs';
 type OrderStep = 'idle' | 'checkout' | 'success';
 type OrderType = 'dine_in' | 'takeaway';
 
+export interface SocialLink {
+  platform: string;
+  url:      string;
+  handle:   string | null;
+}
+
 @Component({
   selector:     'app-menu-page',
   standalone:   true,
-  imports:      [CommonModule, FormsModule],
+  imports:      [CommonModule, FormsModule, QRCodeModule],
   templateUrl:  './menu-page.component.html',
   styleUrls:    ['./menu-page.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -55,9 +62,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   cartOpen     = this.cart.isOpen;
   cartEmpty    = this.cart.isEmpty;
 
-  // Controls which tab is visible inside the cart modal:
-  //   'cart'   → item list + checkout (default)
-  //   'orders' → active order tracking cards
   cartMode = signal<'cart' | 'orders'>('cart');
 
   // ── Item modal ────────────────────────────────────────────────────────────
@@ -84,9 +88,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   // ── Opening hours ──────────────────────────────────────────────────────────
   isOpen         = signal(true);
-  nextOpenTime   = signal<string | null>(null);   // e.g. "Opens at 09:00"
+  nextOpenTime   = signal<string | null>(null);
   private hoursCheckInterval?: ReturnType<typeof setInterval>;
-  // orderRef() is now a computed shorthand for display — real state is activeOrders
+
   submitting = signal(false);
   orderError = signal<string | null>(null);
 
@@ -96,16 +100,12 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   tableNumber   = signal('');
   orderNotes    = signal('');
 
-  // ── Order tracking — supports multiple simultaneous active orders ────────────
-  trackingView    = signal(false);     // true = tracking panel visible
-  trackingRef     = signal('');        // reference typed in lookup form
+  // ── Order tracking ────────────────────────────────────────────────────────
+  trackingView    = signal(false);
+  trackingRef     = signal('');
   trackingError   = signal<string | null>(null);
-  trackingLoading = signal(false);     // only for manual lookup
-
-  // All currently tracked orders — source of truth for bottom bar + cart modal
+  trackingLoading = signal(false);
   activeOrders    = signal<TrackedOrder[]>([]);
-
-  // The order whose detail is expanded in the tracking panel (null = list view)
   expandedRef     = signal<string | null>(null);
 
   private trackPoll?: Subscription;
@@ -113,18 +113,19 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   readonly trackingSteps   = TRACKING_STEPS;
   readonly trackingMetaMap = TRACKING_STATUS_META;
 
+  // ── WiFi password copy state ───────────────────────────────────────────────
+  wifiCopied = signal(false);
+
   // ── Computed ──────────────────────────────────────────────────────────────
   categories = computed(() => this.menu()?.categories ?? []);
-  currency   = computed(() => this.menu()?.currencySymbol ?? 'DT');
-  whatsapp   = computed(() => this.menu()?.whatsappNumber ?? '');
+  currency   = computed(() => this.menu()?.tenant.currencySymbol ?? 'DT');
+  whatsapp   = computed(() => this.menu()?.tenant.whatsappNumber ?? '');
 
-  // The most recently submitted order ref — used on the success screen
   latestOrderRef = computed(() => {
     const orders = this.activeOrders();
     return orders.length > 0 ? orders[orders.length - 1].reference : '';
   });
 
-  // True when at least one non-terminal order is being tracked
   hasActiveOrders = computed(() => this.activeOrders().length > 0);
 
   canAddToCart = computed(() => {
@@ -143,6 +144,73 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return true;
   });
 
+  // ── Footer computeds ──────────────────────────────────────────────────────
+
+  /** Ordered list of active social links built from tenant fields. */
+  socialLinks = computed<SocialLink[]>(() => {
+    const t = this.menu()?.tenant;
+    if (!t) return [];
+    const links: SocialLink[] = [];
+    if (t.instagramUrl) links.push({ platform: 'instagram', url: t.instagramUrl, handle: this.extractHandle(t.instagramUrl) });
+    if (t.facebookUrl)  links.push({ platform: 'facebook',  url: t.facebookUrl,  handle: this.extractHandle(t.facebookUrl)  });
+    if (t.tiktokUrl)    links.push({ platform: 'tiktok',    url: t.tiktokUrl,    handle: this.extractHandle(t.tiktokUrl)    });
+    if (t.twitterUrl)   links.push({ platform: 'twitter',   url: t.twitterUrl,   handle: this.extractHandle(t.twitterUrl)   });
+    if (t.youtubeUrl)   links.push({ platform: 'youtube',   url: t.youtubeUrl,   handle: this.extractHandle(t.youtubeUrl)   });
+    if (t.linkedInUrl)  links.push({ platform: 'linkedin',  url: t.linkedInUrl,  handle: this.extractHandle(t.linkedInUrl)  });
+    return links;
+  });
+
+  /** Full location string for display. */
+  locationText = computed(() => {
+    const t = this.menu()?.tenant;
+    if (!t) return null;
+    return [t.address, t.city, t.country].filter(Boolean).join(', ') || null;
+  });
+
+  /** Maps URL — prefer the stored one, fall back to a Google search link. */
+  mapsUrl = computed(() => {
+    const t = this.menu()?.tenant;
+    if (!t) return null;
+    if (t.googleMapsUrl) return t.googleMapsUrl;
+    const q = this.locationText();
+    return q ? `https://maps.google.com/?q=${encodeURIComponent(q)}` : null;
+  });
+
+  /** WhatsApp deep-link (wa.me expects digits only). */
+  whatsappUrl = computed(() => {
+    const num = this.menu()?.tenant.whatsappNumber;
+    if (!num) return null;
+    return `https://wa.me/${num.replace(/\D/g, '')}`;
+  });
+
+  /** tel: link for the phone dialer. */
+  telUrl = computed(() => {
+    const num = this.menu()?.tenant.whatsappNumber;
+    return num ? `tel:${num.replace(/\s/g, '')}` : null;
+  });
+
+  /** WiFi QR payload — standard WIFI: URI scheme. */
+  wifiQrData = computed(() => {
+    const t = this.menu()?.tenant;
+    if (!t?.wifiName) return null;
+    // Escape special chars: \ " ; , per the WIFI QR spec
+    const esc = (s: string) => s.replace(/[\\";,]/g, c => `\\${c}`);
+    const pw  = t.wifiPassword ? esc(t.wifiPassword) : '';
+    return `WIFI:T:WPA;S:${esc(t.wifiName)};P:${pw};;`;
+  });
+
+  /** True when at least one footer section has data to show. */
+  hasFooterContent = computed(() => {
+    const t = this.menu()?.tenant;
+    if (!t) return false;
+    return !!(
+      t.instagramUrl || t.facebookUrl || t.tiktokUrl ||
+      t.twitterUrl   || t.youtubeUrl  || t.linkedInUrl ||
+      t.wifiName || t.whatsappNumber ||
+      t.address  || t.city || t.country || t.googleMapsUrl
+    );
+  });
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.themeSvc.listenForPreviewUpdates();
@@ -150,7 +218,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     const table = this.session.getTableNumber();
     if (table) this.tableNumber.set(table);
 
-    // Auto-open tracking panel if ?track=REF is in the URL
     if (this.isBrowser) {
       const ref = new URLSearchParams(window.location.search).get('track');
       if (ref) {
@@ -178,10 +245,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
           this.session.getQrCode(),
           this.session.getTableNumber()
         );
-        // Start opening hours check (runs immediately + every 60s)
-        this.checkOpeningHours(menu.openingHours);
+        this.checkOpeningHours(menu.tenant.openingHours);
         this.hoursCheckInterval = setInterval(
-          () => this.checkOpeningHours(menu.openingHours), 60_000
+          () => this.checkOpeningHours(menu.tenant.openingHours), 60_000
         );
       },
       error: () => {
@@ -249,7 +315,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return this.selectedMods().has(id);
   }
 
-  // Named stepper methods — arrow functions are forbidden in Angular templates
   decModalQty(): void { if (this.modalQty() > 1) this.modalQty.update(q => q - 1); }
   incModalQty(): void { this.modalQty.update(q => q + 1); }
 
@@ -271,7 +336,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   // ── Cart ──────────────────────────────────────────────────────────────────
   openCart(): void {
-    // If cart is empty but there are active orders, default to orders tab
     this.cartMode.set(
       this.cart.isEmpty() && this.hasActiveOrders() ? 'orders' : 'cart'
     );
@@ -306,9 +370,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.cart.open();
   }
 
-  // Named setters — signal.set() calls must not appear in templates
-  setOrderTypeDineIn():  void { this.orderType.set('dine_in');  }
-  setOrderTypeTakeaway():void { this.orderType.set('takeaway'); }
+  setOrderTypeDineIn():   void { this.orderType.set('dine_in');  }
+  setOrderTypeTakeaway(): void { this.orderType.set('takeaway'); }
   setTableNumber(v: string):   void { this.tableNumber.set(v);   }
   setCustomerName(v: string):  void { this.customerName.set(v);  }
   setCustomerPhone(v: string): void { this.customerPhone.set(v); }
@@ -340,9 +403,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       next: order => {
         this.submitting.set(false);
         this.cart.clear();
-        // Add to the active orders list and start polling for it
         this.addTrackedOrder(order.reference);
-        // Switch to success screen
         this.orderStep.set('success');
       },
       error: () => {
@@ -354,14 +415,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   backToMenu(): void {
     this.orderStep.set('idle');
-    // activeOrders and poll are already running from submitOrder()
-    // Nothing to do here — bottom bar and cart modal will show automatically
   }
 
   // ── Order tracking ─────────────────────────────────────────────────────────
-
-  // ── Tracking panel ────────────────────────────────────────────────────────
-
   openTracking(ref?: string): void {
     this.trackingError.set(null);
     this.trackingView.set(true);
@@ -369,7 +425,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   }
 
   closeTracking(): void {
-    // Hide panel only — poll keeps running, activeOrders stays populated
     this.trackingView.set(false);
     this.expandedRef.set(null);
   }
@@ -379,10 +434,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   }
 
   endTracking(ref: string): void {
-    // Remove one completed/cancelled order from the active list
     this.activeOrders.update(list => list.filter(o => o.reference !== ref));
 
-    // If no more active orders, stop the poll and clean up URL
     if (this.activeOrders().length === 0) {
       this.trackPoll?.unsubscribe();
       this.trackingView.set(false);
@@ -402,7 +455,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     const ref = this.trackingRef().trim().toUpperCase();
     if (!ref) return;
 
-    // Don't add duplicates
     if (this.activeOrders().some(o => o.reference === ref)) {
       this.expandedRef.set(ref);
       return;
@@ -433,22 +485,18 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   }
 
   private addTrackedOrder(reference: string): void {
-    // Don't add duplicates
     if (this.activeOrders().some(o => o.reference === reference)) return;
 
-    // Fetch once immediately, then the shared poll will keep it updated
     this.menuSvc.trackOrder(reference).subscribe({
       next: order => {
         this.activeOrders.update(list => [...list, order]);
         this.restartPoll();
       },
-      error: () => {} // silent — poll will retry
+      error: () => {}
     });
   }
 
   private restartPoll(): void {
-    // One shared interval that refreshes ALL active orders every 30s.
-    // Restarts whenever a new order is added so the timer resets cleanly.
     this.trackPoll?.unsubscribe();
 
     this.trackPoll = interval(30_000)
@@ -457,7 +505,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         switchMap(() => {
           const refs = this.activeOrders().map(o => o.reference);
           if (refs.length === 0) return [];
-          // Fetch all orders in parallel
           return forkJoin(
             refs.reduce((acc, ref) => {
               acc[ref] = this.menuSvc.trackOrder(ref);
@@ -472,7 +519,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
             list.map(o => results[o.reference] ?? o)
           );
         },
-        error: () => {} // silent — next tick will retry
+        error: () => {}
       });
   }
 
@@ -491,10 +538,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   }
 
   // ── Opening hours ─────────────────────────────────────────────────────────
-
   private checkOpeningHours(openingHoursJson: string | null): void {
     if (!openingHoursJson) {
-      // No hours configured — assume always open
       this.isOpen.set(true);
       this.nextOpenTime.set(null);
       return;
@@ -505,13 +550,11 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         = JSON.parse(openingHoursJson);
 
       const now  = new Date();
-      // Day key matches the format stored in settings: 'monday', 'tuesday', etc.
       const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-      const todayKey = days[now.getDay()];
+      const todayKey  = days[now.getDay()];
       const todaySlot = hours[todayKey];
 
       if (!todaySlot?.open) {
-        // Closed today — find next open day
         this.isOpen.set(false);
         this.nextOpenTime.set(this.findNextOpenTime(hours, days, now));
         return;
@@ -527,16 +570,13 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         this.isOpen.set(true);
         this.nextOpenTime.set(null);
       } else if (nowMins < fromMins) {
-        // Before opening time today
         this.isOpen.set(false);
         this.nextOpenTime.set(`Opens today at ${todaySlot.from}`);
       } else {
-        // After closing time today — find next open day
         this.isOpen.set(false);
         this.nextOpenTime.set(this.findNextOpenTime(hours, days, now));
       }
     } catch {
-      // Malformed JSON — fail open (don't block customers)
       this.isOpen.set(true);
       this.nextOpenTime.set(null);
     }
@@ -560,6 +600,30 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return 'Currently closed';
   }
 
+  // ── Footer helpers ────────────────────────────────────────────────────────
+
+  /** Copy WiFi password to clipboard with a brief visual confirmation. */
+  copyWifiPassword(): void {
+    const pw = this.menu()?.tenant.wifiPassword;
+    if (!pw || !this.isBrowser) return;
+    navigator.clipboard.writeText(pw).then(() => {
+      this.wifiCopied.set(true);
+      setTimeout(() => this.wifiCopied.set(false), 2000);
+    });
+  }
+
+  /** Extract a @handle or channel name from a social URL for display. */
+  private extractHandle(url: string): string | null {
+    try {
+      const path = new URL(url).pathname.replace(/\/$/, '');
+      const parts = path.split('/').filter(Boolean);
+      const last = parts[parts.length - 1];
+      return last ? `@${last}` : null;
+    } catch {
+      return null;
+    }
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   fmt(n: number | null): string {
     if (n == null) return '';
@@ -570,17 +634,19 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return item.id ?? item.cartId ?? '';
   }
 
+  trackByPlatform(_: number, link: SocialLink): string {
+    return link.platform;
+  }
+
   // ── Keyboard shortcuts ────────────────────────────────────────────────────
   ngOnDestroy(): void {
     this.trackPoll?.unsubscribe();
     clearInterval(this.hoursCheckInterval);
   }
 
-
-
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.modalItem())                { this.closeModal();   return; }
+    if (this.modalItem())                { this.closeModal();    return; }
     if (this.trackingView())             { this.closeTracking(); return; }
     if (this.cartOpen())                 { this.cart.close();    return; }
     if (this.orderStep() === 'checkout') { this.backToCart(); }

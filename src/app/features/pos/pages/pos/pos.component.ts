@@ -166,7 +166,7 @@ export class PosComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: ({ menu, tables }) => {
         this.categories.set(menu.categories);
-        this.tenantName.set(menu.tenantName ?? '');
+        this.tenantName.set(menu.tenant.name ?? '');
         this.tables.set(tables);
         this.loading.set(false);
       },

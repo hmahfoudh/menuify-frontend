@@ -2319,3 +2319,280 @@ img    { display: block; }
 
   &:hover { transform: none !important; }
 }
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+//
+// Four cards stacked vertically, full-width, consistent with the rest of the
+// menu surface/border system. All colors use the existing CSS variable tokens.
+//
+
+.mp-footer {
+  padding:         24px 16px 120px; // 120px bottom clears the persistent bottom bar
+  display:         flex;
+  flex-direction:  column;
+  gap:             12px;
+}
+
+// ── Base card ─────────────────────────────────────────────────────────────────
+.mp-footer__card {
+  background:    var(--mp-surface);
+  border:        1px solid var(--mp-border);
+  border-radius: var(--mp-r-card);
+  padding:       20px;
+  display:       flex;
+  flex-direction: column;
+  gap:           14px;
+}
+
+// ── Icon + body row used by location and contact cards ────────────────────────
+.mp-footer__card-icon {
+  width:           38px;
+  height:          38px;
+  border-radius:   50%;
+  background:      rgba(255, 255, 255, 0.05);
+  border:          1px solid var(--mp-border);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  color:           var(--mp-accent);
+  flex-shrink:     0;
+}
+
+.mp-footer__card-body {
+  display:        flex;
+  flex-direction: column;
+  gap:            8px;
+}
+
+// ── Location card ─────────────────────────────────────────────────────────────
+.mp-footer__location-text {
+  font-size:   15px;
+  font-weight: 500;
+  color:       var(--mp-text);
+  line-height: 1.4;
+}
+
+.mp-footer__maps-link {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             5px;
+  font-size:       13px;
+  font-weight:     500;
+  color:           var(--mp-accent);
+  text-decoration: none;
+  transition:      color var(--mp-tr);
+
+  &:hover { color: var(--mp-accent-hi); }
+}
+
+// ── Contact / WhatsApp card ───────────────────────────────────────────────────
+.mp-footer__contact-number {
+  font-size:   16px;
+  font-weight: 600;
+  color:       var(--mp-text);
+  letter-spacing: 0.02em;
+}
+
+.mp-footer__contact-actions {
+  display: flex;
+  gap:     8px;
+  flex-wrap: wrap;
+}
+
+.mp-footer__contact-btn {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             6px;
+  padding:         9px 16px;
+  border-radius:   var(--mp-r-btn);
+  font-size:       13px;
+  font-weight:     600;
+  text-decoration: none;
+  transition:      opacity var(--mp-tr), transform var(--mp-tr);
+  border:          none;
+
+  &:active { transform: scale(0.97); }
+
+  &--whatsapp {
+    background: #25d366;
+    color:      #fff;
+  }
+
+  &--call {
+    background: var(--mp-surface2);
+    border:     1px solid var(--mp-border);
+    color:      var(--mp-text);
+  }
+
+  &:hover { opacity: 0.88; }
+}
+
+// ── WiFi card ─────────────────────────────────────────────────────────────────
+.mp-footer__wifi-top {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+}
+
+.mp-footer__wifi-label {
+  font-size:   16px;
+  font-weight: 700;
+  color:       var(--mp-text);
+  font-family: var(--mp-font-head), serif;
+}
+
+.mp-footer__wifi-details {
+  display:        flex;
+  flex-direction: column;
+  gap:            10px;
+  background:     var(--mp-surface2);
+  border-radius:  calc(var(--mp-r-card) - 4px);
+  padding:        14px 16px;
+}
+
+.mp-footer__wifi-row {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+}
+
+.mp-footer__wifi-key {
+  font-size:   12px;
+  font-weight: 500;
+  color:       var(--mp-muted);
+  min-width:   72px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mp-footer__wifi-val {
+  font-size:   14px;
+  font-weight: 600;
+  color:       var(--mp-text);
+
+  &--pw {
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.08em;
+  }
+}
+
+.mp-footer__wifi-pw-wrap {
+  display:     flex;
+  align-items: center;
+  gap:         8px;
+  flex:        1;
+  min-width:   0;
+}
+
+.mp-footer__copy-btn {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           28px;
+  height:          28px;
+  border-radius:   6px;
+  border:          1px solid var(--mp-border);
+  background:      transparent;
+  color:           var(--mp-muted);
+  transition:      color var(--mp-tr), border-color var(--mp-tr), background var(--mp-tr);
+  flex-shrink:     0;
+
+  &:hover {
+    color:        var(--mp-accent);
+    border-color: var(--mp-accent);
+    background:   rgba(var(--mp-accent), 0.06);
+  }
+}
+
+.mp-footer__wifi-qr {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            8px;
+  padding-top:    4px;
+}
+
+// The library renders an <img> inside the qrcode component.
+// We target the class we pass via [cssClass].
+.mp-footer__qr-img {
+  border-radius: 10px;
+  border:        6px solid #fff;  // white border mimics a QR code quiet zone
+  display:       block;
+}
+
+.mp-footer__qr-hint {
+  font-size:  12px;
+  color:      var(--mp-muted);
+  text-align: center;
+}
+
+// ── Social links card ─────────────────────────────────────────────────────────
+.mp-footer__social-title {
+  font-size:   11px;
+  font-weight: 600;
+  color:       var(--mp-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mp-footer__social-list {
+  display:        flex;
+  flex-direction: column;
+  gap:            2px;
+}
+
+.mp-footer__social-item {
+  display:         flex;
+  align-items:     center;
+  gap:             12px;
+  padding:         11px 12px;
+  border-radius:   calc(var(--mp-r-card) - 4px);
+  text-decoration: none;
+  color:           var(--mp-text);
+  transition:      background var(--mp-tr), color var(--mp-tr);
+
+  &:hover {
+    background: var(--mp-surface2);
+  }
+
+  // Per-platform accent on hover (icon color only)
+  &--instagram:hover { color: #e1306c; }
+  &--facebook:hover  { color: #1877f2; }
+  &--tiktok:hover    { color: var(--mp-text); } // TikTok stays neutral
+  &--twitter:hover   { color: var(--mp-text); }
+  &--youtube:hover   { color: #ff0000; }
+  &--linkedin:hover  { color: #0a66c2; }
+}
+
+.mp-footer__social-text {
+  display:        flex;
+  flex-direction: column;
+  gap:            1px;
+  flex:           1;
+  min-width:      0;
+}
+
+.mp-footer__social-platform {
+  font-size:   14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.mp-footer__social-handle {
+  font-size:  12px;
+  color:      var(--mp-muted);
+  white-space: nowrap;
+  overflow:    hidden;
+  text-overflow: ellipsis;
+}
+
+.mp-footer__social-arrow {
+  color:      var(--mp-muted);
+  flex-shrink: 0;
+  transition:  color var(--mp-tr), transform var(--mp-tr);
+
+  .mp-footer__social-item:hover & {
+    color:     var(--mp-accent);
+    transform: translateX(2px);
+  }
+}

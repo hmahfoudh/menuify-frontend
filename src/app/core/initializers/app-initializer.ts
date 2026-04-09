@@ -5,16 +5,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { SubdomainService }        from '../services/subdomain.service';
 import { LocalStorageService }     from '../services/local-storage.service';
 import { environment }             from '../../../environments/environment';
+import { PublicMenuResponse, PublicTenantResponse } from '../../features/public/models/public-menu.models';
 
-export interface PublicTenantInfo {
-  subdomain:      string;
-  name:           string;
-  logoUrl:        string | null;
-  tagline:        string | null;
-  whatsappNumber: string | null;
-  currencySymbol: string;
-  address:        string | null;
-}
+
 
 export function initApp(): () => Promise<void> {
   const subdomainSvc = inject(SubdomainService);
@@ -54,7 +47,7 @@ export function initApp(): () => Promise<void> {
     }
 
     // Check if we already have this tenant cached for this subdomain
-    const cached = storage.getJson<PublicTenantInfo>('tenant');
+    const cached = storage.getJson<PublicTenantResponse>('tenant');
     if (cached && cached.subdomain === sub) {
       resolve();
       return;
@@ -66,17 +59,10 @@ export function initApp(): () => Promise<void> {
 
     http.get<any>(`${environment.apiUrl}/api/menu`, { headers }).subscribe({
       next: (res) => {
-        const menu = res.data ?? res;
+        const menu = res?.data ?? res;
 
-        const tenantInfo: PublicTenantInfo = {
-          subdomain:      sub,
-          name:           menu.tenantName,
-          logoUrl:        menu.logoUrl        ?? null,
-          tagline:        menu.tagline        ?? null,
-          whatsappNumber: menu.whatsappNumber ?? null,
-          currencySymbol: menu.currencySymbol ?? 'DT',
-          address:        menu.address        ?? null,
-        };
+        const tenantInfo = menu.tenant;
+        console.log('Fetched tenant info on app init:', tenantInfo);
 
         // Store so the tenantInterceptor and menu page can read it
         storage.setJson('tenant', tenantInfo);

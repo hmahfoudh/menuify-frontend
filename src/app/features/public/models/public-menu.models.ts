@@ -1,13 +1,28 @@
 // ── Public API responses ───────────────────────────────────────────────────────
 
-export interface PublicMenuResponse {
-  tenantName:     string;
+export interface PublicTenantResponse {
+  name:           string;
+  subdomain:      string;
   logoUrl:        string | null;
   tagline:        string | null;
-  whatsappNumber: string | null;
-  currencySymbol: string;
   address:        string | null;
+  city:           string | null;
+  country:        string | null;
+  whatsappNumber: string | null;
+  googleMapsUrl: string | null;
   openingHours:   string | null;
+  facebookUrl: string | null;
+  instagramUrl: string | null;
+  twitterUrl: string | null;
+  tiktokUrl: string | null;
+  linkedInUrl: string | null;
+  youtubeUrl: string | null;
+  wifiName: string | null;
+  wifiPassword: string | null;
+  currencySymbol: string;
+}
+export interface PublicMenuResponse {
+  tenant:         PublicTenantResponse;
   categories:     PublicCategoryResponse[];
 }
 
