@@ -71,6 +71,14 @@ export class SettingsComponent implements OnInit {
     city:           [''],
     country:        [''],
     googleMapsUrl:  [''],
+    facebookUrl:    [''],
+    instagramUrl:   [''],
+    twitterUrl:     [''],
+    tiktokUrl:      [''],
+    linkedinUrl:    [''],
+    youtubeUrl:     [''],
+    wifiName:       [''],
+    wifiPassword:   [''],
   });
 
   advancedForm: FormGroup = this.fb.group({
@@ -107,6 +115,14 @@ export class SettingsComponent implements OnInit {
       city:           t.city           ?? '',
       country:        t.country        ?? '',
       googleMapsUrl:  t.googleMapsUrl  ?? '',
+      facebookUrl:    t.facebookUrl    ?? '',
+      instagramUrl:   t.instagramUrl   ?? '',
+      twitterUrl:     t.twitterUrl     ?? '',
+      tiktokUrl:      t.tiktokUrl      ?? '',
+      linkedinUrl:    t.linkedinUrl    ?? '',
+      youtubeUrl:     t.youtubeUrl     ?? '',
+      wifiName:       t.wifiName       ?? '',
+      wifiPassword:   t.wifiPassword   ?? '',
     });
 
     this.advancedForm.patchValue({

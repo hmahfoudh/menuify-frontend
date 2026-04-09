@@ -6,6 +6,14 @@ export interface TenantSettingsRequest {
   city?:             string;
   country?:          string;
   googleMapsUrl?:    string;
+  facebookUrl?:      string;
+  instagramUrl?:     string;
+  twitterUrl?:       string;
+  tiktokUrl?:        string;
+  linkedinUrl?:      string;
+  youtubeUrl?:       string;
+  wifiName?:         string;
+  wifiPassword?:     string;
   openingHours?:     string;   // JSON string
   defaultLocale?:    string;
   currencySymbol?:   string;
@@ -25,6 +33,14 @@ export interface TenantResponse {
   city:            string | null;
   country:         string | null;
   googleMapsUrl:   string | null;
+  facebookUrl:     string | null;
+  instagramUrl:    string | null;
+  twitterUrl:      string | null;
+  tiktokUrl:       string | null;
+  linkedinUrl:     string | null;
+  youtubeUrl:      string | null;
+  wifiName:        string | null;
+  wifiPassword:    string | null;
   openingHours:    string | null;
   customDomain:    string | null;
   customDomainVerified: boolean;
