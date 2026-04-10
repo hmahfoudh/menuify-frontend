@@ -99,7 +99,7 @@
 
             <!-- Like count directly under heart -->
             @if (getItemLikeCount(item.id) > 0) {
-            <span class="mp-card__like-count">{{ item.likeCount | formatLikeCount }}</span>
+            <span class="mp-card__like-count">{{ getItemLikeCount(item.id) | formatLikeCount }}</span>
             }
           </div>
           <!-- ▲▲▲ END: Heart + Count ▲▲▲ -->

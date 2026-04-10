@@ -661,7 +661,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   /**
    * Get the like count for an item.
    */
-  getItemLikeCount(itemId: string): number {
+  public getItemLikeCount(itemId: string): number {
     return this.itemLikeCounts().get(itemId) ?? 0;
   }
 
