@@ -52,7 +52,7 @@ export class RegisterComponent {
       Validators.required,
       Validators.minLength(2),
       Validators.maxLength(50),
-      Validators.pattern(/^[a-z0-9]+(-[a-z0-9]+)*$/)
+      Validators.pattern(/^[a-z0-9]+(-*[a-z0-9]+)*$/)
     ]],
     subdomain: ['', [
       Validators.required,
@@ -154,7 +154,13 @@ export class RegisterComponent {
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   onSubmit(): void {
+    console.log('Submitting registration with payload:', {
+      ...this.accountForm.value,
+      tenant: this.restaurantForm.value,
+      form: this.restaurantForm
+    });
     if (this.restaurantForm.invalid) {
+      console.log('Restaurant form is invalid:', this.restaurantForm.errors);
       this.restaurantForm.markAllAsTouched();
       return;
     }
