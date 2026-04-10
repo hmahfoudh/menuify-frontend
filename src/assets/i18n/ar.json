@@ -104,18 +104,124 @@
     "error": "خطأ في الإرسال. حاول مجدداً.",
     "address": "تونس"
   },
-  "footer": {
-    "tagline": "القائمة الرقمية المصممة لتونس.",
-    "rights": "© 2026 Menuify. جميع الحقوق محفوظة.",
-    "about": "من نحن",
-    "contact": "اتصل بنا",
-    "privacy": "الخصوصية",
-    "terms": "الشروط"
-  },
   "seo": {
     "title": "Menuify - منصة القوائم الرقمية",
     "description": "قم بإدارة قائمة مطعمك باستخدام QR code وتتبع الطلبات في الوقت الحقيقي",
     "ogTitle": "Menuify - قائمة رقمية",
     "ogDescription": "حل حديث لإدارة قوائم المطاعم"
+  },
+  "menu": {
+    "badge": {
+      "signature": "مميّز",
+      "options": "خيارات"
+    },
+    "card": {
+      "like_aria": "أعجبني هذا الطبق",
+      "see_options": "عرض الخيارات",
+      "ask_us": "اسألنا"
+    },
+    "diet": {
+      "vegetarian": "نباتي",
+      "vegan": "نباتي صرف",
+      "gluten_free": "خالٍ من الغلوتين",
+      "spicy": "حار"
+    }
+  },
+  "header": {
+    "language": "اختر اللغة"
+  },
+  "footer": {
+    "find_us": "موقعنا",
+    "open_in_maps": "فتح في الخرائط",
+    "contact_us": "تواصل معنا",
+    "whatsapp": "واتساب",
+    "call": "اتصال",
+    "free_wifi": "واي فاي مجاني",
+    "wifi_network": "الشبكة",
+    "wifi_password": "كلمة المرور",
+    "wifi_copy_aria": "نسخ كلمة المرور",
+    "wifi_copied_aria": "تم النسخ!",
+    "wifi_scan": "امسح للاتصال",
+    "follow_us": "تابعنا"
+  },
+  "closed_banner": {
+    "title": "نحن مغلقون الآن"
+  },
+  "bottom_bar": {
+    "cart_aria": "عرض السلة",
+    "your_cart": "سلتك",
+    "item": "صنف",
+    "items": "أصناف",
+    "track_orders_aria": "تتبع طلباتك",
+    "track_orders": "تتبع الطلبات"
+  },
+  "item_modal": {
+    "close_aria": "إغلاق",
+    "required": "إلزامي",
+    "up_to": "حتى {{max}}",
+    "special_instructions": "تعليمات خاصة",
+    "optional": "اختياري",
+    "note_placeholder": "بدون بصل، صلصة إضافية…",
+    "add_to_order": "أضف إلى الطلب"
+  },
+  "cart": {
+    "tab_cart": "السلة",
+    "tab_orders": "الطلبات",
+    "close_aria": "إغلاق",
+    "ready_now": "جاهز في أي لحظة!",
+    "ready_in": "جاهز خلال ~{{min}} دقيقة",
+    "done_with": "انتهى من {{ref}}",
+    "full_tracking": "تتبع كامل لـ {{ref}}",
+    "total": "المجموع",
+    "closed": "مغلق",
+    "place_order": "تأكيد الطلب"
+  },
+  "checkout": {
+    "title": "أكمل طلبك",
+    "back_aria": "رجوع",
+    "order_type_label": "نوع الطلب",
+    "dine_in": "🪑 داخل المطعم",
+    "takeaway": "🥡 خارج المطعم",
+    "table_number": "رقم الطاولة",
+    "table_placeholder": "5",
+    "your_name": "اسمك",
+    "optional": "اختياري",
+    "name_placeholder": "أحمد",
+    "phone_number": "رقم الهاتف",
+    "phone_placeholder": "+216 22 000 000",
+    "notes": "ملاحظات",
+    "notes_placeholder": "أي طلبات خاصة…",
+    "item": "صنف",
+    "items": "أصناف",
+    "back": "→ رجوع",
+    "submit": "تأكيد الطلب"
+  },
+  "success": {
+    "title": "تم استلام طلبك!",
+    "ref_label": "رقم مرجع طلبك",
+    "ref_hint": "احتفظ به لسجلاتك",
+    "step_placed": "تم الطلب",
+    "step_preparing": "قيد التحضير",
+    "step_ready": "جاهز",
+    "desc": "استلم المطعم طلبك وسيبدأ التحضير قريباً. لا يلزمك القيام بأي إجراء.",
+    "track_btn": "تتبع طلبي",
+    "back_to_menu": "العودة إلى القائمة"
+  },
+  "tracking": {
+    "title": "طلباتك",
+    "close_aria": "إغلاق",
+    "ready_now": "جاهز في أي لحظة!",
+    "ready_in": "جاهز خلال حوالي {{min}} دقيقة",
+    "order_summary": "ملخص الطلب",
+    "total": "المجموع",
+    "done": "انتهى",
+    "auto_refresh": "يتجدد تلقائياً كل 30 ثانية",
+    "track_another": "تتبع طلب آخر",
+    "ref_placeholder": "رقم المرجع مثلاً BLK-20260328-0001",
+    "search": "بحث"
+  },
+  "toast": {
+    "added": "تمت الإضافة إلى السلة",
+    "view_cart": "عرض السلة"
   }
 }

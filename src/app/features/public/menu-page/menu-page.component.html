@@ -20,6 +20,33 @@
 
 <!-- ── Menu ───────────────────────────────────────────────────────────────── -->
 @if (!loading() && menu(); as m) {
+  <!-- ══════════════════════════════════════════════════════════════
+       CART TOAST
+  ══════════════════════════════════════════════════════════════════ -->
+@if (cartToast(); as toast) {
+<div class="mp-toast" [class.mp-toast--visible]="toast.visible" role="status" aria-live="polite">
+  <div class="mp-toast__icon">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  </div>
+  <div class="mp-toast__body">
+    <span class="mp-toast__title">{{ 'toast.added' | translate }}</span>
+    <span class="mp-toast__name">{{ toast.name }}</span>
+  </div>
+  <button class="mp-toast__cart" (click)="toggleCart()" type="button">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2.2" stroke-linecap="round">
+      <circle cx="9" cy="21" r="1" />
+      <circle cx="20" cy="21" r="1" />
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+    </svg>
+    {{ 'toast.view_cart' | translate }}
+    <span class="mp-toast__count">{{ cartCount() }}</span>
+  </button>
+</div>
+}
 
 <!-- HEADER -->
 <header class="mp-header">
@@ -33,6 +60,42 @@
       <p class="mp-header__tagline">{{ m.tenant.tagline }}</p>
       }
     </div>
+
+    <!-- ── Language selector ─────────────────────────────────── -->
+    <div class="mp-lang" [class.mp-lang--open]="langMenuOpen()" (click)="$event.stopPropagation()">
+      <button class="mp-lang__trigger" (click)="toggleLangMenu()" type="button"
+        [attr.aria-label]="'header.language' | translate" aria-haspopup="listbox">
+        <span class="mp-lang__flag">{{ currentLang().flag }}</span>
+        <span class="mp-lang__code">{{ currentLang().code | uppercase }}</span>
+        <svg class="mp-lang__chevron" width="10" height="10" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      @if (langMenuOpen()) {
+      <ul class="mp-lang__menu" role="listbox">
+        @for (lang of availableLangs(); track lang.code) {
+        <li class="mp-lang__option"
+          [class.mp-lang__option--active]="currentLang().code === lang.code"
+          (click)="switchLang(lang.code)"
+          role="option"
+          [attr.aria-selected]="currentLang().code === lang.code">
+          <span class="mp-lang__flag">{{ lang.flag }}</span>
+          <span class="mp-lang__label">{{ lang.label }}</span>
+          @if (currentLang().code === lang.code) {
+          <svg class="mp-lang__check" width="11" height="11" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          }
+        </li>
+        }
+      </ul>
+      }
+    </div>
+    <!-- ── End language selector ─────────────────────────────── -->
+
   </div>
 </header>
 
@@ -79,17 +142,18 @@
 
           <!-- Badges: Featured & Options -->
           @if (item.featured) {
-          <span class="mp-badge mp-badge--featured">Signature</span>
+          <span class="mp-badge mp-badge--featured">{{ 'menu.badge.signature' | translate }}</span>
           }
           @if (item.hasVariants) {
-          <span class="mp-badge mp-badge--variants">Options</span>
+          <span class="mp-badge mp-badge--variants">{{ 'menu.badge.options' | translate }}</span>
           }
 
           <!-- ▼▼▼ NEW: Heart + Count in TOP-RIGHT corner ▼▼▼ -->
           <div class="mp-card__like-overlay">
             <button class="mp-card__like" [class.mp-card__like--active]="isItemLiked(item.id)"
-              (click)="toggleItemLike($event, item.id)" type="button" title="Like this item"
-              aria-label="Like this item">
+              (click)="toggleItemLike($event, item.id)" type="button"
+              [title]="'menu.card.like_aria' | translate"
+              [attr.aria-label]="'menu.card.like_aria' | translate">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"
                 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path
@@ -130,9 +194,9 @@
               {{ fmt(item.displayPrice) }}
               <span class="mp-card__currency">{{ currency() }}</span>
               } @else if (item.hasVariants) {
-              <span class="mp-card__from">See options</span>
+              <span class="mp-card__from">{{ 'menu.card.see_options' | translate }}</span>
               } @else {
-              <span class="mp-card__from">Ask us</span>
+              <span class="mp-card__from">{{ 'menu.card.ask_us' | translate }}</span>
               }
             </span>
             <span class="mp-card__add" aria-hidden="true">+</span>
@@ -156,7 +220,7 @@
   <!-- ── 1. Location card ──────────────────────────────────────── -->
   @if (locationText() || mapsUrl()) {
   <div class="mp-footer__card">
-    <p class="mp-footer__social-title">Find us</p>
+    <p class="mp-footer__social-title">{{ 'footer.find_us' | translate }}</p>
     <div class="mp-footer__card-icon">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
         stroke-linecap="round">
@@ -176,7 +240,7 @@
           <polyline points="15 3 21 3 21 9" />
           <line x1="10" y1="14" x2="21" y2="3" />
         </svg>
-        Open in Maps
+        {{ 'footer.open_in_maps' | translate }}
       </a>
       }
     </div>
@@ -186,7 +250,7 @@
   <!-- ── 2. Contact / WhatsApp card ────────────────────────────── -->
   @if (whatsappUrl() || telUrl()) {
   <div class="mp-footer__card">
-    <p class="mp-footer__social-title">Contact us</p>
+    <p class="mp-footer__social-title">{{ 'footer.contact_us' | translate }}</p>
     <div class="mp-footer__card-icon">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
         stroke-linecap="round">
@@ -226,7 +290,7 @@
                              -.236-.374A9.908 9.908 0 0 1 2.118 12C2.118 6.51 6.51 2.118 12 2.118
                              S21.882 6.51 21.882 12 17.49 21.882 12 21.882z" />
           </svg>
-          WhatsApp
+          {{ 'footer.whatsapp' | translate }}
         </a>
         }
         @if (telUrl()) {
@@ -240,7 +304,7 @@
                              a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45
                              c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
           </svg>
-          Call
+          {{ 'footer.call' | translate }}
         </a>
         }
       </div>
@@ -261,23 +325,23 @@
           <circle cx="12" cy="20" r="1" fill="currentColor" />
         </svg>
       </div>
-      <span class="mp-footer__social-title">Free WiFi</span>
+      <span class="mp-footer__social-title">{{ 'footer.free_wifi' | translate }}</span>
     </div>
 
     <div class="mp-footer__wifi-details">
       <div class="mp-footer__wifi-row">
-        <span class="mp-footer__wifi-key">Network</span>
+        <span class="mp-footer__wifi-key">{{ 'footer.wifi_network' | translate }}</span>
         <span class="mp-footer__wifi-val">{{ menu()!.tenant.wifiName }}</span>
       </div>
       @if (menu()!.tenant.wifiPassword) {
       <div class="mp-footer__wifi-row">
-        <span class="mp-footer__wifi-key">Password</span>
+        <span class="mp-footer__wifi-key">{{ 'footer.wifi_password' | translate }}</span>
         <div class="mp-footer__wifi-pw-wrap">
           <span class="mp-footer__wifi-val mp-footer__wifi-val--pw">
             {{ menu()!.tenant.wifiPassword }}
           </span>
           <button class="mp-footer__copy-btn" (click)="copyWifiPassword()" type="button"
-            [attr.aria-label]="wifiCopied() ? 'Copied!' : 'Copy password'">
+            [attr.aria-label]="wifiCopied() ? ('footer.wifi_copied_aria' | translate) : ('footer.wifi_copy_aria' | translate)">
             @if (wifiCopied()) {
             <!-- Checkmark -->
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"
@@ -304,7 +368,7 @@
       <qrcode [qrdata]="wifiQrData()!" [width]="160" [margin]="2" [colorDark]="'#000000'" [colorLight]="'#ffffff'"
         [errorCorrectionLevel]="'M'" elementType="img" [cssClass]="'mp-footer__qr-img'">
       </qrcode>
-      <p class="mp-footer__qr-hint">Scan to connect</p>
+      <p class="mp-footer__qr-hint">{{ 'footer.wifi_scan' | translate }}</p>
     </div>
     }
   </div>
@@ -313,7 +377,7 @@
   <!-- ── 4. Social links card ───────────────────────────────────── -->
   @if (socialLinks().length > 0) {
   <div class="mp-footer__card">
-    <p class="mp-footer__social-title">Follow us</p>
+    <p class="mp-footer__social-title">{{ 'footer.follow_us' | translate }}</p>
     <div class="mp-footer__social-list">
       @for (link of socialLinks(); track trackByPlatform($index, link)) {
       <a [href]="link.url" target="_blank" rel="noopener noreferrer" class="mp-footer__social-item"
@@ -408,7 +472,7 @@
     <polyline points="12 6 12 12 16 14" />
   </svg>
   <div class="mp-closed-banner__text">
-    <span class="mp-closed-banner__title">We're closed right now</span>
+    <span class="mp-closed-banner__title">{{ 'closed_banner.title' | translate }}</span>
     @if (nextOpenTime()) {
     <span class="mp-closed-banner__sub">{{ nextOpenTime() }}</span>
     }
@@ -418,16 +482,12 @@
 
 <!-- ══════════════════════════════════════════════════════════════
        PERSISTENT BOTTOM BAR
-       Always visible. Shows:
-         - Cart section (left): item count + total, opens cart drawer
-         - Order tracker (right): live status pill when order in progress
-       The bar is always rendered so there's no layout jump when
-       items are added or an order is placed.
   ══════════════════════════════════════════════════════════════════ -->
 <div class="mp-bottom-bar" [class.mp-bottom-bar--has-order]="hasActiveOrders()">
 
   <!-- ── Cart side ─────────────────────────────────────────────── -->
-  <button class="mp-bottom-bar__cart" (click)="toggleCart()" type="button" aria-label="View cart">
+  <button class="mp-bottom-bar__cart" (click)="toggleCart()" type="button"
+    [attr.aria-label]="'bottom_bar.cart_aria' | translate">
     <div class="mp-bbc__icon-wrap" [class.mp-bbc__icon-wrap--filled]="!cartEmpty()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
         stroke-linecap="round">
@@ -441,10 +501,10 @@
     </div>
     <div class="mp-bbc__text">
       @if (cartEmpty()) {
-      <span class="mp-bbc__empty-label">Your cart</span>
+      <span class="mp-bbc__empty-label">{{ 'bottom_bar.your_cart' | translate }}</span>
       } @else {
       <span class="mp-bbc__items-label">
-        {{ cartCount() }} item{{ cartCount() > 1 ? 's' : '' }}
+        {{ cartCount() }} {{ (cartCount() > 1 ? 'bottom_bar.items' : 'bottom_bar.item') | translate }}
       </span>
       <span class="mp-bbc__total">
         {{ fmt(cartSubtotal()) }} {{ currency() }}
@@ -460,14 +520,15 @@
 
   <!-- ── Single track button ─────────────────────────────────── -->
   @if (hasActiveOrders()) {
-  <button class="mp-bottom-bar__tracker" (click)="openTracking()" type="button" aria-label="Track your orders">
+  <button class="mp-bottom-bar__tracker" (click)="openTracking()" type="button"
+    [attr.aria-label]="'bottom_bar.track_orders_aria' | translate">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
       stroke-linecap="round">
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
     </svg>
     <div class="mp-bbt__text">
-      <span class="mp-bbt__status">Track orders</span>
+      <span class="mp-bbt__status">{{ 'bottom_bar.track_orders' | translate }}</span>
     </div>
     <span class="mp-bbt__count">{{ activeOrders().length }}</span>
   </button>
@@ -482,7 +543,8 @@
 <div class="mp-backdrop" (click)="closeModal()" role="dialog" [attr.aria-label]="item.name">
   <div class="mp-modal" (click)="$event.stopPropagation()">
 
-    <button class="mp-modal__close" (click)="closeModal()" aria-label="Close" type="button">
+    <button class="mp-modal__close" (click)="closeModal()"
+      [attr.aria-label]="'item_modal.close_aria' | translate" type="button">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
         stroke-linecap="round">
         <line x1="18" y1="6" x2="6" y2="18" />
@@ -503,10 +565,10 @@
       <p class="mp-modal__desc">{{ item.description }}</p>
       }
       <div class="mp-modal__diet">
-        @if (item.vegetarian) { <span class="mp-diet-tag">🌿 Vegetarian</span> }
-        @if (item.vegan) { <span class="mp-diet-tag">🌱 Vegan</span> }
-        @if (item.glutenFree) { <span class="mp-diet-tag">🌾 Gluten free</span>}
-        @if (item.spicy) { <span class="mp-diet-tag">🌶️ Spicy</span> }
+        @if (item.vegetarian) { <span class="mp-diet-tag">🌿 {{ 'menu.diet.vegetarian' | translate }}</span> }
+        @if (item.vegan) { <span class="mp-diet-tag">🌱 {{ 'menu.diet.vegan' | translate }}</span> }
+        @if (item.glutenFree) { <span class="mp-diet-tag">🌾 {{ 'menu.diet.gluten_free' | translate }}</span>}
+        @if (item.spicy) { <span class="mp-diet-tag">🌶️ {{ 'menu.diet.spicy' | translate }}</span> }
       </div>
 
       <!-- Variant groups -->
@@ -515,7 +577,7 @@
         <div class="mp-option-group__head">
           <span class="mp-option-group__name">{{ group.name }}</span>
           @if (group.required) {
-          <span class="mp-required-badge">Required</span>
+          <span class="mp-required-badge">{{ 'item_modal.required' | translate }}</span>
           }
         </div>
         <div class="mp-variants" [class]="'mp-variants--' + group.uiType">
@@ -542,10 +604,10 @@
           <span class="mp-option-group__name">{{ group.name }}</span>
           <div class="mp-option-group__meta">
             @if (group.required) {
-            <span class="mp-required-badge">Required</span>
+            <span class="mp-required-badge">{{ 'item_modal.required' | translate }}</span>
             }
             @if (group.maxSelect > 1) {
-            <span class="mp-select-hint">Up to {{ group.maxSelect }}</span>
+            <span class="mp-select-hint">{{ 'item_modal.up_to' | translate: { max: group.maxSelect } }}</span>
             }
           </div>
         </div>
@@ -577,11 +639,12 @@
       <!-- Special note -->
       <div class="mp-note">
         <label class="mp-note__label" for="specNote">
-          Special instructions
-          <span class="mp-optional">optional</span>
+          {{ 'item_modal.special_instructions' | translate }}
+          <span class="mp-optional">{{ 'item_modal.optional' | translate }}</span>
         </label>
         <textarea id="specNote" class="mp-note__input" [ngModel]="specialNote()"
-          (ngModelChange)="setSpecialNote($event)" placeholder="No onions, extra sauce…" rows="2"></textarea>
+          (ngModelChange)="setSpecialNote($event)"
+          [placeholder]="'item_modal.note_placeholder' | translate" rows="2"></textarea>
       </div>
 
       <!-- Footer: qty + add -->
@@ -593,7 +656,7 @@
         </div>
 
         <button class="mp-add-btn" [disabled]="!canAddToCart()" (click)="addToCart()" type="button">
-          Add to order
+          {{ 'item_modal.add_to_order' | translate }}
           <span class="mp-add-btn__price">
             {{ fmt(modalTotal()) }} {{ currency() }}
           </span>
@@ -623,7 +686,7 @@
           <circle cx="20" cy="21" r="1" />
           <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
         </svg>
-        Cart
+        {{ 'cart.tab_cart' | translate }}
         @if (!cartEmpty()) {
         <span class="mp-cart__tab-badge">{{ cartCount() }}</span>
         }
@@ -636,14 +699,15 @@
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
-        Orders
+        {{ 'cart.tab_orders' | translate }}
         <span class="mp-cart__tab-badge mp-cart__tab-badge--accent">
           {{ activeOrders().length }}
         </span>
       </button>
       }
     </div>
-    <button class="mp-cart__close" (click)="closeCart()" aria-label="Close" type="button">
+    <button class="mp-cart__close" (click)="closeCart()"
+      [attr.aria-label]="'cart.close_aria' | translate" type="button">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
         stroke-linecap="round">
         <line x1="18" y1="6" x2="6" y2="18" />
@@ -684,9 +748,9 @@
             <polyline points="12 6 12 12 16 14" />
           </svg>
           @if (order.minutesRemaining === 0) {
-          Ready any moment now!
+          {{ 'cart.ready_now' | translate }}
           } @else {
-          Ready in ~<strong>{{ order.minutesRemaining }} min</strong>
+          {{ 'cart.ready_in' | translate: { min: order.minutesRemaining } }}
           }
         </div>
         }
@@ -730,7 +794,7 @@
     <!-- Done or View detail -->
     @if (getTrackingMeta(order.status).terminal) {
     <button class="mp-cop__done-btn" (click)="endTracking(order.reference)" type="button">
-      Done with {{ order.reference }}
+      {{ 'cart.done_with' | translate: { ref: order.reference } }}
     </button>
     } @else {
     <button class="mp-cop__track-btn" (click)="openTracking(order.reference); closeCart()" type="button">
@@ -739,7 +803,7 @@
         <circle cx="12" cy="12" r="10" />
         <polyline points="12 6 12 12 16 14" />
       </svg>
-      Full tracking for {{ order.reference }}
+      {{ 'cart.full_tracking' | translate: { ref: order.reference } }}
     </button>
     }
 
@@ -783,7 +847,7 @@
 
 <div class="mp-cart__foot">
   <div class="mp-cart__total-row">
-    <span class="mp-cart__total-label">Total</span>
+    <span class="mp-cart__total-label">{{ 'cart.total' | translate }}</span>
     <span class="mp-cart__total-val">
       {{ fmt(cartSubtotal()) }} {{ currency() }}
     </span>
@@ -796,9 +860,9 @@
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
     </svg>
-    Closed
+    {{ 'cart.closed' | translate }}
     } @else {
-    Place order
+    {{ 'cart.place_order' | translate }}
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
       stroke-linecap="round">
       <polyline points="5 12 12 19 19 5" />
@@ -819,8 +883,9 @@
   <div class="mp-checkout" (click)="$event.stopPropagation()">
 
     <div class="mp-checkout__head">
-      <h2 class="mp-checkout__title">Complete your order</h2>
-      <button class="mp-modal__close" (click)="backToCart()" aria-label="Back" type="button">
+      <h2 class="mp-checkout__title">{{ 'checkout.title' | translate }}</h2>
+      <button class="mp-modal__close" (click)="backToCart()"
+        [attr.aria-label]="'checkout.back_aria' | translate" type="button">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round">
           <line x1="18" y1="6" x2="6" y2="18" />
@@ -833,15 +898,15 @@
 
       <!-- Order type -->
       <div class="mp-co-field">
-        <label class="mp-co-label">Order type</label>
+        <label class="mp-co-label">{{ 'checkout.order_type_label' | translate }}</label>
         <div class="mp-type-tabs">
           <button type="button" class="mp-type-tab" [class.mp-type-tab--active]="orderType() === 'dine_in'"
             (click)="setOrderTypeDineIn()">
-            🪑 Dine in
+            {{ 'checkout.dine_in' | translate }}
           </button>
           <button type="button" class="mp-type-tab" [class.mp-type-tab--active]="orderType() === 'takeaway'"
             (click)="setOrderTypeTakeaway()">
-            🥡 Takeaway
+            {{ 'checkout.takeaway' | translate }}
           </button>
         </div>
       </div>
@@ -849,40 +914,44 @@
       <!-- Table number (dine-in only) -->
       @if (orderType() === 'dine_in') {
       <div class="mp-co-field">
-        <label class="mp-co-label" for="tableNum">Table number</label>
+        <label class="mp-co-label" for="tableNum">{{ 'checkout.table_number' | translate }}</label>
         <input id="tableNum" type="text" class="mp-co-input" [ngModel]="tableNumber()"
-          (ngModelChange)="setTableNumber($event)" placeholder="5">
+          (ngModelChange)="setTableNumber($event)"
+          [placeholder]="'checkout.table_placeholder' | translate">
       </div>
       }
 
       <!-- Name -->
       <div class="mp-co-field">
         <label class="mp-co-label" for="coName">
-          Your name
-          <span class="mp-optional">optional</span>
+          {{ 'checkout.your_name' | translate }}
+          <span class="mp-optional">{{ 'checkout.optional' | translate }}</span>
         </label>
         <input id="coName" type="text" class="mp-co-input" [ngModel]="customerName()"
-          (ngModelChange)="setCustomerName($event)" placeholder="Ahmed">
+          (ngModelChange)="setCustomerName($event)"
+          [placeholder]="'checkout.name_placeholder' | translate">
       </div>
 
       <!-- Phone -->
       <div class="mp-co-field">
         <label class="mp-co-label" for="coPhone">
-          Phone number
-          <span class="mp-optional">optional</span>
+          {{ 'checkout.phone_number' | translate }}
+          <span class="mp-optional">{{ 'checkout.optional' | translate }}</span>
         </label>
         <input id="coPhone" type="tel" class="mp-co-input" [ngModel]="customerPhone()"
-          (ngModelChange)="setCustomerPhone($event)" placeholder="+216 22 000 000">
+          (ngModelChange)="setCustomerPhone($event)"
+          [placeholder]="'checkout.phone_placeholder' | translate">
       </div>
 
       <!-- Notes -->
       <div class="mp-co-field">
         <label class="mp-co-label" for="coNotes">
-          Notes
-          <span class="mp-optional">optional</span>
+          {{ 'checkout.notes' | translate }}
+          <span class="mp-optional">{{ 'checkout.optional' | translate }}</span>
         </label>
         <textarea id="coNotes" class="mp-co-input mp-co-textarea" [ngModel]="orderNotes()"
-          (ngModelChange)="setOrderNotes($event)" placeholder="Any special requests…" rows="2"></textarea>
+          (ngModelChange)="setOrderNotes($event)"
+          [placeholder]="'checkout.notes_placeholder' | translate" rows="2"></textarea>
       </div>
 
       @if (orderError()) {
@@ -890,7 +959,7 @@
       }
 
       <div class="mp-co-summary">
-        <span>{{ cartCount() }} item{{ cartCount() > 1 ? 's' : '' }}</span>
+        <span>{{ cartCount() }} {{ (cartCount() > 1 ? 'checkout.items' : 'checkout.item') | translate }}</span>
         <span class="mp-co-summary__total">
           {{ fmt(cartSubtotal()) }} {{ currency() }}
         </span>
@@ -899,13 +968,13 @@
 
     <div class="mp-checkout__foot">
       <button type="button" class="mp-co-back" (click)="backToCart()">
-        ← Back
+        {{ 'checkout.back' | translate }}
       </button>
       <button type="button" class="mp-co-submit" [disabled]="submitting()" (click)="submitOrder()">
         @if (submitting()) {
         <span class="mp-ring mp-ring--sm"></span>
         }
-        Place order
+        {{ 'checkout.submit' | translate }}
       </button>
     </div>
 
@@ -928,14 +997,14 @@
       </svg>
     </div>
 
-    <h2 class="mp-success__title">Order received!</h2>
+    <h2 class="mp-success__title">{{ 'success.title' | translate }}</h2>
 
     <!-- Order reference — the customer's tracking number -->
     <div class="mp-success__ref-box">
-      <span class="mp-success__ref-label">Your order reference</span>
+      <span class="mp-success__ref-label">{{ 'success.ref_label' | translate }}</span>
       <span class="mp-success__ref-code">{{ latestOrderRef() }}</span>
       <span class="mp-success__ref-hint">
-        Keep this for your records
+        {{ 'success.ref_hint' | translate }}
       </span>
     </div>
 
@@ -943,23 +1012,22 @@
     <div class="mp-success__steps">
       <div class="mp-success__step mp-success__step--done">
         <span class="mp-success__step-dot">✓</span>
-        <span>Order placed</span>
+        <span>{{ 'success.step_placed' | translate }}</span>
       </div>
       <div class="mp-success__step-line"></div>
       <div class="mp-success__step mp-success__step--active">
         <span class="mp-success__step-dot mp-success__step-dot--pulse"></span>
-        <span>Being prepared</span>
+        <span>{{ 'success.step_preparing' | translate }}</span>
       </div>
       <div class="mp-success__step-line"></div>
       <div class="mp-success__step">
         <span class="mp-success__step-dot mp-success__step-dot--empty"></span>
-        <span>Ready</span>
+        <span>{{ 'success.step_ready' | translate }}</span>
       </div>
     </div>
 
     <p class="mp-success__desc">
-      The restaurant has received your order and will prepare it shortly.
-      No action needed on your end.
+      {{ 'success.desc' | translate }}
     </p>
 
     <div class="mp-success__actions">
@@ -969,10 +1037,10 @@
           <circle cx="12" cy="12" r="10" />
           <polyline points="12 6 12 12 16 14" />
         </svg>
-        Track my order
+        {{ 'success.track_btn' | translate }}
       </button>
       <button class="mp-success__btn mp-success__btn--ghost" (click)="backToMenu()" type="button">
-        Back to menu
+        {{ 'success.back_to_menu' | translate }}
       </button>
     </div>
 
@@ -991,14 +1059,15 @@
     <!-- Header -->
     <div class="mp-tracking__head">
       <div class="mp-tracking__head-left">
-        <h2 class="mp-tracking__title">Your orders</h2>
+        <h2 class="mp-tracking__title">{{ 'tracking.title' | translate }}</h2>
         @if (activeOrders().length > 0) {
         <span class="mp-tracking__count-badge">
           {{ activeOrders().length }}
         </span>
         }
       </div>
-      <button class="mp-modal__close" (click)="closeTracking()" aria-label="Close" type="button">
+      <button class="mp-modal__close" (click)="closeTracking()"
+        [attr.aria-label]="'tracking.close_aria' | translate" type="button">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round">
           <line x1="18" y1="6" x2="6" y2="18" />
@@ -1061,11 +1130,9 @@
                 <polyline points="12 6 12 12 16 14" />
               </svg>
               @if (order.minutesRemaining === 0) {
-              <span>Ready any moment now!</span>
+              <span>{{ 'tracking.ready_now' | translate }}</span>
               } @else {
-              <span>Ready in approximately
-                <strong>{{ order.minutesRemaining }} min</strong>
-              </span>
+              <span>{{ 'tracking.ready_in' | translate: { min: order.minutesRemaining } }}</span>
               }
             </div>
             }
@@ -1115,7 +1182,7 @@
 
         <!-- Order lines -->
         <div class="mp-tracking__lines">
-          <span class="mp-tracking__lines-title">Order summary</span>
+          <span class="mp-tracking__lines-title">{{ 'tracking.order_summary' | translate }}</span>
           @for (line of order.lines; track line.id) {
           <div class="mp-tracking__line">
             <span class="mp-tracking__line-qty">{{ line.quantity }}×</span>
@@ -1140,7 +1207,7 @@
           </div>
           }
           <div class="mp-tracking__total-row">
-            <span>Total</span>
+            <span>{{ 'tracking.total' | translate }}</span>
             <span class="mp-tracking__total">
               {{ fmt(order.total) }} {{ currency() }}
             </span>
@@ -1150,7 +1217,7 @@
         <!-- Done or auto-refresh -->
         @if (getTrackingMeta(order.status).terminal) {
         <button class="mp-tracking__done-btn" (click)="endTracking(order.reference)" type="button">
-          Done
+          {{ 'tracking.done' | translate }}
         </button>
         } @else {
         <p class="mp-tracking__refresh-hint">
@@ -1159,7 +1226,7 @@
             <polyline points="23 4 23 10 17 10" />
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
           </svg>
-          Updates automatically every 30 seconds
+          {{ 'tracking.auto_refresh' | translate }}
         </p>
         }
 
@@ -1175,17 +1242,18 @@
   <!-- ── Manual lookup ──────────────────────────────────────── -->
   <div class="mp-tracking__lookup-section">
     <p class="mp-tracking__lookup-label">
-      Track another order
+      {{ 'tracking.track_another' | translate }}
     </p>
     <div class="mp-tracking__lookup">
-      <input type="text" class="mp-tracking__input" placeholder="Reference number e.g. BLK-20260328-0001"
+      <input type="text" class="mp-tracking__input"
+        [placeholder]="'tracking.ref_placeholder' | translate"
         [value]="trackingRef()" (input)="setTrackingRef($any($event.target).value)" (keydown.enter)="lookupOrder()">
       <button class="mp-tracking__lookup-btn" (click)="lookupOrder()"
         [disabled]="!trackingRef().trim() || trackingLoading()" type="button">
         @if (trackingLoading()) {
         <span class="mp-ring mp-ring--sm mp-ring--dark"></span>
         } @else {
-        Search
+        {{ 'tracking.search' | translate }}
         }
       </button>
     </div>

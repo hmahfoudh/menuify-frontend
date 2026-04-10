@@ -104,18 +104,124 @@
     "error": "Send error. Please try again.",
     "address": "Tunisia"
   },
-  "footer": {
-    "tagline": "The digital menu built for Tunisia.",
-    "rights": "© 2026 Menuify. All rights reserved.",
-    "about": "About",
-    "contact": "Contact",
-    "privacy": "Privacy",
-    "terms": "Terms"
-  },
   "seo": {
     "title": "Menuify - Digital Menu Platform for Restaurants & Coffeeshops",
     "description": "Manage your restaurant & coffeeshop menu with QR codes and real-time order tracking",
     "ogTitle": "Menuify - Digital Menu Platform",
     "ogDescription": "Modern digital menu solution for restaurants and coffeeshops"
+  },
+  "menu": {
+    "badge": {
+      "signature": "Signature",
+      "options": "Options"
+    },
+    "card": {
+      "like_aria": "Like this item",
+      "see_options": "See options",
+      "ask_us": "Ask us"
+    },
+    "diet": {
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan",
+      "gluten_free": "Gluten free",
+      "spicy": "Spicy"
+    }
+  },
+  "header": {
+    "language": "Select language"
+  },
+  "footer": {
+    "find_us": "Find us",
+    "open_in_maps": "Open in Maps",
+    "contact_us": "Contact us",
+    "whatsapp": "WhatsApp",
+    "call": "Call",
+    "free_wifi": "Free WiFi",
+    "wifi_network": "Network",
+    "wifi_password": "Password",
+    "wifi_copy_aria": "Copy password",
+    "wifi_copied_aria": "Copied!",
+    "wifi_scan": "Scan to connect",
+    "follow_us": "Follow us"
+  },
+  "closed_banner": {
+    "title": "We're closed right now"
+  },
+  "bottom_bar": {
+    "cart_aria": "View cart",
+    "your_cart": "Your cart",
+    "item": "item",
+    "items": "items",
+    "track_orders_aria": "Track your orders",
+    "track_orders": "Track orders"
+  },
+  "item_modal": {
+    "close_aria": "Close",
+    "required": "Required",
+    "up_to": "Up to {{max}}",
+    "special_instructions": "Special instructions",
+    "optional": "optional",
+    "note_placeholder": "No onions, extra sauce…",
+    "add_to_order": "Add to order"
+  },
+  "cart": {
+    "tab_cart": "Cart",
+    "tab_orders": "Orders",
+    "close_aria": "Close",
+    "ready_now": "Ready any moment now!",
+    "ready_in": "Ready in ~{{min}} min",
+    "done_with": "Done with {{ref}}",
+    "full_tracking": "Full tracking for {{ref}}",
+    "total": "Total",
+    "closed": "Closed",
+    "place_order": "Place order"
+  },
+  "checkout": {
+    "title": "Complete your order",
+    "back_aria": "Back",
+    "order_type_label": "Order type",
+    "dine_in": "🪑 Dine in",
+    "takeaway": "🥡 Takeaway",
+    "table_number": "Table number",
+    "table_placeholder": "5",
+    "your_name": "Your name",
+    "optional": "optional",
+    "name_placeholder": "Ahmed",
+    "phone_number": "Phone number",
+    "phone_placeholder": "+216 22 000 000",
+    "notes": "Notes",
+    "notes_placeholder": "Any special requests…",
+    "item": "item",
+    "items": "items",
+    "back": "← Back",
+    "submit": "Place order"
+  },
+  "success": {
+    "title": "Order received!",
+    "ref_label": "Your order reference",
+    "ref_hint": "Keep this for your records",
+    "step_placed": "Order placed",
+    "step_preparing": "Being prepared",
+    "step_ready": "Ready",
+    "desc": "The restaurant has received your order and will prepare it shortly. No action needed on your end.",
+    "track_btn": "Track my order",
+    "back_to_menu": "Back to menu"
+  },
+  "tracking": {
+    "title": "Your orders",
+    "close_aria": "Close",
+    "ready_now": "Ready any moment now!",
+    "ready_in": "Ready in approximately {{min}} min",
+    "order_summary": "Order summary",
+    "total": "Total",
+    "done": "Done",
+    "auto_refresh": "Updates automatically every 30 seconds",
+    "track_another": "Track another order",
+    "ref_placeholder": "Reference number e.g. BLK-20260328-0001",
+    "search": "Search"
+  },
+  "toast": {
+    "added": "Added to cart",
+    "view_cart": "View cart"
   }
 }

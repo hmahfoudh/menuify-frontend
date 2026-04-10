@@ -26,6 +26,7 @@ import { forkJoin } from 'rxjs';
 import { ItemLikeService } from '../services/item-like.service';
 import { ItemLikeToggleResponse } from '../models/item-like.models';
 import { FormatLikeCountPipe } from '../../../shared/pipes/format-like-count.pipe';
+import { TranslateDirective, TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 
 type OrderStep = 'idle' | 'checkout' | 'success';
@@ -40,7 +41,7 @@ export interface SocialLink {
 @Component({
   selector: 'app-menu-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, QRCodeModule, FormatLikeCountPipe],
+  imports: [CommonModule, FormsModule, QRCodeModule, FormatLikeCountPipe, TranslatePipe, TranslateDirective],
   templateUrl: './menu-page.component.html',
   styleUrls: ['./menu-page.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -53,6 +54,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   private session = inject(SessionService);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private itemLikeSvc = inject(ItemLikeService);
+  private translate = inject(TranslateService);
 
   // ── Menu data ────────────────────────────────────────────────────────────
   menu = signal<PublicMenuResponse | null>(null);
@@ -119,6 +121,17 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   activeOrders = signal<TrackedOrder[]>([]);
   expandedRef = signal<string | null>(null);
 
+  // ── Language selection ────────────────────────────────────────────────────
+
+  langMenuOpen = signal(false);
+  currentLang = signal({ code: 'fr', flag: '🇫🇷', label: 'Français' });
+
+  availableLangs = signal([
+    { code: 'en', flag: '🇬🇧', label: 'English' },
+    { code: 'fr', flag: '🇫🇷', label: 'Français' },
+    { code: 'ar', flag: '🇹🇳', label: 'العربية' },
+  ]);
+
   private trackPoll?: Subscription;
 
   readonly trackingSteps = TRACKING_STEPS;
@@ -126,6 +139,10 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   // ── WiFi password copy state ───────────────────────────────────────────────
   wifiCopied = signal(false);
+
+  // ── Cart toast ────────────────────────────────────────────────────────────
+  cartToast = signal<{ name: string; visible: boolean } | null>(null);
+  private toastTimer?: ReturnType<typeof setTimeout>;
 
   // ── Computed ──────────────────────────────────────────────────────────────
   categories = computed(() => this.menu()?.categories ?? []);
@@ -353,10 +370,24 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       this.modalQty(), this.specialNote()
     );
     this.closeModal();
-    this.cart.open();
+    this.showCartToast(item.name);
+    //this.cart.open();
   }
 
   // ── Cart ──────────────────────────────────────────────────────────────────
+  private showCartToast(itemName: string): void {
+    clearTimeout(this.toastTimer);
+    // Mount visible immediately (drives enter animation)
+    this.cartToast.set({ name: itemName, visible: true });
+    // Start exit animation after 2.6 s
+    this.toastTimer = setTimeout(() => {
+      this.cartToast.update(t => t ? { ...t, visible: false } : null);
+      // Remove from DOM after transition completes (300 ms)
+      setTimeout(() => this.cartToast.set(null), 320);
+    }, 2600);
+    console.log({cartToast: this.cartToast()});
+  }
+
   openCart(): void {
     this.cartMode.set(
       this.cart.isEmpty() && this.hasActiveOrders() ? 'orders' : 'cart'
@@ -519,52 +550,52 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   }
 
   private restartPoll(): void {
-  this.trackPoll?.unsubscribe();
- 
-  this.trackPoll = interval(30_000)
-    .pipe(
-      startWith(0),
-      switchMap(() => {
-        const refs = this.activeOrders().map(o => o.reference);
-        if (refs.length === 0) return [];
- 
-        // Build the forkJoin with order tracking
-        const requests: Record<string, any> = {};
-        refs.forEach(ref => {
-          requests[ref] = this.menuSvc.trackOrder(ref);
-        });
- 
-        // Optionally fetch fresh menu to get updated like counts
-        // This is simple but adds latency. Alternative: track likes per item
-        // separately. For MVP, just refetch menu every poll cycle.
-        requests['menu'] = this.menuSvc.getMenu();
- 
-        return forkJoin(requests);
-      })
-    )
-    .subscribe({
-      next: (results: Record<string, any>) => {
-        // Update orders
-        this.activeOrders.update(list =>
-          list.map(o => results[o.reference] ?? o)
-        );
- 
-        // Update like counts from fresh menu
-        if (results['menu']?.categories) {
-          const likeCounts = new Map<string, number>();
-          results['menu'].categories.forEach((cat: any) => {
-            cat.items.forEach((item: any) => {
-              if (item.likeCount !== undefined) {
-                likeCounts.set(item.id, item.likeCount);
-              }
-            });
+    this.trackPoll?.unsubscribe();
+
+    this.trackPoll = interval(30_000)
+      .pipe(
+        startWith(0),
+        switchMap(() => {
+          const refs = this.activeOrders().map(o => o.reference);
+          if (refs.length === 0) return [];
+
+          // Build the forkJoin with order tracking
+          const requests: Record<string, any> = {};
+          refs.forEach(ref => {
+            requests[ref] = this.menuSvc.trackOrder(ref);
           });
-          this.itemLikeCounts.set(likeCounts);
-        }
-      },
-      error: () => {}
-    });
-}
+
+          // Optionally fetch fresh menu to get updated like counts
+          // This is simple but adds latency. Alternative: track likes per item
+          // separately. For MVP, just refetch menu every poll cycle.
+          requests['menu'] = this.menuSvc.getMenu();
+
+          return forkJoin(requests);
+        })
+      )
+      .subscribe({
+        next: (results: Record<string, any>) => {
+          // Update orders
+          this.activeOrders.update(list =>
+            list.map(o => results[o.reference] ?? o)
+          );
+
+          // Update like counts from fresh menu
+          if (results['menu']?.categories) {
+            const likeCounts = new Map<string, number>();
+            results['menu'].categories.forEach((cat: any) => {
+              cat.items.forEach((item: any) => {
+                if (item.likeCount !== undefined) {
+                  likeCounts.set(item.id, item.likeCount);
+                }
+              });
+            });
+            this.itemLikeCounts.set(likeCounts);
+          }
+        },
+        error: () => { }
+      });
+  }
 
 
   getTrackingMeta(status: TrackingStatus) {
@@ -752,6 +783,19 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  toggleLangMenu() {
+    this.langMenuOpen.update(v => !v);
+  }
+
+  switchLang(code: string) {
+    const lang = this.availableLangs().find(l => l.code === code)!;
+    this.currentLang.set(lang);
+    this.translate.use(code); // TranslateService
+    this.langMenuOpen.set(false);
+    // Optional: persist to localStorage
+    localStorage.setItem('lang', code);
+  }
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   fmt(n: number | null): string {
     if (n == null) return '';
@@ -770,6 +814,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.trackPoll?.unsubscribe();
     clearInterval(this.hoursCheckInterval);
+    clearTimeout(this.toastTimer);
   }
 
   @HostListener('document:keydown.escape')
@@ -778,5 +823,10 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (this.trackingView()) { this.closeTracking(); return; }
     if (this.cartOpen()) { this.cart.close(); return; }
     if (this.orderStep() === 'checkout') { this.backToCart(); }
+  }
+
+  @HostListener('document:click')
+  closeLangMenu() {
+    this.langMenuOpen.set(false);
   }
 }

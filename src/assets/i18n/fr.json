@@ -104,18 +104,124 @@
     "error": "Erreur d'envoi. Réessayez.",
     "address": "Tunisie"
   },
-  "footer": {
-    "tagline": "Le menu digital pensé pour la Tunisie.",
-    "rights": "© 2026 Menuify. Tous droits réservés.",
-    "about": "À propos",
-    "contact": "Contact",
-    "privacy": "Confidentialité",
-    "terms": "CGU"
-  },
   "seo": {
     "title": "Menuify - Plateforme de menu digital pour restaurants et cafés",
     "description": "Gérez le menu de votre restaurant et de votre café avec des QR codes et suivez les commandes en temps réel",
     "ogTitle": "Menuify - Menu digital",
     "ogDescription": "Solution moderne de menu digital pour restaurants et cafés"
+  },
+  "menu": {
+    "badge": {
+      "signature": "Signature",
+      "options": "Options"
+    },
+    "card": {
+      "like_aria": "Aimer ce plat",
+      "see_options": "Voir les options",
+      "ask_us": "Nous demander"
+    },
+    "diet": {
+      "vegetarian": "Végétarien",
+      "vegan": "Végétalien",
+      "gluten_free": "Sans gluten",
+      "spicy": "Épicé"
+    }
+  },
+  "header": {
+    "language": "Choisir la langue"
+  },
+  "footer": {
+    "find_us": "Nous trouver",
+    "open_in_maps": "Ouvrir dans Maps",
+    "contact_us": "Nous contacter",
+    "whatsapp": "WhatsApp",
+    "call": "Appeler",
+    "free_wifi": "WiFi gratuit",
+    "wifi_network": "Réseau",
+    "wifi_password": "Mot de passe",
+    "wifi_copy_aria": "Copier le mot de passe",
+    "wifi_copied_aria": "Copié !",
+    "wifi_scan": "Scanner pour se connecter",
+    "follow_us": "Nous suivre"
+  },
+  "closed_banner": {
+    "title": "Nous sommes fermés en ce moment"
+  },
+  "bottom_bar": {
+    "cart_aria": "Voir le panier",
+    "your_cart": "Votre panier",
+    "item": "article",
+    "items": "articles",
+    "track_orders_aria": "Suivre vos commandes",
+    "track_orders": "Suivre les commandes"
+  },
+  "item_modal": {
+    "close_aria": "Fermer",
+    "required": "Obligatoire",
+    "up_to": "Jusqu'à {{max}}",
+    "special_instructions": "Instructions spéciales",
+    "optional": "facultatif",
+    "note_placeholder": "Sans oignons, sauce supplémentaire…",
+    "add_to_order": "Ajouter à la commande"
+  },
+  "cart": {
+    "tab_cart": "Panier",
+    "tab_orders": "Commandes",
+    "close_aria": "Fermer",
+    "ready_now": "Prêt d'un moment à l'autre !",
+    "ready_in": "Prêt dans ~{{min}} min",
+    "done_with": "Terminé avec {{ref}}",
+    "full_tracking": "Suivi complet de {{ref}}",
+    "total": "Total",
+    "closed": "Fermé",
+    "place_order": "Passer la commande"
+  },
+  "checkout": {
+    "title": "Finaliser votre commande",
+    "back_aria": "Retour",
+    "order_type_label": "Type de commande",
+    "dine_in": "🪑 Sur place",
+    "takeaway": "🥡 À emporter",
+    "table_number": "Numéro de table",
+    "table_placeholder": "5",
+    "your_name": "Votre nom",
+    "optional": "facultatif",
+    "name_placeholder": "Ahmed",
+    "phone_number": "Numéro de téléphone",
+    "phone_placeholder": "+216 22 000 000",
+    "notes": "Remarques",
+    "notes_placeholder": "Demandes particulières…",
+    "item": "article",
+    "items": "articles",
+    "back": "← Retour",
+    "submit": "Passer la commande"
+  },
+  "success": {
+    "title": "Commande reçue !",
+    "ref_label": "Votre référence de commande",
+    "ref_hint": "Conservez-la pour vos archives",
+    "step_placed": "Commande passée",
+    "step_preparing": "En préparation",
+    "step_ready": "Prête",
+    "desc": "Le restaurant a reçu votre commande et la préparera sous peu. Aucune action requise de votre part.",
+    "track_btn": "Suivre ma commande",
+    "back_to_menu": "Retour au menu"
+  },
+  "tracking": {
+    "title": "Vos commandes",
+    "close_aria": "Fermer",
+    "ready_now": "Prêt d'un moment à l'autre !",
+    "ready_in": "Prêt dans environ {{min}} min",
+    "order_summary": "Récapitulatif de la commande",
+    "total": "Total",
+    "done": "Terminé",
+    "auto_refresh": "Mise à jour automatique toutes les 30 secondes",
+    "track_another": "Suivre une autre commande",
+    "ref_placeholder": "Numéro de référence ex. BLK-20260328-0001",
+    "search": "Rechercher"
+  },
+  "toast": {
+    "added": "Ajouté au panier",
+    "view_cart": "Voir le panier"
   }
 }
