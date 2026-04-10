@@ -30,22 +30,6 @@
     </div>
   </div>
 
-  <!-- ── STATUS FILTERS ──────────────────────────────────────────────────── -->
-  <div class="filter-bar" role="tablist">
-    @for (f of statusFilters; track f.label) {
-      <button class="filter-tab"
-              role="tab"
-              [class.filter-tab--active]="selectedStatus() === f.value"
-              (click)="setFilter(f.value)"
-              [attr.aria-selected]="selectedStatus() === f.value">
-        {{ f.label }}
-        @if (f.value === 'PENDING' && pendingCount() > 0) {
-          <span class="filter-badge">{{ pendingCount() }}</span>
-        }
-      </button>
-    }
-  </div>
-
   <!-- ── ERROR ───────────────────────────────────────────────────────────── -->
   @if (error()) {
     <div class="alert-error">
@@ -60,166 +44,170 @@
     </div>
   }
 
-  <!-- ── MAIN LAYOUT ─────────────────────────────────────────────────────── -->
-  <div class="layout" [class.layout--detail-open]="selectedOrder()">
+  <!-- ── BOARD + DETAIL SHELL ────────────────────────────────────────────── -->
+  <div class="board-shell" [class.board-shell--detail-open]="selectedOrder()">
 
-    <!-- Order list -->
-    <div class="list-col">
+    <!-- ── KANBAN BOARD ───────────────────────────────────────────────────── -->
+    <div class="kanban">
 
-      <!-- Skeletons -->
-      @if (loading()) {
-        <div class="order-list">
-          @for (i of [1,2,3,4,5]; track i) {
-            <div class="skeleton-row">
-              <div class="sk sk-ref"></div>
-              <div class="sk sk-info"></div>
-              <div class="sk sk-badge"></div>
-              <div class="sk sk-btn"></div>
-            </div>
+      <!-- ── PENDING ─────────────────────────────────────────────────────── -->
+      <div class="kanban-col">
+        <div class="kanban-col-head">
+          <span class="kanban-dot kanban-dot--amber"></span>
+          <span class="kanban-col-title">Pending</span>
+          <span class="kanban-col-count kanban-col-count--amber">
+            {{ pendingCount() }}
+          </span>
+        </div>
+
+        <div class="kanban-cards">
+          @if (loading()) {
+            <div class="kanban-skeleton"></div>
+            <div class="kanban-skeleton"></div>
           }
-        </div>
-      }
 
-      <!-- Empty -->
-      @if (!loading() && orders().length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-              <circle cx="9" cy="21" r="1"/>
-              <circle cx="20" cy="21" r="1"/>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-            </svg>
-          </div>
-          <h3 class="empty-title">No orders yet</h3>
-          <p class="empty-sub">
-            @if (selectedStatus()) {
-              No {{ selectedStatus()!.toLowerCase() }} orders at the moment.
-            } @else {
-              Orders will appear here when customers submit them via WhatsApp.
-            }
-          </p>
-        </div>
-      }
-
-      <!-- Orders -->
-      @if (!loading() && orders().length > 0) {
-        <div class="order-list">
           @for (order of orders(); track order.id) {
-            <div class="order-row"
-                 [class.order-row--selected]="selectedOrder()?.id === order.id"
-                 [class.order-row--pending]="order.status === 'PENDING'"
-                 (click)="openOrder(order)">
-
-              <!-- Left: ref + time -->
-              <div class="order-ref-col">
-                <span class="order-ref">{{ order.reference }}</span>
-                <span class="order-time">
-                  {{ formatDate(order.createdAt) }} · {{ formatTime(order.createdAt) }}
-                </span>
+            @if (order.status === 'PENDING') {
+              <div class="kanban-card kanban-card--amber"
+                   [class.kanban-card--selected]="selectedOrder()?.id === order.id"
+                   (click)="openOrder(order)">
+                <ng-container *ngTemplateOutlet="cardTpl; context: { $implicit: order, color: 'amber' }"></ng-container>
               </div>
+            }
+          }
 
-              <!-- Center: customer + type -->
-              <div class="order-info-col">
-                <span class="order-customer">
-                  @if (order.customerName) {
-                    {{ order.customerName }}
-                  } @else {
-                    <span class="order-anon">Anonymous</span>
-                  }
-                </span>
-                <span class="order-type">
-                  @if (order.orderType === 'dine_in') {
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
-                      <path d="M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
-                    </svg>
-                    Table {{ order.tableNumber ?? '–' }}
-                  } @else if (order.orderType === 'takeaway') {
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-                      <line x1="3" y1="6" x2="21" y2="6"/>
-                      <path d="M16 10a4 4 0 0 1-8 0"/>
-                    </svg>
-                    Takeaway
-                  } @else {
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                      <circle cx="12" cy="12" r="10"/>
-                      <polyline points="8 12 12 16 16 12"/>
-                      <line x1="12" y1="8" x2="12" y2="16"/>
-                    </svg>
-                    Delivery
-                  }
-                </span>
-              </div>
-
-              <!-- Total -->
-              <span class="order-total">
-                {{ order.total | number:'1.3-3' }}
-                <span class="order-currency">DT</span>
-              </span>
-
-              <!-- Status badge -->
-              <span class="status-badge status-badge--{{ getStatusMeta(order.status).color }}">
-                {{ getStatusMeta(order.status).label }}
-              </span>
-
-              <!-- Quick advance button -->
-              @if (getStatusMeta(order.status).next) {
-                <button class="btn-advance"
-                        [disabled]="updatingId() === order.id"
-                        (click)="$event.stopPropagation(); advanceStatus(order)"
-                        [title]="getStatusMeta(order.status).nextLabel ?? ''">
-                  @if (updatingId() === order.id) {
-                    <span class="spinner-sm"></span>
-                  } @else {
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                  }
-                </button>
-              }
-
+          @if (!loading() && pendingCount() === 0) {
+            <div class="kanban-empty">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              No pending orders
             </div>
           }
         </div>
+      </div>
 
-        <!-- Pagination -->
-        @if (totalPages() > 1) {
-          <div class="pagination">
-            <button class="page-btn"
-                    [disabled]="currentPage() === 0"
-                    (click)="goToPage(currentPage() - 1)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <polyline points="15 18 9 12 15 6"/>
+      <!-- ── CONFIRMED ──────────────────────────────────────────────────── -->
+      <div class="kanban-col">
+        <div class="kanban-col-head">
+          <span class="kanban-dot kanban-dot--blue"></span>
+          <span class="kanban-col-title">Confirmed</span>
+          <span class="kanban-col-count kanban-col-count--blue">
+            {{ confirmedCount() }}
+          </span>
+        </div>
+
+        <div class="kanban-cards">
+          @if (loading()) {
+            <div class="kanban-skeleton"></div>
+          }
+
+          @for (order of orders(); track order.id) {
+            @if (order.status === 'CONFIRMED') {
+              <div class="kanban-card kanban-card--blue"
+                   [class.kanban-card--selected]="selectedOrder()?.id === order.id"
+                   (click)="openOrder(order)">
+                <ng-container *ngTemplateOutlet="cardTpl; context: { $implicit: order, color: 'blue' }"></ng-container>
+              </div>
+            }
+          }
+
+          @if (!loading() && confirmedCount() === 0) {
+            <div class="kanban-empty">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <polyline points="20 6 9 17 4 12"/>
               </svg>
-            </button>
-            <span class="page-info">
-              {{ currentPage() + 1 }} / {{ totalPages() }}
-            </span>
-            <button class="page-btn"
-                    [disabled]="currentPage() >= totalPages() - 1"
-                    (click)="goToPage(currentPage() + 1)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <polyline points="9 18 15 12 9 6"/>
+              No confirmed orders
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ── PREPARING ──────────────────────────────────────────────────── -->
+      <div class="kanban-col">
+        <div class="kanban-col-head">
+          <span class="kanban-dot kanban-dot--purple"></span>
+          <span class="kanban-col-title">Preparing</span>
+          <span class="kanban-col-count kanban-col-count--purple">
+            {{ preparingCount() }}
+          </span>
+        </div>
+
+        <div class="kanban-cards">
+          @if (loading()) {
+            <div class="kanban-skeleton"></div>
+          }
+
+          @for (order of orders(); track order.id) {
+            @if (order.status === 'PREPARING') {
+              <div class="kanban-card kanban-card--purple"
+                   [class.kanban-card--selected]="selectedOrder()?.id === order.id"
+                   (click)="openOrder(order)">
+                <ng-container *ngTemplateOutlet="cardTpl; context: { $implicit: order, color: 'purple' }"></ng-container>
+              </div>
+            }
+          }
+
+          @if (!loading() && preparingCount() === 0) {
+            <div class="kanban-empty">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <path d="M12 2a10 10 0 0 1 0 20"/><path d="M12 6v6l4 2"/>
               </svg>
-            </button>
-          </div>
-        }
-      }
-    </div>
+              Nothing being prepared
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- ── READY ──────────────────────────────────────────────────────── -->
+      <div class="kanban-col">
+        <div class="kanban-col-head">
+          <span class="kanban-dot kanban-dot--green"></span>
+          <span class="kanban-col-title">Ready</span>
+          <span class="kanban-col-count kanban-col-count--green">
+            {{ readyCount() }}
+          </span>
+        </div>
+
+        <div class="kanban-cards">
+          @if (loading()) {
+            <div class="kanban-skeleton"></div>
+          }
+
+          @for (order of orders(); track order.id) {
+            @if (order.status === 'READY') {
+              <div class="kanban-card kanban-card--green"
+                   [class.kanban-card--selected]="selectedOrder()?.id === order.id"
+                   (click)="openOrder(order)">
+                <ng-container *ngTemplateOutlet="cardTpl; context: { $implicit: order, color: 'green' }"></ng-container>
+              </div>
+            }
+          }
+
+          @if (!loading() && readyCount() === 0) {
+            <div class="kanban-empty">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                <line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/>
+                <line x1="14" y1="1" x2="14" y2="4"/>
+              </svg>
+              No orders ready
+            </div>
+          }
+        </div>
+      </div>
+
+    </div><!-- /kanban -->
 
     <!-- ── ORDER DETAIL PANEL ─────────────────────────────────────────────── -->
     @if (selectedOrder(); as order) {
       <div class="detail-panel">
 
-        <!-- Panel header -->
         <div class="detail-head">
           <div>
             <span class="detail-ref">{{ order.reference }}</span>
@@ -236,12 +224,10 @@
           </button>
         </div>
 
-        <!-- Status + advance -->
         <div class="detail-status-row">
           <span class="status-badge status-badge--lg status-badge--{{ getStatusMeta(order.status).color }}">
             {{ getStatusMeta(order.status).label }}
           </span>
-
           <div class="detail-actions">
             @if (getStatusMeta(order.status).next) {
               <button class="btn-primary"
@@ -253,7 +239,6 @@
                 {{ getStatusMeta(order.status).nextLabel }}
               </button>
             }
-
             @if (!['COMPLETED','CANCELLED'].includes(order.status)) {
               <button class="btn-cancel"
                       [disabled]="updatingId() === order.id"
@@ -264,7 +249,6 @@
           </div>
         </div>
 
-        <!-- ETA + message inputs (shown while order is active) -->
         @if (!['COMPLETED','CANCELLED'].includes(order.status)) {
           <div class="detail-section detail-eta-section">
             <span class="section-label">Customer update</span>
@@ -296,21 +280,16 @@
               <div class="eta-current">
                 <span class="eta-current-label">Currently showing:</span>
                 @if (order.estimatedMinutes) {
-                  <span class="eta-pill">
-                    ~{{ order.estimatedMinutes }} min
-                  </span>
+                  <span class="eta-pill">~{{ order.estimatedMinutes }} min</span>
                 }
                 @if (order.restaurantMessage) {
-                  <span class="eta-msg-preview">
-                    "{{ order.restaurantMessage }}"
-                  </span>
+                  <span class="eta-msg-preview">"{{ order.restaurantMessage }}"</span>
                 }
               </div>
             }
           </div>
         }
 
-        <!-- Customer info -->
         <div class="detail-section">
           <span class="section-label">Customer</span>
           <div class="customer-card">
@@ -322,19 +301,15 @@
               </svg>
               {{ order.customerName ?? 'Anonymous' }}
             </div>
-
             @if (order.customerPhone) {
               <div class="customer-row">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                 </svg>
-                <a class="phone-link" (click)="openWhatsApp(order)">
-                  {{ order.customerPhone }}
-                </a>
+                <a class="phone-link" (click)="openWhatsApp(order)">{{ order.customerPhone }}</a>
               </div>
             }
-
             <div class="customer-row">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -345,7 +320,6 @@
           </div>
         </div>
 
-        <!-- Notes -->
         @if (order.notes) {
           <div class="detail-section">
             <span class="section-label">Notes</span>
@@ -353,15 +327,10 @@
           </div>
         }
 
-        <!-- Order lines -->
         <div class="detail-section detail-section--grow">
           <span class="section-label">
-            Items
-            <span class="section-count">
-              {{ order.lines.length }}
-            </span>
+            Items <span class="section-count">{{ order.lines.length }}</span>
           </span>
-
           <div class="lines-list">
             @for (line of order.lines; track line.id) {
               <div class="line-row">
@@ -375,9 +344,7 @@
                     <span class="line-mod">
                       + {{ mod.modifierNameSnapshot }}
                       @if (mod.priceDeltaSnapshot > 0) {
-                        <span class="mod-price">
-                          +{{ mod.priceDeltaSnapshot | number:'1.3-3' }} DT
-                        </span>
+                        <span class="mod-price">+{{ mod.priceDeltaSnapshot | number:'1.3-3' }} DT</span>
                       }
                     </span>
                   }
@@ -394,7 +361,6 @@
           </div>
         </div>
 
-        <!-- Total -->
         <div class="detail-total">
           <span class="total-label">Total</span>
           <span class="total-value">
@@ -406,5 +372,53 @@
       </div>
     }
 
-  </div>
+  </div><!-- /board-shell -->
+
+  <!-- ── CARD TEMPLATE ──────────────────────────────────────────────────────── -->
+  <ng-template #cardTpl let-order let-color="color">
+    <div class="kc-head">
+      <div class="kc-avatar kc-avatar--{{ color }}">
+        {{ order.tableNumber ? order.tableNumber : (order.customerName?.[0]?.toUpperCase() ?? 'A') }}
+      </div>
+      <div class="kc-meta">
+        <span class="kc-label">
+          {{ order.tableNumber ? 'Table ' + order.tableNumber : (order.customerName ?? 'Anonymous') }}
+        </span>
+        <span class="kc-time">{{ formatDate(order.createdAt) }} · {{ formatTime(order.createdAt) }}</span>
+      </div>
+    </div>
+
+    <div class="kc-items">
+      @for (line of order.lines; track line.id) {
+        <div class="kc-item-row">
+          <span class="kc-qty">{{ line.quantity }}×</span>
+          <span class="kc-name">{{ line.itemNameSnapshot }}</span>
+        </div>
+        @for (mod of line.selectedModifiers; track mod.id) {
+          <div class="kc-mod">+ {{ mod.modifierNameSnapshot }}</div>
+        }
+      }
+    </div>
+
+    <div class="kc-foot">
+      <span class="kc-total">TND {{ order.total | number:'1.1-1' }}</span>
+      @if (getStatusMeta(order.status).next) {
+        <button class="kc-btn kc-btn--{{ color }}"
+                [disabled]="updatingId() === order.id"
+                (click)="$event.stopPropagation(); advanceStatus(order)"
+                [title]="getStatusMeta(order.status).nextLabel ?? ''">
+          @if (updatingId() === order.id) {
+            <span class="spinner-sm"></span>
+          } @else {
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            {{ getStatusMeta(order.status).nextLabel }}
+          }
+        </button>
+      }
+    </div>
+  </ng-template>
+
 </div>

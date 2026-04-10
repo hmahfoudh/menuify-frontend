@@ -35,7 +35,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
   error          = signal<string | null>(null);
   lastRefreshed  = signal<Date>(new Date());
 
-  // ETA / message inputs shown when advancing status
   etaMinutes        = signal<number | null>(null);
   restaurantMessage = signal('');
 
@@ -44,8 +43,12 @@ export class OrdersComponent implements OnInit, OnDestroy {
   readonly statusMeta    = STATUS_META;
 
   // ── Computed ─────────────────────────────────────────────────────────────────
-  pendingCount = computed(() =>
-    this.orders().filter(o => o.status === 'PENDING').length);
+
+  // Per-column counts used by the kanban headers
+  pendingCount   = computed(() => this.orders().filter(o => o.status === 'PENDING').length);
+  confirmedCount = computed(() => this.orders().filter(o => o.status === 'CONFIRMED').length);
+  preparingCount = computed(() => this.orders().filter(o => o.status === 'PREPARING').length);
+  readyCount     = computed(() => this.orders().filter(o => o.status === 'READY').length);
 
   totalPages = computed(() =>
     Math.ceil(this.totalElements() / this.pageSize));
@@ -62,15 +65,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() { this.poll?.unsubscribe(); }
 
-  // ── Polling (refreshes every 30s for live order list display) ───────────────
-  // Note: pending count + notifications are handled by OrderNotificationService
-  // which polls independently and runs for the entire dashboard session.
-
   startPolling() {
     this.poll = interval(30_000)
       .pipe(startWith(0), switchMap(() => {
-        return this.svc.getAll(
-          this.selectedStatus(), this.currentPage(), this.pageSize);
+        // Always fetch all active statuses for the kanban board
+        return this.svc.getAll(null, this.currentPage(), this.pageSize);
       }))
       .subscribe({
         next: page => {
@@ -79,7 +78,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
           this.loading.set(false);
           this.lastRefreshed.set(new Date());
 
-          // Refresh selected order detail if open
           const sel = this.selectedOrder();
           if (sel) {
             const updated = page.content.find(o => o.id === sel.id);
@@ -111,10 +109,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   // ── Order detail ─────────────────────────────────────────────────────────────
-  openOrder(order: OrderResponse) {
-    this.selectedOrder.set(order);
-  }
-
+  openOrder(order: OrderResponse) { this.selectedOrder.set(order); }
   closeDetail() { this.selectedOrder.set(null); }
 
   // ── Status update ────────────────────────────────────────────────────────────
@@ -124,8 +119,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
     this.updatingId.set(order.id);
     this.svc.updateStatus(
-      order.id,
-      meta.next,
+      order.id, meta.next,
       this.etaMinutes(),
       this.restaurantMessage() || null
     ).subscribe({
@@ -175,13 +169,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
   // ── Helpers ──────────────────────────────────────────────────────────────────
   getStatusMeta(status: OrderStatus) { return STATUS_META[status]; }
 
-  setEtaMinutes(v: string): void {
-    this.etaMinutes.set(v ? +v : null);
-  }
-
-  setRestaurantMessage(v: string): void {
-    this.restaurantMessage.set(v);
-  }
+  setEtaMinutes(v: string): void { this.etaMinutes.set(v ? +v : null); }
+  setRestaurantMessage(v: string): void { this.restaurantMessage.set(v); }
 
   formatTime(iso: string): string {
     return new Date(iso).toLocaleTimeString('fr-TN', {
