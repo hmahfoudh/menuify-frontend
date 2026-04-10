@@ -3,12 +3,12 @@ import {
   inject, HostListener, ViewEncapsulation, PLATFORM_ID
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { FormsModule }        from '@angular/forms';
-import { QRCodeComponent, QRCodeModule }    from 'angularx-qrcode';
-import { PublicMenuService }  from '../services/public-menu.service';
-import { CartService }        from '../services/cart.service';
+import { FormsModule } from '@angular/forms';
+import { QRCodeModule } from 'angularx-qrcode';
+import { PublicMenuService } from '../services/public-menu.service';
+import { CartService } from '../services/cart.service';
 import { ThemeInjectorService } from '../services/theme-injector.service';
-import { SessionService }     from '../services/session.service';
+import { SessionService } from '../services/session.service';
 import {
   PublicMenuResponse,
   PublicItemResponse,
@@ -21,56 +21,67 @@ import {
   TRACKING_STEPS,
 } from '../models/public-menu.models';
 import { interval, Subscription } from 'rxjs';
-import { switchMap, startWith }   from 'rxjs/operators';
+import { switchMap, startWith } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
+import { ItemLikeService } from '../services/item-like.service';
+import { ItemLikeToggleResponse } from '../models/item-like.models';
+import { FormatLikeCountPipe } from '../../../shared/pipes/format-like-count.pipe';
+
 
 type OrderStep = 'idle' | 'checkout' | 'success';
 type OrderType = 'dine_in' | 'takeaway';
 
 export interface SocialLink {
   platform: string;
-  url:      string;
-  handle:   string | null;
+  url: string;
+  handle: string | null;
 }
 
 @Component({
-  selector:     'app-menu-page',
-  standalone:   true,
-  imports:      [CommonModule, FormsModule, QRCodeModule],
-  templateUrl:  './menu-page.component.html',
-  styleUrls:    ['./menu-page.component.scss'],
+  selector: 'app-menu-page',
+  standalone: true,
+  imports: [CommonModule, FormsModule, QRCodeModule, FormatLikeCountPipe],
+  templateUrl: './menu-page.component.html',
+  styleUrls: ['./menu-page.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class MenuPageComponent implements OnInit, OnDestroy {
 
-  private menuSvc   = inject(PublicMenuService);
-  private cart      = inject(CartService);
-  private themeSvc  = inject(ThemeInjectorService);
-  private session   = inject(SessionService);
+  private menuSvc = inject(PublicMenuService);
+  private cart = inject(CartService);
+  private themeSvc = inject(ThemeInjectorService);
+  private session = inject(SessionService);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private itemLikeSvc = inject(ItemLikeService);
 
   // ── Menu data ────────────────────────────────────────────────────────────
-  menu           = signal<PublicMenuResponse | null>(null);
-  loading        = signal(true);
-  error          = signal<string | null>(null);
+  menu = signal<PublicMenuResponse | null>(null);
+  loading = signal(true);
+  error = signal<string | null>(null);
   activeCategory = signal<string>('');
 
   // ── Cart (proxied from CartService) ──────────────────────────────────────
-  cartItems    = this.cart.items;
-  cartCount    = this.cart.count;
+  cartItems = this.cart.items;
+  cartCount = this.cart.count;
   cartSubtotal = this.cart.subtotal;
-  cartOpen     = this.cart.isOpen;
-  cartEmpty    = this.cart.isEmpty;
+  cartOpen = this.cart.isOpen;
+  cartEmpty = this.cart.isEmpty;
 
   cartMode = signal<'cart' | 'orders'>('cart');
 
+  // ── ItemLikes ──────────────────────────────────────────────────────────────
+
+  likedItems = signal<Set<string>>(new Set());
+  itemLikeCounts = signal<Map<string, number>>(new Map());
+  private likeInFlight = signal<Set<string>>(new Set());
+
   // ── Item modal ────────────────────────────────────────────────────────────
-  modalItem       = signal<PublicItemResponse | null>(null);
+  modalItem = signal<PublicItemResponse | null>(null);
   modalCategoryId = signal<string>('');
   selectedVariant = signal<PublicVariantResponse | null>(null);
-  selectedMods    = signal<Set<string>>(new Set());
-  modalQty        = signal(1);
-  specialNote     = signal('');
+  selectedMods = signal<Set<string>>(new Set());
+  modalQty = signal(1);
+  specialNote = signal('');
 
   modalPrice = computed(() => {
     const item = this.modalItem();
@@ -84,33 +95,33 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   modalTotal = computed(() => this.modalPrice() * this.modalQty());
 
   // ── Order flow ────────────────────────────────────────────────────────────
-  orderStep  = signal<OrderStep>('idle');
+  orderStep = signal<OrderStep>('idle');
 
   // ── Opening hours ──────────────────────────────────────────────────────────
-  isOpen         = signal(true);
-  nextOpenTime   = signal<string | null>(null);
+  isOpen = signal(true);
+  nextOpenTime = signal<string | null>(null);
   private hoursCheckInterval?: ReturnType<typeof setInterval>;
 
   submitting = signal(false);
   orderError = signal<string | null>(null);
 
-  customerName  = signal('');
+  customerName = signal('');
   customerPhone = signal('');
-  orderType     = signal<OrderType>('dine_in');
-  tableNumber   = signal('');
-  orderNotes    = signal('');
+  orderType = signal<OrderType>('dine_in');
+  tableNumber = signal('');
+  orderNotes = signal('');
 
   // ── Order tracking ────────────────────────────────────────────────────────
-  trackingView    = signal(false);
-  trackingRef     = signal('');
-  trackingError   = signal<string | null>(null);
+  trackingView = signal(false);
+  trackingRef = signal('');
+  trackingError = signal<string | null>(null);
   trackingLoading = signal(false);
-  activeOrders    = signal<TrackedOrder[]>([]);
-  expandedRef     = signal<string | null>(null);
+  activeOrders = signal<TrackedOrder[]>([]);
+  expandedRef = signal<string | null>(null);
 
   private trackPoll?: Subscription;
 
-  readonly trackingSteps   = TRACKING_STEPS;
+  readonly trackingSteps = TRACKING_STEPS;
   readonly trackingMetaMap = TRACKING_STATUS_META;
 
   // ── WiFi password copy state ───────────────────────────────────────────────
@@ -118,8 +129,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   // ── Computed ──────────────────────────────────────────────────────────────
   categories = computed(() => this.menu()?.categories ?? []);
-  currency   = computed(() => this.menu()?.tenant.currencySymbol ?? 'DT');
-  whatsapp   = computed(() => this.menu()?.tenant.whatsappNumber ?? '');
+  currency = computed(() => this.menu()?.tenant.currencySymbol ?? 'DT');
+  whatsapp = computed(() => this.menu()?.tenant.whatsappNumber ?? '');
 
   latestOrderRef = computed(() => {
     const orders = this.activeOrders();
@@ -152,11 +163,11 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (!t) return [];
     const links: SocialLink[] = [];
     if (t.instagramUrl) links.push({ platform: 'instagram', url: t.instagramUrl, handle: this.extractHandle(t.instagramUrl) });
-    if (t.facebookUrl)  links.push({ platform: 'facebook',  url: t.facebookUrl,  handle: this.extractHandle(t.facebookUrl)  });
-    if (t.tiktokUrl)    links.push({ platform: 'tiktok',    url: t.tiktokUrl,    handle: this.extractHandle(t.tiktokUrl)    });
-    if (t.twitterUrl)   links.push({ platform: 'twitter',   url: t.twitterUrl,   handle: this.extractHandle(t.twitterUrl)   });
-    if (t.youtubeUrl)   links.push({ platform: 'youtube',   url: t.youtubeUrl,   handle: this.extractHandle(t.youtubeUrl)   });
-    if (t.linkedInUrl)  links.push({ platform: 'linkedin',  url: t.linkedInUrl,  handle: this.extractHandle(t.linkedInUrl)  });
+    if (t.facebookUrl) links.push({ platform: 'facebook', url: t.facebookUrl, handle: this.extractHandle(t.facebookUrl) });
+    if (t.tiktokUrl) links.push({ platform: 'tiktok', url: t.tiktokUrl, handle: this.extractHandle(t.tiktokUrl) });
+    if (t.twitterUrl) links.push({ platform: 'twitter', url: t.twitterUrl, handle: this.extractHandle(t.twitterUrl) });
+    if (t.youtubeUrl) links.push({ platform: 'youtube', url: t.youtubeUrl, handle: this.extractHandle(t.youtubeUrl) });
+    if (t.linkedInUrl) links.push({ platform: 'linkedin', url: t.linkedInUrl, handle: this.extractHandle(t.linkedInUrl) });
     return links;
   });
 
@@ -195,7 +206,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (!t?.wifiName) return null;
     // Escape special chars: \ " ; , per the WIFI QR spec
     const esc = (s: string) => s.replace(/[\\";,]/g, c => `\\${c}`);
-    const pw  = t.wifiPassword ? esc(t.wifiPassword) : '';
+    const pw = t.wifiPassword ? esc(t.wifiPassword) : '';
     return `WIFI:T:WPA;S:${esc(t.wifiName)};P:${pw};;`;
   });
 
@@ -205,9 +216,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (!t) return false;
     return !!(
       t.instagramUrl || t.facebookUrl || t.tiktokUrl ||
-      t.twitterUrl   || t.youtubeUrl  || t.linkedInUrl ||
+      t.twitterUrl || t.youtubeUrl || t.linkedInUrl ||
       t.wifiName || t.whatsappNumber ||
-      t.address  || t.city || t.country || t.googleMapsUrl
+      t.address || t.city || t.country || t.googleMapsUrl
     );
   });
 
@@ -230,7 +241,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   private loadMenu(): void {
     forkJoin({
-      menu:  this.menuSvc.getMenu(),
+      menu: this.menuSvc.getMenu(),
       theme: this.menuSvc.getTheme(),
     }).subscribe({
       next: ({ menu, theme }) => {
@@ -249,6 +260,17 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         this.hoursCheckInterval = setInterval(
           () => this.checkOpeningHours(menu.tenant.openingHours), 60_000
         );
+        if (menu?.categories) {
+          const likeCounts = new Map<string, number>();
+          menu.categories.forEach(cat => {
+            cat.items.forEach(item => {
+              if (item.likeCount !== undefined) {
+                likeCounts.set(item.id, item.likeCount);
+              }
+            });
+          });
+          this.itemLikeCounts.set(likeCounts);
+        }
       },
       error: () => {
         this.loading.set(false);
@@ -370,13 +392,13 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.cart.open();
   }
 
-  setOrderTypeDineIn():   void { this.orderType.set('dine_in');  }
+  setOrderTypeDineIn(): void { this.orderType.set('dine_in'); }
   setOrderTypeTakeaway(): void { this.orderType.set('takeaway'); }
-  setTableNumber(v: string):   void { this.tableNumber.set(v);   }
-  setCustomerName(v: string):  void { this.customerName.set(v);  }
+  setTableNumber(v: string): void { this.tableNumber.set(v); }
+  setCustomerName(v: string): void { this.customerName.set(v); }
   setCustomerPhone(v: string): void { this.customerPhone.set(v); }
-  setOrderNotes(v: string):    void { this.orderNotes.set(v);    }
-  setSpecialNote(v: string):   void { this.specialNote.set(v);   }
+  setOrderNotes(v: string): void { this.orderNotes.set(v); }
+  setSpecialNote(v: string): void { this.specialNote.set(v); }
 
   submitOrder(): void {
     if (this.cart.isEmpty()) return;
@@ -384,17 +406,17 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.orderError.set(null);
 
     const req: CreateOrderRequest = {
-      customerName:    this.customerName() || null,
-      customerPhone:   this.customerPhone() || null,
-      orderType:       this.orderType(),
-      tableNumber:     this.tableNumber() || null,
+      customerName: this.customerName() || null,
+      customerPhone: this.customerPhone() || null,
+      orderType: this.orderType(),
+      tableNumber: this.tableNumber() || null,
       customerAddress: null,
-      notes:           this.orderNotes() || null,
-      lines:           this.cartItems().map(c => ({
-        itemId:              c.item.id,
-        variantId:           c.variant?.id ?? null,
-        quantity:            c.quantity,
-        modifierIds:         c.modifiers.map(m => m.id),
+      notes: this.orderNotes() || null,
+      lines: this.cartItems().map(c => ({
+        itemId: c.item.id,
+        variantId: c.variant?.id ?? null,
+        quantity: c.quantity,
+        modifierIds: c.modifiers.map(m => m.id),
         specialInstructions: c.specialNote || null,
       }))
     };
@@ -492,36 +514,58 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         this.activeOrders.update(list => [...list, order]);
         this.restartPoll();
       },
-      error: () => {}
+      error: () => { }
     });
   }
 
   private restartPoll(): void {
-    this.trackPoll?.unsubscribe();
+  this.trackPoll?.unsubscribe();
+ 
+  this.trackPoll = interval(30_000)
+    .pipe(
+      startWith(0),
+      switchMap(() => {
+        const refs = this.activeOrders().map(o => o.reference);
+        if (refs.length === 0) return [];
+ 
+        // Build the forkJoin with order tracking
+        const requests: Record<string, any> = {};
+        refs.forEach(ref => {
+          requests[ref] = this.menuSvc.trackOrder(ref);
+        });
+ 
+        // Optionally fetch fresh menu to get updated like counts
+        // This is simple but adds latency. Alternative: track likes per item
+        // separately. For MVP, just refetch menu every poll cycle.
+        requests['menu'] = this.menuSvc.getMenu();
+ 
+        return forkJoin(requests);
+      })
+    )
+    .subscribe({
+      next: (results: Record<string, any>) => {
+        // Update orders
+        this.activeOrders.update(list =>
+          list.map(o => results[o.reference] ?? o)
+        );
+ 
+        // Update like counts from fresh menu
+        if (results['menu']?.categories) {
+          const likeCounts = new Map<string, number>();
+          results['menu'].categories.forEach((cat: any) => {
+            cat.items.forEach((item: any) => {
+              if (item.likeCount !== undefined) {
+                likeCounts.set(item.id, item.likeCount);
+              }
+            });
+          });
+          this.itemLikeCounts.set(likeCounts);
+        }
+      },
+      error: () => {}
+    });
+}
 
-    this.trackPoll = interval(30_000)
-      .pipe(
-        startWith(0),
-        switchMap(() => {
-          const refs = this.activeOrders().map(o => o.reference);
-          if (refs.length === 0) return [];
-          return forkJoin(
-            refs.reduce((acc, ref) => {
-              acc[ref] = this.menuSvc.trackOrder(ref);
-              return acc;
-            }, {} as Record<string, any>)
-          );
-        })
-      )
-      .subscribe({
-        next: (results: Record<string, any>) => {
-          this.activeOrders.update(list =>
-            list.map(o => results[o.reference] ?? o)
-          );
-        },
-        error: () => {}
-      });
-  }
 
   getTrackingMeta(status: TrackingStatus) {
     return this.trackingMetaMap[status];
@@ -529,12 +573,96 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   isStepDone(stepStatus: TrackingStatus, current: TrackingStatus): boolean {
     const currentStep = this.trackingMetaMap[current].step;
-    const thisStep    = this.trackingMetaMap[stepStatus].step;
+    const thisStep = this.trackingMetaMap[stepStatus].step;
     return currentStep > thisStep;
   }
 
   isStepActive(stepStatus: TrackingStatus, current: TrackingStatus): boolean {
     return stepStatus === current;
+  }
+
+  // ── ItemLikes ──────────────────────────────────────────────────────────────
+
+  /**
+ * Toggle like on an item (local optimistic update + API call).
+ * Stops propagation to prevent opening the item modal.
+ */
+  toggleItemLike(event: Event, itemId: string): void {
+    event.stopPropagation();
+
+    // Prevent rapid double-clicks
+    if (this.likeInFlight().has(itemId)) return;
+
+    const isCurrentlyLiked = this.likedItems().has(itemId);
+    const currentCount = this.itemLikeCounts().get(itemId) ?? 0;
+
+    // Optimistic update
+    const newLiked = new Set(this.likedItems());
+    if (isCurrentlyLiked) {
+      newLiked.delete(itemId);
+      this.itemLikeCounts().set(itemId, Math.max(0, currentCount - 1));
+    } else {
+      newLiked.add(itemId);
+      this.itemLikeCounts().set(itemId, currentCount + 1);
+    }
+    this.likedItems.set(newLiked);
+
+    // Mark as in-flight
+    const inFlight = new Set(this.likeInFlight());
+    inFlight.add(itemId);
+    this.likeInFlight.set(inFlight);
+
+    // API call
+    this.itemLikeSvc.toggleLike(itemId).subscribe({
+      next: (response: ItemLikeToggleResponse) => {
+        // Update with authoritative state from server
+        this.itemLikeCounts().set(itemId, response.newLikeCount);
+
+        const likedSet = new Set(this.likedItems());
+        if (response.isNowLiked) {
+          likedSet.add(itemId);
+        } else {
+          likedSet.delete(itemId);
+        }
+        this.likedItems.set(likedSet);
+
+        // Mark not in-flight
+        const cleared = new Set(this.likeInFlight());
+        cleared.delete(itemId);
+        this.likeInFlight.set(cleared);
+      },
+      error: () => {
+        // Revert optimistic update on error
+        const reverted = new Set(this.likedItems());
+        if (isCurrentlyLiked) {
+          reverted.add(itemId);
+          this.itemLikeCounts().set(itemId, currentCount);
+        } else {
+          reverted.delete(itemId);
+          this.itemLikeCounts().set(itemId, currentCount);
+        }
+        this.likedItems.set(reverted);
+
+        // Mark not in-flight
+        const cleared = new Set(this.likeInFlight());
+        cleared.delete(itemId);
+        this.likeInFlight.set(cleared);
+      }
+    });
+  }
+
+  /**
+   * Check if a customer has liked an item.
+   */
+  isItemLiked(itemId: string): boolean {
+    return this.likedItems().has(itemId);
+  }
+
+  /**
+   * Get the like count for an item.
+   */
+  getItemLikeCount(itemId: string): number {
+    return this.itemLikeCounts().get(itemId) ?? 0;
   }
 
   // ── Opening hours ─────────────────────────────────────────────────────────
@@ -549,9 +677,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       const hours: Record<string, { open: boolean; from: string; to: string }>
         = JSON.parse(openingHoursJson);
 
-      const now  = new Date();
-      const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-      const todayKey  = days[now.getDay()];
+      const now = new Date();
+      const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const todayKey = days[now.getDay()];
       const todaySlot = hours[todayKey];
 
       if (!todaySlot?.open) {
@@ -562,9 +690,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
       const [fh, fm] = todaySlot.from.split(':').map(Number);
       const [th, tm] = todaySlot.to.split(':').map(Number);
-      const nowMins  = now.getHours() * 60 + now.getMinutes();
+      const nowMins = now.getHours() * 60 + now.getMinutes();
       const fromMins = fh * 60 + fm;
-      const toMins   = th * 60 + tm;
+      const toMins = th * 60 + tm;
 
       if (nowMins >= fromMins && nowMins < toMins) {
         this.isOpen.set(true);
@@ -588,9 +716,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     now: Date
   ): string | null {
     for (let i = 1; i <= 7; i++) {
-      const dayIdx  = (now.getDay() + i) % 7;
-      const dayKey  = days[dayIdx];
-      const slot    = hours[dayKey];
+      const dayIdx = (now.getDay() + i) % 7;
+      const dayKey = days[dayIdx];
+      const slot = hours[dayKey];
       if (slot?.open) {
         const dayLabel = i === 1 ? 'tomorrow'
           : days[dayIdx].charAt(0).toUpperCase() + days[dayIdx].slice(1);
@@ -646,9 +774,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.modalItem())                { this.closeModal();    return; }
-    if (this.trackingView())             { this.closeTracking(); return; }
-    if (this.cartOpen())                 { this.cart.close();    return; }
+    if (this.modalItem()) { this.closeModal(); return; }
+    if (this.trackingView()) { this.closeTracking(); return; }
+    if (this.cartOpen()) { this.cart.close(); return; }
     if (this.orderStep() === 'checkout') { this.backToCart(); }
   }
 }

@@ -56,6 +56,7 @@ export interface PublicItemResponse {
   position:       number;
   variantGroups:  PublicVariantGroupResponse[];
   modifierGroups: PublicModifierGroupResponse[];
+  likeCount:      number;
 }
 
 export interface PublicVariantGroupResponse {
