@@ -27,3 +27,8 @@ body {
 input:-webkit-autofill {
   transition: background-color 5000s ease-in-out 0s;
 }
+
+:host {
+  display: block;
+  min-height: 100vh;
+}

@@ -19,6 +19,10 @@
  */
 
 // ── CSS variable aliases ──────────────────────────────────────────────────────
+:host {
+  display: block;
+  min-height: 100vh;
+}
 :root {
   --mp-bg:          var(--colors-background,  #0e0c0a);
   --mp-surface:     var(--colors-surface,     #1e1c18);
@@ -127,12 +131,14 @@ img    { display: block; }
 
 // ── Category tabs ─────────────────────────────────────────────────────────────
 .mp-tabs {
-  position:      sticky;
+  position:      sticky !important;
   top:           0;
   z-index:       50;
   background:    var(--mp-surface);
   border-bottom: 1px solid var(--mp-border);
-  // overflow-x: auto  ← REMOVED from here — kills sticky on every browser
+  &.mp-tabs--with-banner {
+    top: 48px; // height of .mp-closed-banner
+  }
 }
 
 .mp-tabs__inner {
@@ -140,7 +146,7 @@ img    { display: block; }
   max-width:        600px;
   margin:           0 auto;
   padding:          0 0.5rem;
-  overflow-x:       auto;        // ← moved here, onto the inner scroll container
+  overflow-x:       auto;
   scrollbar-width:  none;
   &::-webkit-scrollbar { display: none; }
 }
