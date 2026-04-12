@@ -2,12 +2,14 @@ import { Routes } from '@angular/router';
 import { authGuard }  from './core/guards/auth.guard';
 import { ownerGuard } from './core/guards/owner.guard';
 import { superAdminGuard } from './core/guards/super-admin.guard';
+import { tenantRedirectGuard } from './core/guards/tenant-redirect.guards';
 
 export const routes: Routes = [
 
   // ── Landing page — bare domain (menuify.tn) ──────────────────────────────────
   {
     path:          '',
+    canActivate: [tenantRedirectGuard],
     loadComponent: () =>import('./features/landing/landing/landing.component').then(m => m.LandingComponent),
   },
 

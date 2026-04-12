@@ -1,0 +1,11 @@
+<nav class="mp-tabs" aria-label="Menu categories">
+  <div class="mp-tabs__inner">
+    @for (cat of categories; track cat.id) {
+    <button class="mp-tab" [class.mp-tab--active]="activeCategory === cat.id" (click)="selectCategory.emit(cat.id)"
+      type="button">
+      @if (cat.icon) { <span>{{ cat.icon }}</span> }
+      {{ cat.name }}
+    </button>
+    }
+  </div>
+</nav>

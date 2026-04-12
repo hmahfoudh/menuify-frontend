@@ -1,0 +1,101 @@
+<div class="mp-backdrop" (click)="back.emit()">
+  <div class="mp-checkout" (click)="$event.stopPropagation()">
+
+    <div class="mp-checkout__head">
+      <h2 class="mp-checkout__title">{{ 'checkout.title' | translate }}</h2>
+      <button class="mp-modal__close" (click)="back.emit()"
+        [attr.aria-label]="'checkout.back_aria' | translate" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="mp-checkout__body">
+
+      <!-- Order type -->
+      <div class="mp-co-field">
+        <label class="mp-co-label">{{ 'checkout.order_type_label' | translate }}</label>
+        <div class="mp-type-tabs">
+          <button type="button" class="mp-type-tab" [class.mp-type-tab--active]="orderType === 'dine_in'"
+            (click)="setOrderTypeDineIn.emit()">
+            {{ 'checkout.dine_in' | translate }}
+          </button>
+          <button type="button" class="mp-type-tab" [class.mp-type-tab--active]="orderType === 'takeaway'"
+            (click)="setOrderTypeTakeaway.emit()">
+            {{ 'checkout.takeaway' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Table number (dine-in only) -->
+      @if (orderType === 'dine_in') {
+      <div class="mp-co-field">
+        <label class="mp-co-label" for="tableNum">{{ 'checkout.table_number' | translate }}</label>
+        <input id="tableNum" type="text" class="mp-co-input" [ngModel]="tableNumber"
+          (ngModelChange)="setTableNumber.emit($event)"
+          [placeholder]="'checkout.table_placeholder' | translate">
+      </div>
+      }
+
+      <!-- Name -->
+      <div class="mp-co-field">
+        <label class="mp-co-label" for="coName">
+          {{ 'checkout.your_name' | translate }}
+          <span class="mp-optional">{{ 'checkout.optional' | translate }}</span>
+        </label>
+        <input id="coName" type="text" class="mp-co-input" [ngModel]="customerName"
+          (ngModelChange)="setCustomerName.emit($event)"
+          [placeholder]="'checkout.name_placeholder' | translate">
+      </div>
+
+      <!-- Phone -->
+      <div class="mp-co-field">
+        <label class="mp-co-label" for="coPhone">
+          {{ 'checkout.phone_number' | translate }}
+          <span class="mp-optional">{{ 'checkout.optional' | translate }}</span>
+        </label>
+        <input id="coPhone" type="tel" class="mp-co-input" [ngModel]="customerPhone"
+          (ngModelChange)="setCustomerPhone.emit($event)"
+          [placeholder]="'checkout.phone_placeholder' | translate">
+      </div>
+
+      <!-- Notes -->
+      <div class="mp-co-field">
+        <label class="mp-co-label" for="coNotes">
+          {{ 'checkout.notes' | translate }}
+          <span class="mp-optional">{{ 'checkout.optional' | translate }}</span>
+        </label>
+        <textarea id="coNotes" class="mp-co-input mp-co-textarea" [ngModel]="orderNotes"
+          (ngModelChange)="setOrderNotes.emit($event)"
+          [placeholder]="'checkout.notes_placeholder' | translate" rows="2"></textarea>
+      </div>
+
+      @if (orderError) {
+      <p class="mp-order-error">{{ orderError }}</p>
+      }
+
+      <div class="mp-co-summary">
+        <span>{{ cartCount }} {{ (cartCount > 1 ? 'checkout.items' : 'checkout.item') | translate }}</span>
+        <span class="mp-co-summary__total">
+          {{ fmt(cartSubtotal) }} {{ currency }}
+        </span>
+      </div>
+    </div>
+
+    <div class="mp-checkout__foot">
+      <button type="button" class="mp-co-back" (click)="back.emit()">
+        {{ 'checkout.back' | translate }}
+      </button>
+      <button type="button" class="mp-co-submit" [disabled]="submitting" (click)="submitOrder.emit()">
+        @if (submitting) {
+        <span class="mp-ring mp-ring--sm"></span>
+        }
+        {{ 'checkout.submit' | translate }}
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,211 @@
+<div class="mp-backdrop" (click)="close.emit()">
+  <div class="mp-tracking" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="mp-tracking__head">
+      <div class="mp-tracking__head-left">
+        <h2 class="mp-tracking__title">{{ 'tracking.title' | translate }}</h2>
+        @if (activeOrders.length > 0) {
+        <span class="mp-tracking__count-badge">
+          {{ activeOrders.length }}
+        </span>
+        }
+      </div>
+      <button class="mp-modal__close" (click)="close.emit()"
+        [attr.aria-label]="'tracking.close_aria' | translate" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- ── Active orders list ──────────────────────────────────── -->
+    @if (activeOrders.length > 0) {
+    <div class="mp-tracking__orders">
+      @for (order of activeOrders; track order.reference) {
+
+      <!-- Collapsed row — tap to expand -->
+      <div class="mp-tracking__order-row" [class.mp-tracking__order-row--expanded]="expandedRef === order.reference"
+        [class.mp-tracking__order-row--terminal]="getTrackingMeta(order.status).terminal">
+
+        <button class="mp-tracking__order-summary" (click)="expandOrder.emit(order.reference)" type="button">
+          <span class="mp-tros__dot
+                               mp-tros__dot--{{ getTrackingMeta(order.status).color }}">
+          </span>
+          <div class="mp-tros__info">
+            <span class="mp-tros__ref">{{ order.reference }}</span>
+            <span class="mp-tros__status">
+              {{ getTrackingMeta(order.status).label }}
+              @if (order.minutesRemaining != null
+              && order.minutesRemaining > 0
+              && !getTrackingMeta(order.status).terminal) {
+              · ~{{ order.minutesRemaining }} min
+              }
+            </span>
+          </div>
+          <svg class="mp-tros__chevron" [class.mp-tros__chevron--open]="expandedRef === order.reference" width="14"
+            height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+
+        <!-- Expanded detail -->
+        @if (expandedRef === order.reference) {
+        <div class="mp-tracking__order-detail">
+
+          <!-- Status hero -->
+          <div class="mp-tracking__status-hero
+                                mp-tracking__status-hero--{{ getTrackingMeta(order.status).color }}">
+            <span class="mp-tracking__status-label">
+              {{ getTrackingMeta(order.status).label }}
+            </span>
+            <p class="mp-tracking__status-desc">
+              {{ getTrackingMeta(order.status).desc }}
+            </p>
+
+            <!-- ETA + message -->
+            @if (order.minutesRemaining != null
+            && !getTrackingMeta(order.status).terminal) {
+            <div class="mp-tracking__eta-countdown">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              @if (order.minutesRemaining === 0) {
+              <span>{{ 'tracking.ready_now' | translate }}</span>
+              } @else {
+              <span>{{ 'tracking.ready_in' | translate: { min: order.minutesRemaining } }}</span>
+              }
+            </div>
+            }
+            @if (order.restaurantMessage) {
+            <div class="mp-tracking__restaurant-msg">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              <span>{{ order.restaurantMessage }}</span>
+            </div>
+            }
+          </div>
+
+          <!-- Progress bar -->
+          @if (order.status !== 'CANCELLED') {
+          <div class="mp-tracking__progress">
+            @for (step of trackingSteps; track step; let i = $index) {
+            <div class="mp-tracking__progress-step"
+              [class.mp-tracking__progress-step--done]="isStepDone(step, order.status)"
+              [class.mp-tracking__progress-step--active]="isStepActive(step, order.status)">
+              <div class="mp-tracking__step-dot">
+                @if (isStepDone(step, order.status)) {
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"
+                  stroke-linecap="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                }
+              </div>
+              @if (i < trackingSteps.length - 1) { <div class="mp-tracking__step-line"
+                [class.mp-tracking__step-line--done]="isStepDone(step, order.status)">
+            </div>
+            }
+          </div>
+          }
+        </div>
+        <div class="mp-tracking__step-labels">
+          @for (step of trackingSteps; track step) {
+          <span class="mp-tracking__step-label"
+            [class.mp-tracking__step-label--active]="isStepActive(step, order.status)"
+            [class.mp-tracking__step-label--done]="isStepDone(step, order.status)">
+            {{ trackingMetaMap[step].label }}
+          </span>
+          }
+        </div>
+        }
+
+        <!-- Order lines -->
+        <div class="mp-tracking__lines">
+          <span class="mp-tracking__lines-title">{{ 'tracking.order_summary' | translate }}</span>
+          @for (line of order.lines; track line.id) {
+          <div class="mp-tracking__line">
+            <span class="mp-tracking__line-qty">{{ line.quantity }}×</span>
+            <div class="mp-tracking__line-info">
+              <span class="mp-tracking__line-name">
+                {{ line.itemNameSnapshot }}
+              </span>
+              @if (line.variantNameSnapshot) {
+              <span class="mp-tracking__line-variant">
+                {{ line.variantNameSnapshot }}
+              </span>
+              }
+              @for (mod of line.selectedModifiers; track mod.id) {
+              <span class="mp-tracking__line-mod">
+                + {{ mod.modifierNameSnapshot }}
+              </span>
+              }
+            </div>
+            <span class="mp-tracking__line-total">
+              {{ fmt(line.lineTotal) }} {{ currency }}
+            </span>
+          </div>
+          }
+          <div class="mp-tracking__total-row">
+            <span>{{ 'tracking.total' | translate }}</span>
+            <span class="mp-tracking__total">
+              {{ fmt(order.total) }} {{ currency }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Done or auto-refresh -->
+        @if (getTrackingMeta(order.status).terminal) {
+        <button class="mp-tracking__done-btn" (click)="endTracking.emit(order.reference)" type="button">
+          {{ 'tracking.done' | translate }}
+        </button>
+        } @else {
+        <p class="mp-tracking__refresh-hint">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round">
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+          </svg>
+          {{ 'tracking.auto_refresh' | translate }}
+        </p>
+        }
+
+      </div>
+      }
+
+    </div>
+
+    }
+  </div>
+  }
+
+  <!-- ── Manual lookup ──────────────────────────────────────── -->
+  <div class="mp-tracking__lookup-section">
+    <p class="mp-tracking__lookup-label">
+      {{ 'tracking.track_another' | translate }}
+    </p>
+    <div class="mp-tracking__lookup">
+      <input type="text" class="mp-tracking__input"
+        [placeholder]="'tracking.ref_placeholder' | translate"
+        [value]="trackingRef" (input)="setTrackingRef.emit($any($event.target).value)" (keydown.enter)="lookupOrder.emit()">
+      <button class="mp-tracking__lookup-btn" (click)="lookupOrder.emit()"
+        [disabled]="!trackingRef.trim() || trackingLoading" type="button">
+        @if (trackingLoading) {
+        <span class="mp-ring mp-ring--sm mp-ring--dark"></span>
+        } @else {
+        {{ 'tracking.search' | translate }}
+        }
+      </button>
+    </div>
+    @if (trackingError) {
+    <p class="mp-tracking__error">{{ trackingError }}</p>
+    }
+  </div>
+
+</div>
+</div>

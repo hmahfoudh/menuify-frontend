@@ -1,0 +1,126 @@
+<div class="mp-backdrop" (click)="close.emit()" role="dialog" [attr.aria-label]="item.name">
+  <div class="mp-modal" (click)="$event.stopPropagation()">
+
+    <button class="mp-modal__close" (click)="close.emit()"
+      [attr.aria-label]="'item_modal.close_aria' | translate" type="button">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+
+    @if (item.imageUrl) {
+    <div class="mp-modal__img">
+      <img [src]="item.imageUrl" [alt]="item.name">
+    </div>
+    }
+
+    <div class="mp-modal__body">
+
+      <h2 class="mp-modal__name">{{ item.name }}</h2>
+      @if (item.description) {
+      <p class="mp-modal__desc">{{ item.description }}</p>
+      }
+      <div class="mp-modal__diet">
+        @if (item.vegetarian) { <span class="mp-diet-tag">🌿 {{ 'menu.diet.vegetarian' | translate }}</span> }
+        @if (item.vegan) { <span class="mp-diet-tag">🌱 {{ 'menu.diet.vegan' | translate }}</span> }
+        @if (item.glutenFree) { <span class="mp-diet-tag">🌾 {{ 'menu.diet.gluten_free' | translate }}</span>}
+        @if (item.spicy) { <span class="mp-diet-tag">🌶️ {{ 'menu.diet.spicy' | translate }}</span> }
+      </div>
+
+      <!-- Variant groups -->
+      @for (group of item.variantGroups; track group.id) {
+      <div class="mp-option-group">
+        <div class="mp-option-group__head">
+          <span class="mp-option-group__name">{{ group.name }}</span>
+          @if (group.required) {
+          <span class="mp-required-badge">{{ 'item_modal.required' | translate }}</span>
+          }
+        </div>
+        <div class="mp-variants" [class]="'mp-variants--' + group.uiType">
+          @for (v of group.variants; track v.id) {
+          <button class="mp-variant" [class.mp-variant--active]="selectedVariant?.id === v.id"
+            (click)="selectVariant.emit(v)" type="button">
+            @if (v.imageUrl) {
+            <img [src]="v.imageUrl" [alt]="v.name" class="mp-variant__img">
+            }
+            <span class="mp-variant__name">{{ v.name }}</span>
+            <span class="mp-variant__price">
+              {{ fmt(v.price) }} {{ currency }}
+            </span>
+          </button>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- Modifier groups -->
+      @for (group of item.modifierGroups; track group.id) {
+      <div class="mp-option-group">
+        <div class="mp-option-group__head">
+          <span class="mp-option-group__name">{{ group.name }}</span>
+          <div class="mp-option-group__meta">
+            @if (group.required) {
+            <span class="mp-required-badge">{{ 'item_modal.required' | translate }}</span>
+            }
+            @if (group.maxSelect > 1) {
+            <span class="mp-select-hint">{{ 'item_modal.up_to' | translate: { max: group.maxSelect } }}</span>
+            }
+          </div>
+        </div>
+        <div class="mp-modifiers">
+          @for (mod of group.modifiers; track mod.id) {
+          <button class="mp-mod" [class.mp-mod--active]="isModSelected(mod.id)" (click)="toggleMod.emit({ modId: mod.id, group: group })"
+            type="button">
+            <div class="mp-mod__check" [class.mp-mod__check--on]="isModSelected(mod.id)"
+              [class.mp-mod__check--radio]="group.uiType === 'radio'">
+              @if (isModSelected(mod.id)) {
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"
+                stroke-linecap="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              }
+            </div>
+            <span class="mp-mod__name">{{ mod.name }}</span>
+            @if (mod.priceDelta > 0) {
+            <span class="mp-mod__price">
+              +{{ fmt(mod.priceDelta) }} {{ currency }}
+            </span>
+            }
+          </button>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- Special note -->
+      <div class="mp-note">
+        <label class="mp-note__label" for="specNote">
+          {{ 'item_modal.special_instructions' | translate }}
+          <span class="mp-optional">{{ 'item_modal.optional' | translate }}</span>
+        </label>
+        <textarea id="specNote" class="mp-note__input" [ngModel]="specialNote"
+          (ngModelChange)="setSpecialNote.emit($event)"
+          [placeholder]="'item_modal.note_placeholder' | translate" rows="2"></textarea>
+      </div>
+
+      <!-- Footer: qty + add -->
+      <div class="mp-modal__footer">
+        <div class="mp-stepper">
+          <button type="button" class="mp-stepper__btn" (click)="decQty.emit()">−</button>
+          <span class="mp-stepper__val">{{ modalQty }}</span>
+          <button type="button" class="mp-stepper__btn" (click)="incQty.emit()">+</button>
+        </div>
+
+        <button class="mp-add-btn" [disabled]="!canAddToCart" (click)="addToCart.emit()" type="button">
+          {{ 'item_modal.add_to_order' | translate }}
+          <span class="mp-add-btn__price">
+            {{ fmt(modalTotal) }} {{ currency }}
+          </span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,10 +1,10 @@
 import {
   Component, OnInit, OnDestroy, signal, computed,
-  inject, HostListener, ViewEncapsulation, PLATFORM_ID
+  inject, HostListener, PLATFORM_ID,
+  ViewEncapsulation
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { QRCodeModule } from 'angularx-qrcode';
 import { PublicMenuService } from '../services/public-menu.service';
 import { CartService } from '../services/cart.service';
 import { ThemeInjectorService } from '../services/theme-injector.service';
@@ -25,12 +25,24 @@ import { switchMap, startWith } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { ItemLikeService } from '../services/item-like.service';
 import { ItemLikeToggleResponse } from '../models/item-like.models';
-import { FormatLikeCountPipe } from '../../../shared/pipes/format-like-count.pipe';
-import { TranslateDirective, TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 
+// ── Child components ────────────────────────────────────────────────
+import { MenuHeaderComponent } from '../components/menu-header/menu-header.component';
+import { CategoryTabsComponent } from '../components/category-tabs/category-tabs.component';
+import { MenuGridComponent } from '../components/menu-grid/menu-grid.component';
+import { ItemModalComponent } from '../components/item-modal/item-modal.component';
+import { CartDrawerComponent } from '../components/cart-drawer/cart-drawer.component';
+import { CheckoutModalComponent } from '../components/checkout-modal/checkout-modal.component';
+import { SuccessScreenComponent } from '../components/success-screen/success-screen.component';
+import { TrackingPanelComponent } from '../components/tracking-panel/tracking-panel.component';
+import { BottomBarComponent } from '../components/bottom-bar/bottom-bar.component';
+import { MenuFooterComponent } from '../components/menu-footer/menu-footer.component';
+import { ClosedBannerComponent } from '../components/closed-banner/closed-banner.component';
+import { CartToastComponent } from '../components/cart-toast/cart-toast.component';
 
-type OrderStep = 'idle' | 'checkout' | 'success';
-type OrderType = 'dine_in' | 'takeaway';
+export type OrderStep = 'idle' | 'checkout' | 'success';
+export type OrderType = 'dine_in' | 'takeaway';
 
 export interface SocialLink {
   platform: string;
@@ -41,7 +53,13 @@ export interface SocialLink {
 @Component({
   selector: 'app-menu-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, QRCodeModule, FormatLikeCountPipe, TranslatePipe, TranslateDirective],
+  imports: [
+    CommonModule, FormsModule,
+    MenuHeaderComponent, CategoryTabsComponent, MenuGridComponent,
+    ItemModalComponent, CartDrawerComponent, CheckoutModalComponent,
+    SuccessScreenComponent, TrackingPanelComponent, BottomBarComponent,
+    MenuFooterComponent, ClosedBannerComponent, CartToastComponent,
+  ],
   templateUrl: './menu-page.component.html',
   styleUrls: ['./menu-page.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -72,7 +90,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   cartMode = signal<'cart' | 'orders'>('cart');
 
   // ── ItemLikes ──────────────────────────────────────────────────────────────
-
   likedItems = signal<Set<string>>(new Set());
   itemLikeCounts = signal<Map<string, number>>(new Map());
   private likeInFlight = signal<Set<string>>(new Set());
@@ -122,7 +139,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   expandedRef = signal<string | null>(null);
 
   // ── Language selection ────────────────────────────────────────────────────
-
   langMenuOpen = signal(false);
   currentLang = signal({ code: 'fr', flag: '🇫🇷', label: 'Français' });
 
@@ -173,8 +189,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   });
 
   // ── Footer computeds ──────────────────────────────────────────────────────
-
-  /** Ordered list of active social links built from tenant fields. */
   socialLinks = computed<SocialLink[]>(() => {
     const t = this.menu()?.tenant;
     if (!t) return [];
@@ -188,14 +202,12 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return links;
   });
 
-  /** Full location string for display. */
   locationText = computed(() => {
     const t = this.menu()?.tenant;
     if (!t) return null;
     return [t.address, t.city, t.country].filter(Boolean).join(', ') || null;
   });
 
-  /** Maps URL — prefer the stored one, fall back to a Google search link. */
   mapsUrl = computed(() => {
     const t = this.menu()?.tenant;
     if (!t) return null;
@@ -204,30 +216,25 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return q ? `https://maps.google.com/?q=${encodeURIComponent(q)}` : null;
   });
 
-  /** WhatsApp deep-link (wa.me expects digits only). */
   whatsappUrl = computed(() => {
     const num = this.menu()?.tenant.whatsappNumber;
     if (!num) return null;
     return `https://wa.me/${num.replace(/\D/g, '')}`;
   });
 
-  /** tel: link for the phone dialer. */
   telUrl = computed(() => {
     const num = this.menu()?.tenant.whatsappNumber;
     return num ? `tel:${num.replace(/\s/g, '')}` : null;
   });
 
-  /** WiFi QR payload — standard WIFI: URI scheme. */
   wifiQrData = computed(() => {
     const t = this.menu()?.tenant;
     if (!t?.wifiName) return null;
-    // Escape special chars: \ " ; , per the WIFI QR spec
     const esc = (s: string) => s.replace(/[\\";,]/g, c => `\\${c}`);
     const pw = t.wifiPassword ? esc(t.wifiPassword) : '';
     return `WIFI:T:WPA;S:${esc(t.wifiName)};P:${pw};;`;
   });
 
-  /** True when at least one footer section has data to show. */
   hasFooterContent = computed(() => {
     const t = this.menu()?.tenant;
     if (!t) return false;
@@ -296,7 +303,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Category ──────────────────────────────────────────────────────────────
   selectCategory(id: string): void {
     this.activeCategory.set(id);
     if (this.isBrowser) {
@@ -307,8 +313,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ── Item modal ────────────────────────────────────────────────────────────
-  openItem(item: PublicItemResponse, catId: string): void {
+  openItem(event: { item: PublicItemResponse; catId: string }): void {
+    const { item, catId } = event;
     this.modalItem.set(item);
     this.modalCategoryId.set(catId);
     this.modalQty.set(1);
@@ -333,7 +339,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.selectedVariant.set(v);
   }
 
-  toggleMod(modId: string, group: PublicModifierGroupResponse): void {
+  toggleMod(event: { modId: string; group: PublicModifierGroupResponse }): void {
+    const { modId, group } = event;
     const mods = new Set(this.selectedMods());
     if (group.uiType === 'radio') {
       group.modifiers.forEach(m => mods.delete(m.id));
@@ -371,18 +378,13 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     );
     this.closeModal();
     this.showCartToast(item.name);
-    //this.cart.open();
   }
 
-  // ── Cart ──────────────────────────────────────────────────────────────────
   private showCartToast(itemName: string): void {
     clearTimeout(this.toastTimer);
-    // Mount visible immediately (drives enter animation)
     this.cartToast.set({ name: itemName, visible: true });
-    // Start exit animation after 2.6 s
     this.toastTimer = setTimeout(() => {
       this.cartToast.update(t => t ? { ...t, visible: false } : null);
-      // Remove from DOM after transition completes (300 ms)
       setTimeout(() => this.cartToast.set(null), 320);
     }, 2600);
     console.log({cartToast: this.cartToast()});
@@ -411,7 +413,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.cart.updateQuantity(cartId, qty);
   }
 
-  // ── Checkout flow ─────────────────────────────────────────────────────────
   openCheckout(): void {
     this.cart.close();
     this.orderStep.set('checkout');
@@ -470,7 +471,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.orderStep.set('idle');
   }
 
-  // ── Order tracking ─────────────────────────────────────────────────────────
   openTracking(ref?: string): void {
     this.trackingError.set(null);
     this.trackingView.set(true);
@@ -559,15 +559,11 @@ export class MenuPageComponent implements OnInit, OnDestroy {
           const refs = this.activeOrders().map(o => o.reference);
           if (refs.length === 0) return [];
 
-          // Build the forkJoin with order tracking
           const requests: Record<string, any> = {};
           refs.forEach(ref => {
             requests[ref] = this.menuSvc.trackOrder(ref);
           });
 
-          // Optionally fetch fresh menu to get updated like counts
-          // This is simple but adds latency. Alternative: track likes per item
-          // separately. For MVP, just refetch menu every poll cycle.
           requests['menu'] = this.menuSvc.getMenu();
 
           return forkJoin(requests);
@@ -575,12 +571,10 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (results: Record<string, any>) => {
-          // Update orders
           this.activeOrders.update(list =>
             list.map(o => results[o.reference] ?? o)
           );
 
-          // Update like counts from fresh menu
           if (results['menu']?.categories) {
             const likeCounts = new Map<string, number>();
             results['menu'].categories.forEach((cat: any) => {
@@ -597,37 +591,27 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       });
   }
 
-
   getTrackingMeta(status: TrackingStatus) {
     return this.trackingMetaMap[status];
   }
 
   isStepDone(stepStatus: TrackingStatus, current: TrackingStatus): boolean {
-    const currentStep = this.trackingMetaMap[current].step;
-    const thisStep = this.trackingMetaMap[stepStatus].step;
-    return currentStep > thisStep;
+    return this.trackingMetaMap[current].step > this.trackingMetaMap[stepStatus].step;
   }
 
   isStepActive(stepStatus: TrackingStatus, current: TrackingStatus): boolean {
     return stepStatus === current;
   }
 
-  // ── ItemLikes ──────────────────────────────────────────────────────────────
+  toggleItemLike(event: { domEvent: Event; itemId: string }): void {
+    const { domEvent, itemId } = event;
+    domEvent.stopPropagation();
 
-  /**
- * Toggle like on an item (local optimistic update + API call).
- * Stops propagation to prevent opening the item modal.
- */
-  toggleItemLike(event: Event, itemId: string): void {
-    event.stopPropagation();
-
-    // Prevent rapid double-clicks
     if (this.likeInFlight().has(itemId)) return;
 
     const isCurrentlyLiked = this.likedItems().has(itemId);
     const currentCount = this.itemLikeCounts().get(itemId) ?? 0;
 
-    // Optimistic update
     const newLiked = new Set(this.likedItems());
     if (isCurrentlyLiked) {
       newLiked.delete(itemId);
@@ -638,17 +622,13 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     }
     this.likedItems.set(newLiked);
 
-    // Mark as in-flight
     const inFlight = new Set(this.likeInFlight());
     inFlight.add(itemId);
     this.likeInFlight.set(inFlight);
 
-    // API call
     this.itemLikeSvc.toggleLike(itemId).subscribe({
       next: (response: ItemLikeToggleResponse) => {
-        // Update with authoritative state from server
         this.itemLikeCounts().set(itemId, response.newLikeCount);
-
         const likedSet = new Set(this.likedItems());
         if (response.isNowLiked) {
           likedSet.add(itemId);
@@ -656,14 +636,11 @@ export class MenuPageComponent implements OnInit, OnDestroy {
           likedSet.delete(itemId);
         }
         this.likedItems.set(likedSet);
-
-        // Mark not in-flight
         const cleared = new Set(this.likeInFlight());
         cleared.delete(itemId);
         this.likeInFlight.set(cleared);
       },
       error: () => {
-        // Revert optimistic update on error
         const reverted = new Set(this.likedItems());
         if (isCurrentlyLiked) {
           reverted.add(itemId);
@@ -673,8 +650,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
           this.itemLikeCounts().set(itemId, currentCount);
         }
         this.likedItems.set(reverted);
-
-        // Mark not in-flight
         const cleared = new Set(this.likeInFlight());
         cleared.delete(itemId);
         this.likeInFlight.set(cleared);
@@ -682,21 +657,14 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Check if a customer has liked an item.
-   */
   isItemLiked(itemId: string): boolean {
     return this.likedItems().has(itemId);
   }
 
-  /**
-   * Get the like count for an item.
-   */
   public getItemLikeCount(itemId: string): number {
     return this.itemLikeCounts().get(itemId) ?? 0;
   }
 
-  // ── Opening hours ─────────────────────────────────────────────────────────
   private checkOpeningHours(openingHoursJson: string | null): void {
     if (!openingHoursJson) {
       this.isOpen.set(true);
@@ -759,9 +727,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return 'Currently closed';
   }
 
-  // ── Footer helpers ────────────────────────────────────────────────────────
-
-  /** Copy WiFi password to clipboard with a brief visual confirmation. */
   copyWifiPassword(): void {
     const pw = this.menu()?.tenant.wifiPassword;
     if (!pw || !this.isBrowser) return;
@@ -771,7 +736,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Extract a @handle or channel name from a social URL for display. */
   private extractHandle(url: string): string | null {
     try {
       const path = new URL(url).pathname.replace(/\/$/, '');
@@ -790,13 +754,11 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   switchLang(code: string) {
     const lang = this.availableLangs().find(l => l.code === code)!;
     this.currentLang.set(lang);
-    this.translate.use(code); // TranslateService
+    this.translate.use(code);
     this.langMenuOpen.set(false);
-    // Optional: persist to localStorage
     localStorage.setItem('lang', code);
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   fmt(n: number | null): string {
     if (n == null) return '';
     return n.toFixed(3);
@@ -810,7 +772,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return link.platform;
   }
 
-  // ── Keyboard shortcuts ────────────────────────────────────────────────────
   ngOnDestroy(): void {
     this.trackPoll?.unsubscribe();
     clearInterval(this.hoursCheckInterval);
