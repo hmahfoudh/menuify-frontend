@@ -373,6 +373,7 @@ img {
   transition: transform var(--mp-tr), box-shadow var(--mp-tr), border-color var(--mp-tr);
   animation: mp-card-in 0.3s ease both;
   min-width: 100%;
+  min-height: 100%;
 
   &:hover {
     transform: translateY(-2px);
