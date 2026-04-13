@@ -82,11 +82,6 @@ export class DashboardShellComponent implements OnInit {
       icon: 'M18 20V10M12 20V4M6 20v-6'
     },
     {
-      label: 'QR Codes',
-      route: '/dashboard/qr',
-      icon: 'M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2M19 15v2M15 19h2v2M19 21h2M21 17h-2'
-    },
-    {
       label: 'Staff',
       route: '/dashboard/staff',
       icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'

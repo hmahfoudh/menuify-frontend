@@ -56,8 +56,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
   orderTypeLabel = computed(() => {
     const o = this.selectedOrder();
     if (!o) return '';
-    return o.orderType === 'dine_in'  ? `Table ${o.tableNumber ?? '–'}`
-         : o.orderType === 'takeaway' ? 'Takeaway'
+    return o.orderType === 'DINE_IN'  ? `Table ${o.tableNumber ?? '–'}`
+         : o.orderType === 'TAKEAWAY' ? 'Takeaway'
          : 'Delivery';
   });
 
