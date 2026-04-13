@@ -1,0 +1,24 @@
+<main class="mp-main">
+  @for (cat of categories; track cat.id) {
+  <section [id]="'section-' + cat.id" class="mp-section">
+
+    <h2 class="mp-section__title">
+      @if (cat.icon) { {{ cat.icon }}&nbsp; }{{ cat.name }}
+    </h2>
+
+    <div class="mp-grid">
+      @for (item of cat.items; track item.id) {
+        <app-item-card
+          [item]="item"
+          [catId]="cat.id"
+          [currency]="currency"
+          [isLiked]="isItemLiked(item.id)"
+          [likeCount]="getItemLikeCount(item.id)"
+          (cardClick)="openItem.emit({ item: item, catId: cat.id })"
+          (likeClick)="toggleLike.emit($event)">
+        </app-item-card>
+      }
+    </div>
+  </section>
+  }
+</main>

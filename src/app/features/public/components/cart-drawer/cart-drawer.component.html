@@ -1,0 +1,201 @@
+<div class="mp-cart-backdrop" (click)="close.emit()"></div>
+<div class="mp-cart" role="dialog" aria-label="Your order">
+
+  <!-- Header with tab switcher -->
+  <div class="mp-cart__head">
+    <div class="mp-cart__tabs">
+      <button class="mp-cart__tab" [class.mp-cart__tab--active]="cartMode === 'cart'" (click)="setCartMode.emit('cart')"
+        type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round">
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+        </svg>
+        {{ 'cart.tab_cart' | translate }}
+        @if (!cartEmpty) {
+        <span class="mp-cart__tab-badge">{{ cartCount }}</span>
+        }
+      </button>
+      @if (hasActiveOrders) {
+      <button class="mp-cart__tab" [class.mp-cart__tab--active]="cartMode === 'orders'"
+        (click)="setCartMode.emit('orders')" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+        {{ 'cart.tab_orders' | translate }}
+        <span class="mp-cart__tab-badge mp-cart__tab-badge--accent">
+          {{ activeOrders.length }}
+        </span>
+      </button>
+      }
+    </div>
+    <button class="mp-cart__close" (click)="close.emit()"
+      [attr.aria-label]="'cart.close_aria' | translate" type="button">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- ── Active orders tab ─────────────────────────────────────────────── -->
+  @if (cartMode === 'orders' && hasActiveOrders) {
+  <div class="mp-cart__order-progress">
+
+    @for (order of activeOrders; track order.reference) {
+    <div class="mp-cop__order-card">
+
+      <!-- Status card -->
+      <div class="mp-cop__status-card
+                      mp-cop__status-card--{{ getTrackingMeta(order.status).color }}">
+        <div class="mp-cop__status-top">
+          <span class="mp-cop__dot mp-cop__dot--{{ getTrackingMeta(order.status).color }}">
+          </span>
+          <span class="mp-cop__status-label">
+            {{ getTrackingMeta(order.status).label }}
+          </span>
+          <span class="mp-cop__order-ref-inline">{{ order.reference }}</span>
+        </div>
+        <p class="mp-cop__status-desc">
+          {{ getTrackingMeta(order.status).desc }}
+        </p>
+
+        <!-- ETA -->
+        @if (order.minutesRemaining != null
+        && !getTrackingMeta(order.status).terminal) {
+        <div class="mp-cop__eta">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          @if (order.minutesRemaining === 0) {
+          {{ 'cart.ready_now' | translate }}
+          } @else {
+          {{ 'cart.ready_in' | translate: { min: order.minutesRemaining } }}
+          }
+        </div>
+        }
+
+        @if (order.restaurantMessage) {
+        <p class="mp-cop__message">"{{ order.restaurantMessage }}"</p>
+        }
+      </div>
+
+      <!-- Progress steps -->
+      @if (order.status !== 'CANCELLED') {
+      <div class="mp-cop__steps">
+        @for (step of trackingSteps; track step; let i = $index) {
+        <div class="mp-cop__step" [class.mp-cop__step--done]="isStepDone(step, order.status)"
+          [class.mp-cop__step--active]="isStepActive(step, order.status)">
+          <div class="mp-cop__step-dot">
+            @if (isStepDone(step, order.status)) {
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
+              stroke-linecap="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            }
+          </div>
+          @if (i < trackingSteps.length - 1) { <div class="mp-cop__step-line"
+            [class.mp-cop__step-line--done]="isStepDone(step, order.status)">
+        </div>
+        }
+      </div>
+      }
+    </div>
+    <div class="mp-cop__step-labels">
+      @for (step of trackingSteps; track step) {
+      <span class="mp-cop__step-label" [class.mp-cop__step-label--active]="isStepActive(step, order.status)"
+        [class.mp-cop__step-label--done]="isStepDone(step, order.status)">
+        {{ trackingMetaMap[step].label }}
+      </span>
+      }
+    </div>
+    }
+
+    <!-- Done or View detail -->
+    @if (getTrackingMeta(order.status).terminal) {
+    <button class="mp-cop__done-btn" (click)="endTracking.emit(order.reference)" type="button">
+      {{ 'cart.done_with' | translate: { ref: order.reference } }}
+    </button>
+    } @else {
+    <button class="mp-cop__track-btn" (click)="openTracking.emit(order.reference)" type="button">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round">
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+      {{ 'cart.full_tracking' | translate: { ref: order.reference } }}
+    </button>
+    }
+
+  </div>
+  }
+
+</div>
+
+} @else {
+
+<!-- ── Cart tab — item list ──────────────────────────────────── -->
+<div class="mp-cart__items">
+  @for (ci of cartItems; track ci.cartId) {
+  <div class="mp-cart-row">
+    <div class="mp-cart-row__info">
+      <span class="mp-cart-row__name">{{ ci.item.name }}</span>
+      @if (ci.variant) {
+      <span class="mp-cart-row__meta">{{ ci.variant.name }}</span>
+      }
+      @for (mod of ci.modifiers; track mod.id) {
+      <span class="mp-cart-row__meta">+ {{ mod.name }}</span>
+      }
+      @if (ci.specialNote) {
+      <span class="mp-cart-row__note">📝 {{ ci.specialNote }}</span>
+      }
+    </div>
+    <div class="mp-cart-row__right">
+      <div class="mp-cart-stepper">
+        <button type="button" (click)="updateQty.emit({ cartId: ci.cartId, qty: ci.quantity - 1 })">−</button>
+        <span>{{ ci.quantity }}</span>
+        <button type="button" (click)="updateQty.emit({ cartId: ci.cartId, qty: ci.quantity + 1 })">+</button>
+      </div>
+      <span class="mp-cart-row__total">
+        {{ fmt(ci.lineTotal) }}
+        <span class="mp-curr">{{ currency }}</span>
+      </span>
+    </div>
+  </div>
+  }
+</div>
+
+<div class="mp-cart__foot">
+  <div class="mp-cart__total-row">
+    <span class="mp-cart__total-label">{{ 'cart.total' | translate }}</span>
+    <span class="mp-cart__total-val">
+      {{ fmt(cartSubtotal) }} {{ currency }}
+    </span>
+  </div>
+  <button class="mp-checkout-btn" (click)="openCheckout.emit()" [disabled]="!isOpen"
+    [class.mp-checkout-btn--closed]="!isOpen" type="button">
+    @if (!isOpen) {
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+    {{ 'cart.closed' | translate }}
+    } @else {
+    {{ 'cart.place_order' | translate }}
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round">
+      <polyline points="5 12 12 19 19 5" />
+    </svg>
+    }
+  </button>
+</div>
+
+} <!-- end cart/orders tabs -->
+</div>
