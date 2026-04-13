@@ -64,12 +64,12 @@ export interface PosCartItem {
 
 // ── Order type & payment ───────────────────────────────────────────────────────
 
-export type PosOrderType   = 'dine_in' | 'takeaway' | 'delivery';
+export type PosOrderType   = 'DINE_IN' | 'TAKEAWAY' | 'DELIVERY';
 export type PosPaymentType = 'cash' | 'card' | 'mixed';
 
 export interface PosOrderPayload {
   orderType:       PosOrderType;
-  tableNumber:     string | null;   // null for walk-in / takeaway
+  tableNumber:     string | null;   // null for walk-in / TAKEAWAY
   customerName:    string | null;
   notes:           string | null;
   paymentType:     PosPaymentType;

@@ -42,7 +42,7 @@ import { ClosedBannerComponent } from '../components/closed-banner/closed-banner
 import { CartToastComponent } from '../components/cart-toast/cart-toast.component';
 
 export type OrderStep = 'idle' | 'checkout' | 'success';
-export type OrderType = 'dine_in' | 'takeaway';
+export type OrderType = 'DINE_IN' | 'TAKEAWAY';
 
 export interface SocialLink {
   platform: string;
@@ -126,7 +126,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   customerName = signal('');
   customerPhone = signal('');
-  orderType = signal<OrderType>('dine_in');
+  orderType = signal<OrderType>('DINE_IN');
   tableNumber = signal('');
   orderNotes = signal('');
 
@@ -424,8 +424,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.cart.open();
   }
 
-  setOrderTypeDineIn(): void { this.orderType.set('dine_in'); }
-  setOrderTypeTakeaway(): void { this.orderType.set('takeaway'); }
+  setOrderTypeDineIn(): void { this.orderType.set('DINE_IN'); }
+  setOrderTypeTakeaway(): void { this.orderType.set('TAKEAWAY'); }
   setTableNumber(v: string): void { this.tableNumber.set(v); }
   setCustomerName(v: string): void { this.customerName.set(v); }
   setCustomerPhone(v: string): void { this.customerPhone.set(v); }

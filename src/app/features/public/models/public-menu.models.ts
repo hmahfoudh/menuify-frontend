@@ -125,7 +125,7 @@ export interface CartItem {
 export interface CreateOrderRequest {
   customerName:    string | null;
   customerPhone:   string | null;
-  orderType:       'dine_in' | 'takeaway' | 'delivery';
+  orderType:       'DINE_IN' | 'TAKEAWAY' | 'DELIVERY';
   tableNumber:     string | null;
   customerAddress: string | null;
   notes:           string | null;
@@ -174,7 +174,7 @@ export interface TrackedOrder {
   id:               string;
   reference:        string;
   status:           TrackingStatus;
-  orderType:        'dine_in' | 'takeaway' | 'delivery';
+  orderType:        'DINE_IN' | 'TAKEAWAY' | 'DELIVERY';
   tableNumber:      string | null;
   customerName:     string | null;
   subtotal:         number;

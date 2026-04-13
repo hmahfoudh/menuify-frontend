@@ -10,7 +10,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   templateUrl: './checkout-modal.component.html',
 })
 export class CheckoutModalComponent {
-  @Input({ required: true }) orderType!: 'dine_in' | 'takeaway';
+  @Input({ required: true }) orderType!: 'DINE_IN' | 'TAKEAWAY';
   @Input({ required: true }) tableNumber!: string;
   @Input({ required: true }) customerName!: string;
   @Input({ required: true }) customerPhone!: string;
