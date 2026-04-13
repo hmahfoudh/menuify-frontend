@@ -7,7 +7,7 @@ import { PublicItemResponse } from '../../models/public-menu.models';
 @Component({
   selector: 'app-menu-grid',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, ItemCardComponent],
+  imports: [CommonModule, ItemCardComponent],
   templateUrl: './menu-grid.component.html',
 })
 export class MenuGridComponent {

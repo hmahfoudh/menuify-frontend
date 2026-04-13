@@ -4,8 +4,9 @@ import { Observable }         from 'rxjs';
 import { map }                from 'rxjs/operators';
 import { environment }        from '../../../../../environments/environment';
 import {
-  QrCodeResponse, QrCodeRequest, ApiResponse
+  QrCodeResponse, QrCodeRequest
 } from '../models/qr.models';
+import { ApiResponse } from '../../../../core/models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class QrCodeService {

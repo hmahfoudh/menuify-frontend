@@ -102,11 +102,6 @@ export interface ThemeResponse {
   customCss:      string | null;
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data:    T;
-}
-
 // ── Cart types ────────────────────────────────────────────────────────────────
 
 export interface CartItem {

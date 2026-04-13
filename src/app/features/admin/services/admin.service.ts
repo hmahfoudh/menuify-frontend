@@ -7,8 +7,8 @@ import {
   AdminTenantResponse, AdminStatsResponse,
   AdminCreateTenantRequest, Plan
 } from '../models/admin.models';
+import { ApiResponse } from '../../../core/models/api.models';
 
-interface ApiResponse<T> { success: boolean; data: T; message: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {

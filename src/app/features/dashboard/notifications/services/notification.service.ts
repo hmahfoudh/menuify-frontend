@@ -3,7 +3,8 @@ import { HttpClient }         from '@angular/common/http';
 import { Observable }         from 'rxjs';
 import { map }                from 'rxjs/operators';
 import { environment }        from '../../../../../environments/environment';
-import { NotificationResponse, ApiResponse } from '../models/notification.models';
+import { NotificationResponse } from '../models/notification.models';
+import { ApiResponse } from '../../../../core/models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {

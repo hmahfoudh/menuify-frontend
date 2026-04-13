@@ -7,8 +7,8 @@ import { environment }  from '../../../../environments/environment';
 import { StaffResponse } from '../models/pos.models';
 import { SubdomainService } from '../../../core/services/subdomain.service';
 import { LocalStorageService } from '../../../core/services/local-storage.service';
+import { ApiResponse } from '../../../core/models/api.models';
 
-interface ApiResponse<T> { success: boolean; data: T; message: string; }
 
 /**
  * Handles POS authentication for both owner and staff sessions.

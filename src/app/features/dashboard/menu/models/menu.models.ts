@@ -155,15 +155,6 @@ export interface ModifierRequest {
   isDefault:   boolean;
 }
 
-// ── API wrapper ───────────────────────────────────────────────────────────────
-
-export interface ApiResponse<T> {
-  success:   boolean;
-  message:   string;
-  data:      T;
-  timestamp: string;
-}
-
 // ── UI state helpers ──────────────────────────────────────────────────────────
 
 export type PanelMode = 'create' | 'edit';

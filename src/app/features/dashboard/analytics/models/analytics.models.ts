@@ -33,13 +33,6 @@ export interface AnalyticsSummaryResponse {
   dailyStats: DailyStatsResponse[];
 }
 
-export interface ApiResponse<T> {
-  success:   boolean;
-  message:   string;
-  data:      T;
-  timestamp: string;
-}
-
 export type Period = '7d' | '30d' | '90d';
 
 export const PERIODS: { value: Period; label: string }[] = [

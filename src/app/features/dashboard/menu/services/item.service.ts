@@ -8,9 +8,10 @@ import {
   VariantRequest,
   ModifierGroupResponse, ModifierGroupRequest,
   ModifierRequest,
-  ReorderRequest, ApiResponse
+  ReorderRequest
 } from '../models/menu.models';
 import { environment } from '../../../../../environments/environment';
+import { ApiResponse } from '../../../../core/models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class ItemService {

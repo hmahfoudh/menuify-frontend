@@ -12,10 +12,9 @@ import {
 } from '../../public/models/public-menu.models';
 import { OrderResponse } from '../../dashboard/orders/models/order.models';
 import { LocalStorageService } from '../../../core/services/local-storage.service';
+import { ApiResponse } from '../../../core/models/api.models';
 
 // Reuse existing order response shape
-
-interface ApiResponse<T> { success: boolean; data: T; message: string; }
 
 @Injectable({ providedIn: 'root' })
 export class PosService {

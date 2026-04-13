@@ -4,9 +4,9 @@ import { Observable }  from 'rxjs';
 import { map }         from 'rxjs/operators';
 import {
   OrderResponse, OrderStatus,
-  PageResponse, ApiResponse
 } from '../models/order.models';
 import { environment } from '../../../../../environments/environment';
+import { ApiResponse, PageResponse } from '../../../../core/models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {

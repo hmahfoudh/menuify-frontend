@@ -55,13 +55,6 @@ export interface TenantResponse {
   createdAt:       string;
 }
 
-export interface ApiResponse<T> {
-  success:   boolean;
-  message:   string;
-  data:      T;
-  timestamp: string;
-}
-
 // Opening hours structure
 export interface DayHours {
   open:   boolean;
