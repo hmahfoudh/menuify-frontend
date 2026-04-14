@@ -285,5 +285,11 @@
       "back_to_menu": "Back to menu",
       "new_reservation": "← New reservation"
     }
+  },
+  "wp": {
+    "subtitle_welcome": "Welcome to",
+    "subtitle_action": "What would you like to do?",
+    "btn_view_menu": "View Menu",
+    "btn_reserve": "Reserve a Table"
   }
 }

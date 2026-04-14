@@ -1,11 +1,12 @@
 import { Component, signal, inject, OnInit, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router }       from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector:    'app-welcome-popup',
   standalone:  true,
-  imports:     [CommonModule],
+  imports:     [CommonModule, TranslatePipe],
   templateUrl: './welcome-popup.component.html',
   styleUrls:   ['./welcome-popup.component.scss'],
 })

@@ -285,5 +285,11 @@
       "back_to_menu": "العودة إلى القائمة",
       "new_reservation": "→ حجز جديد"
     }
+  },
+  "wp": {
+    "subtitle_welcome": "مرحباً بكم في",
+    "subtitle_action": "ماذا تريد أن تفعل؟",
+    "btn_view_menu": "عرض القائمة",
+    "btn_reserve": "احجز طاولة"
   }
 }
