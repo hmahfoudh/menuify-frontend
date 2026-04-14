@@ -9,6 +9,7 @@ import { PublicItemResponse } from '../../models/public-menu.models';
   standalone: true,
   imports: [CommonModule, TranslatePipe, FormatLikeCountPipe],
   templateUrl: './item-card.component.html',
+  styleUrl: './item-card.component.scss',
 })
 export class ItemCardComponent {
   @Input({ required: true }) item!: PublicItemResponse;

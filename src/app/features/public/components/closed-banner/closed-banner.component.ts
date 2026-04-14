@@ -7,6 +7,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   templateUrl: './closed-banner.component.html',
+  styleUrl: './closed-banner.component.scss',
 })
 export class ClosedBannerComponent {
   @Input({ required: true }) nextOpenTime!: string | null;

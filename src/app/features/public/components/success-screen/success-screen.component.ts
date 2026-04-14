@@ -7,6 +7,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   templateUrl: './success-screen.component.html',
+  styleUrl: './success-screen.component.scss',
 })
 export class SuccessScreenComponent {
   @Input({ required: true }) latestOrderRef!: string;

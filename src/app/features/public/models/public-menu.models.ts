@@ -3,8 +3,8 @@
 export interface PublicTenantResponse {
   name:           string;
   subdomain:      string;
-  logoUrl:        string | null;
-  tagline:        string | null;
+  logoUrl:        string;
+  tagline:        string;
   address:        string | null;
   city:           string | null;
   country:        string | null;

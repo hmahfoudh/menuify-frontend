@@ -16,7 +16,11 @@ export const routes: Routes = [
   // ── Public menu — tenant subdomains (blackrabbit.menuify.tn) ─────────────────
   {
     path:          'menu',
-    loadComponent: () =>import('./features/public/menu-page/menu-page.component').then(m => m.MenuPageComponent),
+    loadComponent: () =>import('./features/public/pages/menu-page/menu-page.component').then(m => m.MenuPageComponent),
+  },
+  {
+    path: 'reserve',
+    loadComponent: () => import('./features/public/pages/reservation-form/reservation-form.component').then(m => m.ReservationFormComponent),
   },
 
   // ── POS — tenant subdomain ───────────────────────────────────────────────────
@@ -51,6 +55,7 @@ export const routes: Routes = [
       { path: 'menu',          loadChildren:  () => import('./features/dashboard/menu/menu.routes').then(m => m.MENU_ROUTES) },
       { path: 'orders',        loadComponent: () => import('./features/dashboard/orders/pages/orders/orders.component').then(m => m.OrdersComponent) },
       { path: 'history',       loadComponent: () => import('./features/dashboard/orders/pages/order-history/order-history.component').then(m => m.OrderHistoryComponent) },
+      { path: 'reservations',  loadComponent: () => import('./features/dashboard/reservations/reservations/reservations.component').then(m => m.ReservationsComponent) },
       { path: 'theme',         loadComponent: () => import('./features/dashboard/theme/theme-editor/theme-editor.component').then(m => m.ThemeEditorComponent) },
       { path: 'analytics',     loadComponent: () => import('./features/dashboard/analytics/analytics/analytics.component').then(m => m.AnalyticsComponent) },
       { path: 'tables',        loadComponent: () => import('./features/dashboard/tables/tables/tables.component').then(m => m.TablesComponent) },

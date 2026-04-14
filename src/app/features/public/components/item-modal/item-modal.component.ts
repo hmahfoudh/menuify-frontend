@@ -13,6 +13,7 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './item-modal.component.html',
+  styleUrl: './item-modal.component.scss',
 })
 export class ItemModalComponent {
   @Input({ required: true }) item!: PublicItemResponse;

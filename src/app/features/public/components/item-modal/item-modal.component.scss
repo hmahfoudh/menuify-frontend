@@ -1,0 +1,334 @@
+@use '../../scss/menu-shared' as shared;
+
+@include shared.keyframe-fade;
+@include shared.keyframe-sheet-up;
+@include shared.backdrop;
+@include shared.close-button;
+@include shared.required-badge;
+@include shared.optional-label;
+
+:host {
+  display: contents;
+}
+
+.mp-modal {
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  background: var(--menuify-surface);
+  border-radius: 20px 20px 0 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  position: relative;
+  animation: mp-sheet-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @media (min-width: 600px) {
+    border-radius: 16px;
+    margin: auto;
+    max-height: 85vh;
+  }
+}
+
+.mp-modal__img {
+  height: 220px;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.mp-modal__body {
+  padding: 1.25rem;
+}
+
+.mp-modal__name {
+  font-family: var(--menuify-font-head), Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--menuify-text);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+}
+
+.mp-modal__desc {
+  font-size: 0.82rem;
+  color: var(--menuify-muted);
+  line-height: 1.55;
+}
+
+.mp-modal__diet {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin: 0.65rem 0;
+}
+
+.mp-diet-tag {
+  font-size: 0.68rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  background: var(--menuify-surface2);
+  border: 1px solid var(--menuify-border);
+  color: var(--menuify-muted);
+}
+
+// ── Option groups ─────────────────────────────────────────────────
+.mp-option-group {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--menuify-border);
+}
+
+.mp-option-group__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.mp-option-group__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--menuify-text);
+}
+
+.mp-option-group__meta {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.mp-select-hint {
+  font-size: 0.68rem;
+  color: var(--menuify-muted);
+}
+
+// Variants
+.mp-variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  &--cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  &--dropdown {
+    flex-direction: column;
+  }
+}
+
+.mp-variant {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--menuify-r-btn);
+  border: 1.5px solid var(--menuify-border);
+  background: var(--menuify-surface2);
+  color: var(--menuify-muted);
+  font-size: 0.78rem;
+  text-align: left;
+  transition: all var(--menuify-tr);
+
+  &--active {
+    border-color: var(--menuify-accent);
+    background: color-mix(in srgb, var(--menuify-accent) 10%, transparent);
+    color: var(--menuify-accent);
+  }
+
+  &:hover:not(.mp-variant--active) {
+    border-color: var(--menuify-border);
+    color: var(--menuify-text);
+  }
+}
+
+.mp-variant__img {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.mp-variant__name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.mp-variant__price {
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+
+// Modifiers
+.mp-modifiers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.mp-mod {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--menuify-r-btn);
+  border: 1.5px solid var(--menuify-border);
+  background: var(--menuify-surface2);
+  text-align: left;
+  transition: all var(--menuify-tr);
+
+  &--active {
+    border-color: var(--menuify-accent);
+    background: rgba(201, 169, 110, 0.08);
+  }
+}
+
+.mp-mod__check {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid var(--menuify-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--menuify-bg);
+  transition: all var(--menuify-tr);
+
+  &--on {
+    background: var(--menuify-accent);
+    border-color: var(--menuify-accent);
+  }
+
+  &--radio {
+    border-radius: 50%;
+  }
+}
+
+.mp-mod__name {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--menuify-text);
+}
+
+.mp-mod__price {
+  font-size: 0.75rem;
+  color: var(--menuify-accent);
+  flex-shrink: 0;
+}
+
+// Special note
+.mp-note {
+  margin-top: 1rem;
+}
+
+.mp-note__label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--menuify-muted);
+  margin-bottom: 0.4rem;
+}
+
+.mp-note__input {
+  width: 100%;
+  background: var(--menuify-surface2);
+  border: 1.5px solid var(--menuify-border);
+  border-radius: var(--menuify-r-btn);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+  color: var(--menuify-text);
+  outline: none;
+  resize: none;
+  transition: border-color var(--menuify-tr);
+
+  &::placeholder {
+    color: var(--menuify-muted);
+    opacity: 0.55;
+  }
+
+  &:focus {
+    border-color: var(--menuify-accent);
+  }
+}
+
+// Modal footer
+.mp-modal__footer {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--menuify-border);
+  margin-top: 1rem;
+}
+
+.mp-stepper {
+  display: flex;
+  align-items: center;
+  background: var(--menuify-surface2);
+  border: 1.5px solid var(--menuify-border);
+  border-radius: var(--menuify-r-btn);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.mp-stepper__btn {
+  width: 36px;
+  height: 42px;
+  border: none;
+  background: transparent;
+  color: var(--menuify-text);
+  font-size: 1.1rem;
+  transition: background var(--menuify-tr);
+
+  &:hover {
+    background: var(--menuify-surface2);
+  }
+}
+
+.mp-stepper__val {
+  width: 32px;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--menuify-text);
+}
+
+.mp-add-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--menuify-r-btn);
+  border: none;
+  background: var(--menuify-accent);
+  color: var(--menuify-bg);
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all var(--menuify-tr);
+
+  &:hover:not(:disabled) {
+    background: var(--menuify-accent-hi);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.mp-add-btn__price {
+  opacity: 0.82;
+  font-size: 0.82rem;
+}

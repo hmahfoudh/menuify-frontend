@@ -1,0 +1,270 @@
+:host {
+  display: block;
+}
+
+.mp-footer {
+  padding: 24px 16px 120px; // 120px bottom clears the persistent bottom bar
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// ── Base card ─────────────────────────────────────────────────────
+.mp-footer__card {
+  background: var(--menuify-surface);
+  border: 1px solid var(--menuify-border);
+  border-radius: var(--menuify-r-card);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+// ── Icon + body row ───────────────────────────────────────────────
+.mp-footer__card-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--menuify-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--menuify-accent);
+  flex-shrink: 0;
+}
+
+.mp-footer__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// ── Location card ─────────────────────────────────────────────────
+.mp-footer__location-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--menuify-text);
+  line-height: 1.4;
+}
+
+.mp-footer__maps-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--menuify-accent);
+  text-decoration: none;
+  transition: color var(--menuify-tr);
+
+  &:hover {
+    color: var(--menuify-accent-hi);
+  }
+}
+
+// ── Contact / WhatsApp card ───────────────────────────────────────
+.mp-footer__contact-number {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--menuify-text);
+  letter-spacing: 0.02em;
+}
+
+.mp-footer__contact-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mp-footer__contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--menuify-r-btn);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity var(--menuify-tr), transform var(--menuify-tr);
+  border: none;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &--whatsapp {
+    background: #25d366;
+    color: #fff;
+  }
+
+  &--call {
+    background: var(--menuify-surface2);
+    border: 1px solid var(--menuify-border);
+    color: var(--menuify-text);
+  }
+
+  &:hover {
+    opacity: 0.88;
+  }
+}
+
+// ── WiFi card ─────────────────────────────────────────────────────
+.mp-footer__wifi-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mp-footer__wifi-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--menuify-surface2);
+  border-radius: calc(var(--menuify-r-card) - 4px);
+  padding: 14px 16px;
+}
+
+.mp-footer__wifi-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mp-footer__wifi-key {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--menuify-muted);
+  min-width: 72px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mp-footer__wifi-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--menuify-text);
+
+  &--pw {
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.08em;
+  }
+}
+
+.mp-footer__wifi-pw-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mp-footer__copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--menuify-border);
+  background: transparent;
+  color: var(--menuify-muted);
+  transition: color var(--menuify-tr), border-color var(--menuify-tr), background var(--menuify-tr);
+  flex-shrink: 0;
+
+  &:hover {
+    color: var(--menuify-accent);
+    border-color: var(--menuify-accent);
+    background: rgba(var(--menuify-accent), 0.06);
+  }
+}
+
+.mp-footer__wifi-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.mp-footer__qr-img {
+  border-radius: 10px;
+  border: 6px solid #fff;
+  display: block;
+}
+
+.mp-footer__qr-hint {
+  font-size: 12px;
+  color: var(--menuify-muted);
+  text-align: center;
+}
+
+// ── Social links card ─────────────────────────────────────────────
+.mp-footer__social-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--menuify-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mp-footer__social-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mp-footer__social-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: calc(var(--menuify-r-card) - 4px);
+  text-decoration: none;
+  color: var(--menuify-text);
+  transition: background var(--menuify-tr), color var(--menuify-tr);
+
+  &:hover {
+    background: var(--menuify-surface2);
+  }
+
+  &--instagram:hover { color: #e1306c; }
+  &--facebook:hover { color: #1877f2; }
+  &--tiktok:hover { color: var(--menuify-text); }
+  &--twitter:hover { color: var(--menuify-text); }
+  &--youtube:hover { color: #ff0000; }
+  &--linkedin:hover { color: #0a66c2; }
+}
+
+.mp-footer__social-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.mp-footer__social-platform {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.mp-footer__social-handle {
+  font-size: 12px;
+  color: var(--menuify-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mp-footer__social-arrow {
+  color: var(--menuify-muted);
+  flex-shrink: 0;
+  transition: color var(--menuify-tr), transform var(--menuify-tr);
+
+  .mp-footer__social-item:hover & {
+    color: var(--menuify-accent);
+    transform: translateX(2px);
+  }
+}

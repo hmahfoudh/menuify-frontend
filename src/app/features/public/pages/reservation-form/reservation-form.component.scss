@@ -1,0 +1,435 @@
+/**
+ * All colors reference CSS variables injected by ThemeInjectorService.
+ * Fallbacks keep the page usable even before tokens load.
+ *
+ * Token map:
+ *   --colors-background  → page background
+ *   --colors-surface     → card / header background
+ *   --colors-surface2    → inputs / modifiers background
+ *   --colors-accent      → primary accent
+ *   --colors-accentHover → accent hover
+ *   --colors-text        → primary text
+ *   --colors-textMuted   → secondary text
+ *   --colors-border      → borders
+ *   --shape-cardRadius   → card border radius
+ *   --shape-buttonRadius → button border radius
+ *   --typography-headingFont → h1/h2 font family
+ *   --typography-bodyFont    → body font family
+ */
+
+:host {
+  // Derived tokens
+  --menuify-accent-bg:   color-mix(in srgb, var(--menuify-accent) 10%, transparent);
+  --menuify-accent-line: color-mix(in srgb, var(--menuify-accent) 22%, transparent);
+  --menuify-border2:     color-mix(in srgb, var(--menuify-accent) 24%, transparent);
+  --menuify-muted2:      color-mix(in srgb, var(--menuify-muted) 60%, transparent);
+  --menuify-green:       #64c882;
+  --menuify-green-bg:    rgba(100, 200, 130, 0.12);
+  --menuify-red:         #e07070;
+  --menuify-red-bg:      rgba(220, 80, 70, 0.08);
+
+  display: block;
+}
+
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+.rsv-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--menuify-surface);
+  border: 1px solid var(--menuify-border2);
+  //border-radius: calc(var(--menuify-r-card) + 8px);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  animation: rsvCardIn 0.35s ease both;
+}
+
+@keyframes rsvCardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.rsv-card__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.rsv-card__icon {
+  width: 52px; height: 52px;
+  border-radius: var(--menuify-r-card);
+  background: var(--menuify-accent-bg);
+  border: 1px solid var(--menuify-accent-line);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--menuify-accent);
+}
+
+.rsv-card__title {
+  font-family: var(--menuify-font-head), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--menuify-text);
+  margin: 0;
+}
+
+.rsv-card__sub {
+  font-size: 0.82rem;
+  color: var(--menuify-muted);
+  margin: 0;
+}
+
+// ── Alert ─────────────────────────────────────────────────────────────────────
+.rsv-alert {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--menuify-r-btn);
+  font-size: 0.8rem;
+  animation: rsvCardIn 0.2s ease;
+
+  &--error {
+    background: var(--menuify-red-bg);
+    border: 1px solid color-mix(in srgb, var(--menuify-red) 25%, transparent);
+    color: var(--menuify-red);
+  }
+}
+
+// ── Form ──────────────────────────────────────────────────────────────────────
+.rsv-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rsv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.rsv-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.rsv-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--menuify-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rsv-label__hint {
+  font-weight: 400;
+  font-size: 0.65rem;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--menuify-muted2);
+  font-style: italic;
+}
+
+.rsv-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--menuify-r-btn);
+  border: 1px solid var(--menuify-border2);
+  background: var(--menuify-surface2);
+  color: var(--menuify-text);
+  font-size: 0.88rem;
+  font-family: var(--menuify-font-body), sans-serif;
+  outline: none;
+  transition: border-color var(--menuify-tr), box-shadow var(--menuify-tr);
+  box-sizing: border-box;
+  -webkit-appearance: none;
+
+  &::placeholder { color: var(--menuify-muted2); }
+  &:focus {
+    border-color: var(--menuify-accent-line);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--menuify-accent) 8%, transparent);
+  }
+
+  &--mono {
+    font-family: 'DM Mono', 'Courier New', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+.rsv-textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+// Color scheme for date/time pickers
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
+
+// ── Stepper ───────────────────────────────────────────────────────────────────
+.rsv-stepper {
+  display: flex;
+  align-items: center;
+  border-radius: var(--menuify-r-btn);
+  border: 1px solid var(--menuify-border2);
+  overflow: hidden;
+  width: fit-content;
+}
+
+.rsv-stepper__btn {
+  width: 42px;
+  height: 42px;
+  border: none;
+  background: var(--menuify-surface2);
+  color: var(--menuify-text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all var(--menuify-tr);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover:not(:disabled) { background: var(--menuify-bg); color: var(--menuify-accent); }
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
+}
+
+.rsv-stepper__value {
+  width: 50px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--menuify-text);
+  background: var(--menuify-surface2);
+  border-left: 1px solid var(--menuify-border);
+  border-right: 1px solid var(--menuify-border);
+  padding: 8px 0;
+}
+
+// ── Type selector ─────────────────────────────────────────────────────────────
+.rsv-type-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rsv-type-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: var(--menuify-r-btn);
+  border: 1px solid var(--menuify-border2);
+  background: var(--menuify-surface2);
+  color: var(--menuify-muted);
+  font-family: var(--menuify-font-body), sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--menuify-tr);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    border-color: var(--menuify-accent-line);
+    color: var(--menuify-text);
+  }
+
+  &--active {
+    background: var(--menuify-accent-bg);
+    border-color: var(--menuify-accent);
+    color: var(--menuify-accent);
+  }
+}
+
+.rsv-type-btn__icon { font-size: 1.2rem; }
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+.rsv-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 12px 20px;
+  border-radius: var(--menuify-r-btn);
+  border: none;
+  font-family: var(--menuify-font-body), sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--menuify-tr);
+
+  &--primary {
+    background: var(--menuify-accent);
+    color: var(--menuify-bg);
+
+    &:hover:not(:disabled) {
+      background: var(--menuify-accent-hi);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px color-mix(in srgb, var(--menuify-accent) 30%, transparent);
+    }
+    &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  }
+
+  &--ghost {
+    background: transparent;
+    border: 1px solid var(--menuify-border2);
+    color: var(--menuify-text);
+
+    &:hover { background: var(--menuify-surface2); border-color: var(--menuify-accent-line); }
+  }
+
+  &--link {
+    background: none;
+    border: none;
+    padding: 8px;
+    color: var(--menuify-muted);
+    font-size: 0.78rem;
+    font-weight: 400;
+
+    &:hover { color: var(--menuify-accent); }
+  }
+}
+
+.rsv-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid color-mix(in srgb, var(--menuify-bg) 30%, transparent);
+  border-top-color: var(--menuify-bg);
+  border-radius: 50%;
+  animation: rsvSpin 0.6s linear infinite;
+}
+@keyframes rsvSpin { to { transform: rotate(360deg); } }
+
+// ── Success ───────────────────────────────────────────────────────────────────
+.rsv-success-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--menuify-green-bg);
+  border: 2px solid color-mix(in srgb, var(--menuify-green) 30%, transparent);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--menuify-green);
+}
+
+.rsv-ref-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.25rem;
+  background: var(--menuify-surface2);
+  border: 1px solid var(--menuify-accent-line);
+  border-radius: var(--menuify-r-card);
+
+  &--compact {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+  }
+}
+
+.rsv-ref-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--menuify-muted);
+}
+
+.rsv-ref-code {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--menuify-accent);
+  letter-spacing: 0.08em;
+}
+
+.rsv-ref-hint {
+  font-size: 0.7rem;
+  color: var(--menuify-muted2);
+}
+
+// ── Summary ───────────────────────────────────────────────────────────────────
+.rsv-summary {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.rsv-summary__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--menuify-border);
+
+  &:last-child { border-bottom: none; }
+}
+
+.rsv-summary__label {
+  font-size: 0.78rem;
+  color: var(--menuify-muted);
+  flex-shrink: 0;
+}
+
+.rsv-summary__value {
+  font-size: 0.82rem;
+  color: var(--menuify-text);
+  text-align: right;
+  word-break: break-word;
+}
+
+// ── Status badge ──────────────────────────────────────────────────────────────
+.rsv-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.status--gold {
+  background: var(--menuify-accent-bg);
+  border: 1px solid var(--menuify-accent-line);
+  color: var(--menuify-accent);
+}
+
+.status--green {
+  background: var(--menuify-green-bg);
+  border: 1px solid color-mix(in srgb, var(--menuify-green) 30%, transparent);
+  color: var(--menuify-green);
+}
+
+.status--red {
+  background: var(--menuify-red-bg);
+  border: 1px solid color-mix(in srgb, var(--menuify-red) 25%, transparent);
+  color: var(--menuify-red);
+}
+
+.rsv-success-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 480px) {
+  .rsv-page { padding: 1rem 0.75rem; }
+  .rsv-card {
+    padding: 1.5rem;
+    //border-radius: calc(var(--menuify-r-card) + 4px);
+  }
+  .rsv-row      { grid-template-columns: 1fr; }
+  .rsv-type-row { flex-direction: row; }
+}

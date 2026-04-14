@@ -1,0 +1,281 @@
+:host {
+  display: contents;
+}
+
+.mp-card {
+  background: var(--menuify-surface);
+  border: 1px solid var(--menuify-border);
+  border-radius: var(--menuify-r-card);
+  overflow: hidden;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--menuify-tr), box-shadow var(--menuify-tr), border-color var(--menuify-tr);
+  animation: mp-card-in 0.3s ease both;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    border-color: var(--menuify-accent);
+  }
+
+  &--featured {
+    border-left: 2.5px solid var(--menuify-accent);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@keyframes mp-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mp-card__img {
+  height: var(--menuify-img-h);
+  background: var(--menuify-surface2);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s;
+  }
+
+  .mp-card:hover img {
+    transform: scale(1.05);
+  }
+}
+
+.mp-card__img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--menuify-muted);
+  opacity: 0.4;
+}
+
+// Badges
+.mp-badge {
+  position: absolute;
+  font-size: 0.48rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
+  line-height: 1;
+
+  &--featured {
+    top: 0.4rem;
+    left: 0.4rem;
+    background: var(--menuify-accent);
+    color: var(--menuify-bg);
+  }
+
+  &--variants {
+    bottom: 0.4rem;
+    right: 0.4rem;
+    background: rgba(0, 0, 0, 0.65);
+    color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+  }
+}
+
+.mp-card__body {
+  padding: 0.65rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.mp-card__name-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.3rem;
+}
+
+.mp-card__name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--menuify-text);
+  line-height: 1.3;
+  flex: 1;
+}
+
+.mp-card__diet {
+  font-size: 0.72rem;
+  flex-shrink: 0;
+}
+
+.mp-card__desc {
+  font-size: 0.7rem;
+  color: var(--menuify-muted);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.mp-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--menuify-border);
+  margin-top: auto;
+}
+
+.mp-card__price {
+  font-family: var(--menuify-font-head), Georgia, serif;
+  font-size: 0.95rem;
+  color: var(--menuify-accent);
+}
+
+.mp-card__currency {
+  font-size: 0.58rem;
+  font-family: inherit;
+  opacity: 0.7;
+}
+
+.mp-card__from {
+  font-size: 0.65rem;
+  color: var(--menuify-muted);
+  font-family: inherit;
+}
+
+.mp-card__add {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--menuify-accent);
+  color: var(--menuify-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 300;
+  flex-shrink: 0;
+}
+
+// ── Heart button + count ──────────────────────────────────────
+.mp-card__like-overlay {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.1rem;
+  z-index: 10;
+}
+
+.mp-card__like {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all var(--menuify-tr);
+  flex-shrink: 0;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    stroke: currentColor;
+    fill: none;
+  }
+
+  &:hover {
+    color: var(--menuify-accent);
+    background: rgba(0, 0, 0, 0.6);
+    transform: scale(1.15);
+
+    svg {
+      fill: currentColor;
+      opacity: 0.9;
+    }
+  }
+
+  &:active {
+    transform: scale(0.9);
+  }
+
+  &--active {
+    background: rgba(201, 169, 110, 0.2);
+    color: var(--menuify-accent);
+
+    svg {
+      fill: currentColor;
+      stroke: var(--menuify-accent);
+    }
+
+    &:hover {
+      background: rgba(201, 169, 110, 0.35);
+    }
+  }
+}
+
+.mp-card__like-count {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-align: center;
+  min-width: 28px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.mp-card__like--active ~ .mp-card__like-count {
+  color: var(--menuify-accent);
+}
+
+@media (max-width: 480px) {
+  .mp-card__like-overlay {
+    top: 0.4rem;
+    right: 0.4rem;
+    gap: 0.08rem;
+  }
+
+  .mp-card__like {
+    width: 24px;
+    height: 24px;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .mp-card__like-count {
+    font-size: 0.6rem;
+  }
+}

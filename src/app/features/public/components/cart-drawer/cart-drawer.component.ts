@@ -8,6 +8,7 @@ import { TrackedOrder, TrackingStatus, TRACKING_STATUS_META, TRACKING_STEPS } fr
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   templateUrl: './cart-drawer.component.html',
+  styleUrl: './cart-drawer.component.scss',
 })
 export class CartDrawerComponent {
   @Input({ required: true }) cartMode!: 'cart' | 'orders';

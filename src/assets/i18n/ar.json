@@ -223,5 +223,67 @@
   "toast": {
     "added": "تمت الإضافة إلى السلة",
     "view_cart": "عرض السلة"
+  },
+   "rsv": {
+    "form": {
+      "title": "احجز طاولة",
+      "subtitle": "أدخل التفاصيل أدناه وسنؤكد حجزك",
+      "full_name_label": "الاسم الكامل",
+      "full_name_placeholder": "اسمك الكامل",
+      "phone_label": "رقم الهاتف",
+      "phone_placeholder": "+216 XX XXX XXX",
+      "guests_label": "عدد الأشخاص",
+      "type_label": "نوع الحجز",
+      "date_label": "التاريخ",
+      "time_label": "الوقت",
+      "notes_label": "ملاحظات",
+      "notes_optional": "اختياري",
+      "notes_placeholder": "طلبات خاصة، حساسية، أو تفضيلات...",
+      "submit": "تأكيد الحجز",
+      "back_to_menu": "العودة إلى القائمة",
+      "track_link": "لديك حجز مسبق؟ تتبعه هنا"
+    },
+    "success": {
+      "title": "تم إرسال الحجز!",
+      "subtitle": "سنؤكد حجزك قريباً",
+      "ref_label": "رمز المرجع الخاص بك",
+      "ref_hint": "احتفظ بهذا الرمز لتتبع حجزك",
+      "summary": {
+        "name": "الاسم",
+        "guests": "الأشخاص",
+        "type": "النوع",
+        "date": "التاريخ",
+        "time": "الوقت",
+        "notes": "ملاحظات",
+        "status": "الحالة"
+      },
+      "new_reservation": "إجراء حجز آخر",
+      "back_to_menu": "العودة إلى القائمة"
+    },
+    "track": {
+      "title": "تتبع الحجز",
+      "subtitle": "أدخل رمز المرجع للتحقق من حالة حجزك",
+      "ref_label": "رمز المرجع",
+      "ref_placeholder": "RSV-XXXXXX",
+      "submit": "بحث",
+      "back_to_menu": "العودة إلى القائمة",
+      "back_to_form": "→ العودة إلى نموذج الحجز"
+    },
+    "track_result": {
+      "title": "تفاصيل الحجز",
+      "summary": {
+        "name": "الاسم",
+        "phone": "الهاتف",
+        "guests": "الأشخاص",
+        "type": "النوع",
+        "date": "التاريخ",
+        "time": "الوقت",
+        "table": "الطاولة",
+        "notes": "ملاحظات"
+      },
+      "track_another": "تتبع حجز آخر",
+      "back_to_menu": "العودة إلى القائمة",
+      "new_reservation": "→ حجز جديد"
+    }
   }
 }

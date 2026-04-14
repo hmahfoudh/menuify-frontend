@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './category-tabs.component.html',
+  styleUrl: './category-tabs.component.scss',
 })
 export class CategoryTabsComponent {
   @Input({ required: true }) categories!: any[];

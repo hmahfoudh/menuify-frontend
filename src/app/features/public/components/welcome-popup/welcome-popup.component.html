@@ -1,0 +1,58 @@
+@if (visible()) {
+  <div class="wp-backdrop" (click)="viewMenu()">
+    <div class="wp-modal" (click)="$event.stopPropagation()">
+
+      <!-- Decorative top line -->
+      <div class="wp-glow"></div>
+
+      <!-- Logo -->
+      @if (restaurantLogo()) {
+        <div class="wp-logo-wrap">
+          <img [src]="restaurantLogo()" [alt]="restaurantName()" class="wp-logo" />
+        </div>
+      } @else {
+        <div class="wp-logo-placeholder">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+            <path d="M7 2v20"/>
+            <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+          </svg>
+        </div>
+      }
+
+      <!-- Welcome text -->
+      <h2 class="wp-title">{{restaurantTagLineInput()}}</h2>
+      <p class="wp-subtitle">
+        @if (restaurantName()) {
+          Welcome to <strong>{{ restaurantName() }}</strong>.
+        }
+        What would you like to do?
+      </p>
+
+      <!-- Action buttons -->
+      <div class="wp-actions">
+        <button class="wp-btn wp-btn--primary" (click)="viewMenu()" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          View Menu
+        </button>
+
+        <button class="wp-btn wp-btn--secondary" (click)="reserve()" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Reserve a Table
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

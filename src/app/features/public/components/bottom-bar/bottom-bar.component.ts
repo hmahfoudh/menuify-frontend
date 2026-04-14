@@ -7,6 +7,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   templateUrl: './bottom-bar.component.html',
+  styleUrl: './bottom-bar.component.scss',
 })
 export class BottomBarComponent {
   @Input({ required: true }) cartEmpty!: boolean;
