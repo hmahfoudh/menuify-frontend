@@ -5,10 +5,10 @@ import { CommonModule }  from '@angular/common';
 import {
   OrderResponse, OrderStatus,
   STATUS_META, STATUS_FILTERS
-} from '../models/order.models';
+} from '../../models/order.models';
 import { interval, Subscription } from 'rxjs';
 import { switchMap, startWith }   from 'rxjs/operators';
-import { OrderService } from '../services/order.service';
+import { OrderService } from '../../services/order.service';
 
 @Component({
   selector:    'app-orders',

@@ -49,7 +49,8 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'menu', pathMatch: 'full' },
       { path: 'menu',          loadChildren:  () => import('./features/dashboard/menu/menu.routes').then(m => m.MENU_ROUTES) },
-      { path: 'orders',        loadComponent: () => import('./features/dashboard/orders/orders/orders.component').then(m => m.OrdersComponent) },
+      { path: 'orders',        loadComponent: () => import('./features/dashboard/orders/pages/orders/orders.component').then(m => m.OrdersComponent) },
+      { path: 'history',       loadComponent: () => import('./features/dashboard/orders/pages/order-history/order-history.component').then(m => m.OrderHistoryComponent) },
       { path: 'theme',         loadComponent: () => import('./features/dashboard/theme/theme-editor/theme-editor.component').then(m => m.ThemeEditorComponent) },
       { path: 'analytics',     loadComponent: () => import('./features/dashboard/analytics/analytics/analytics.component').then(m => m.AnalyticsComponent) },
       { path: 'tables',        loadComponent: () => import('./features/dashboard/tables/tables/tables.component').then(m => m.TablesComponent) },
