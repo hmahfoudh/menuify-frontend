@@ -52,6 +52,18 @@ export class WelcomePopupComponent implements OnInit {
 
   private dismiss(): void {
     this.visible.set(false);
+  const text = `
+  My Shop
+  --------
+  Coffee   3.00
+  Cake     5.00
+
+  Total:   8.00
+  `;
+
+  const encoded = btoa(unescape(encodeURIComponent(text)));
+  window.location.href = `rawbt:base64,${encoded}`;
+
     // sessionStorage.setItem('menuify_welcome_shown', 'true');
   }
 }

@@ -358,7 +358,18 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   printReceipt(): void {
-    window.print();
+  const text = `
+  My Shop
+  --------
+  Coffee   3.00
+  Cake     5.00
+
+  Total:   8.00
+  `;
+
+  const encoded = btoa(unescape(encodeURIComponent(text)));
+  window.location.href = `rawbt:base64,${encoded}`;
+
   }
 
   newOrder(): void {
