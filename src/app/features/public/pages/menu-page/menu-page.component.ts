@@ -5,10 +5,10 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PublicMenuService } from '../services/public-menu.service';
-import { CartService } from '../services/cart.service';
-import { ThemeInjectorService } from '../services/theme-injector.service';
-import { SessionService } from '../services/session.service';
+import { PublicMenuService } from '../../services/public-menu.service';
+import { CartService } from '../../services/cart.service';
+import { ThemeInjectorService } from '../../services/theme-injector.service';
+import { SessionService } from '../../services/session.service';
 import {
   PublicMenuResponse,
   PublicItemResponse,
@@ -19,30 +19,31 @@ import {
   TrackingStatus,
   TRACKING_STATUS_META,
   TRACKING_STEPS,
-} from '../models/public-menu.models';
+} from '../../models/public-menu.models';
 import { interval, Subscription } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
-import { ItemLikeService } from '../services/item-like.service';
-import { ItemLikeToggleResponse } from '../models/item-like.models';
-import { TranslateService } from '@ngx-translate/core';
+import { ItemLikeService } from '../../services/item-like.service';
+import { ItemLikeToggleResponse } from '../../models/item-like.models';
 
 // ── Child components ────────────────────────────────────────────────
-import { MenuHeaderComponent } from '../components/menu-header/menu-header.component';
-import { CategoryTabsComponent } from '../components/category-tabs/category-tabs.component';
-import { MenuGridComponent } from '../components/menu-grid/menu-grid.component';
-import { ItemModalComponent } from '../components/item-modal/item-modal.component';
-import { CartDrawerComponent } from '../components/cart-drawer/cart-drawer.component';
-import { CheckoutModalComponent } from '../components/checkout-modal/checkout-modal.component';
-import { SuccessScreenComponent } from '../components/success-screen/success-screen.component';
-import { TrackingPanelComponent } from '../components/tracking-panel/tracking-panel.component';
-import { BottomBarComponent } from '../components/bottom-bar/bottom-bar.component';
-import { MenuFooterComponent } from '../components/menu-footer/menu-footer.component';
-import { ClosedBannerComponent } from '../components/closed-banner/closed-banner.component';
-import { CartToastComponent } from '../components/cart-toast/cart-toast.component';
+import { MenuHeaderComponent } from '../../components/menu-header/menu-header.component';
+import { CategoryTabsComponent } from '../../components/category-tabs/category-tabs.component';
+import { MenuGridComponent } from '../../components/menu-grid/menu-grid.component';
+import { ItemModalComponent } from '../../components/item-modal/item-modal.component';
+import { CartDrawerComponent } from '../../components/cart-drawer/cart-drawer.component';
+import { CheckoutModalComponent } from '../../components/checkout-modal/checkout-modal.component';
+import { SuccessScreenComponent } from '../../components/success-screen/success-screen.component';
+import { TrackingPanelComponent } from '../../components/tracking-panel/tracking-panel.component';
+import { BottomBarComponent } from '../../components/bottom-bar/bottom-bar.component';
+import { MenuFooterComponent } from '../../components/menu-footer/menu-footer.component';
+import { ClosedBannerComponent } from '../../components/closed-banner/closed-banner.component';
+import { CartToastComponent } from '../../components/cart-toast/cart-toast.component';
+import { WelcomePopupComponent } from "../../components/welcome-popup/welcome-popup.component";
+import { LocalStorageService } from '../../../../core/services/local-storage.service';
 
 export type OrderStep = 'idle' | 'checkout' | 'success';
-export type OrderType = 'dine_in' | 'takeaway';
+export type OrderType = 'DINE_IN' | 'TAKEAWAY';
 
 export interface SocialLink {
   platform: string;
@@ -59,7 +60,8 @@ export interface SocialLink {
     ItemModalComponent, CartDrawerComponent, CheckoutModalComponent,
     SuccessScreenComponent, TrackingPanelComponent, BottomBarComponent,
     MenuFooterComponent, ClosedBannerComponent, CartToastComponent,
-  ],
+    WelcomePopupComponent
+],
   templateUrl: './menu-page.component.html',
   styleUrls: ['./menu-page.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -72,7 +74,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   private session = inject(SessionService);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private itemLikeSvc = inject(ItemLikeService);
-  private translate = inject(TranslateService);
+  private localStorage = inject(LocalStorageService);
 
   // ── Menu data ────────────────────────────────────────────────────────────
   menu = signal<PublicMenuResponse | null>(null);
@@ -126,7 +128,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   customerName = signal('');
   customerPhone = signal('');
-  orderType = signal<OrderType>('dine_in');
+  orderType = signal<OrderType>('DINE_IN');
   tableNumber = signal('');
   orderNotes = signal('');
 
@@ -137,16 +139,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   trackingLoading = signal(false);
   activeOrders = signal<TrackedOrder[]>([]);
   expandedRef = signal<string | null>(null);
-
-  // ── Language selection ────────────────────────────────────────────────────
-  langMenuOpen = signal(false);
-  currentLang = signal({ code: 'fr', flag: '🇫🇷', label: 'Français' });
-
-  availableLangs = signal([
-    { code: 'en', flag: '🇬🇧', label: 'English' },
-    { code: 'fr', flag: '🇫🇷', label: 'Français' },
-    { code: 'ar', flag: '🇹🇳', label: 'العربية' },
-  ]);
 
   private trackPoll?: Subscription;
 
@@ -269,6 +261,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       theme: this.menuSvc.getTheme(),
     }).subscribe({
       next: ({ menu, theme }) => {
+        this.localStorage.setJson('tenant', menu.tenant);
         this.menu.set(menu);
         this.themeSvc.applyTheme(theme);
         this.loading.set(false);
@@ -424,8 +417,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.cart.open();
   }
 
-  setOrderTypeDineIn(): void { this.orderType.set('dine_in'); }
-  setOrderTypeTakeaway(): void { this.orderType.set('takeaway'); }
+  setOrderTypeDineIn(): void { this.orderType.set('DINE_IN'); }
+  setOrderTypeTakeaway(): void { this.orderType.set('TAKEAWAY'); }
   setTableNumber(v: string): void { this.tableNumber.set(v); }
   setCustomerName(v: string): void { this.customerName.set(v); }
   setCustomerPhone(v: string): void { this.customerPhone.set(v); }
@@ -747,18 +740,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleLangMenu() {
-    this.langMenuOpen.update(v => !v);
-  }
-
-  switchLang(code: string) {
-    const lang = this.availableLangs().find(l => l.code === code)!;
-    this.currentLang.set(lang);
-    this.translate.use(code);
-    this.langMenuOpen.set(false);
-    localStorage.setItem('lang', code);
-  }
-
   fmt(n: number | null): string {
     if (n == null) return '';
     return n.toFixed(3);
@@ -784,10 +765,5 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (this.trackingView()) { this.closeTracking(); return; }
     if (this.cartOpen()) { this.cart.close(); return; }
     if (this.orderStep() === 'checkout') { this.backToCart(); }
-  }
-
-  @HostListener('document:click')
-  closeLangMenu() {
-    this.langMenuOpen.set(false);
   }
 }

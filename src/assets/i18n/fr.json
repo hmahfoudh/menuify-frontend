@@ -180,8 +180,8 @@
     "title": "Finaliser votre commande",
     "back_aria": "Retour",
     "order_type_label": "Type de commande",
-    "dine_in": "🪑 Sur place",
-    "takeaway": "🥡 À emporter",
+    "DINE_IN": "🪑 Sur place",
+    "TAKEAWAY": "🥡 À emporter",
     "table_number": "Numéro de table",
     "table_placeholder": "5",
     "your_name": "Votre nom",
@@ -223,5 +223,73 @@
   "toast": {
     "added": "Ajouté au panier",
     "view_cart": "Voir le panier"
+  },
+  "rsv": {
+    "form": {
+      "title": "Réserver une table",
+      "subtitle": "Remplissez les informations ci-dessous et nous confirmerons votre réservation",
+      "full_name_label": "Nom complet",
+      "full_name_placeholder": "Votre nom complet",
+      "phone_label": "Numéro de téléphone",
+      "phone_placeholder": "+216 XX XXX XXX",
+      "guests_label": "Nombre de personnes",
+      "type_label": "Type de réservation",
+      "date_label": "Date",
+      "time_label": "Heure",
+      "notes_label": "Remarques",
+      "notes_optional": "facultatif",
+      "notes_placeholder": "Demandes spéciales, allergies ou préférences...",
+      "submit": "Confirmer la réservation",
+      "back_to_menu": "Retour au menu",
+      "track_link": "Vous avez déjà une réservation ? Suivez-la ici"
+    },
+    "success": {
+      "title": "Réservation soumise !",
+      "subtitle": "Nous confirmerons votre réservation sous peu",
+      "ref_label": "Votre code de référence",
+      "ref_hint": "Conservez ce code pour suivre votre réservation",
+      "summary": {
+        "name": "Nom",
+        "guests": "Personnes",
+        "type": "Type",
+        "date": "Date",
+        "time": "Heure",
+        "notes": "Remarques",
+        "status": "Statut"
+      },
+      "new_reservation": "Faire une autre réservation",
+      "back_to_menu": "Retour au menu"
+    },
+    "track": {
+      "title": "Suivre une réservation",
+      "subtitle": "Entrez votre code de référence pour vérifier l'état de votre réservation",
+      "ref_label": "Code de référence",
+      "ref_placeholder": "RSV-XXXXXX",
+      "submit": "Rechercher",
+      "back_to_menu": "Retour au menu",
+      "back_to_form": "← Retour au formulaire"
+    },
+    "track_result": {
+      "title": "Détails de la réservation",
+      "summary": {
+        "name": "Nom",
+        "phone": "Téléphone",
+        "guests": "Personnes",
+        "type": "Type",
+        "date": "Date",
+        "time": "Heure",
+        "table": "Table",
+        "notes": "Remarques"
+      },
+      "track_another": "Suivre une autre",
+      "back_to_menu": "Retour au menu",
+      "new_reservation": "← Nouvelle réservation"
+    }
+  },
+  "wp": {
+    "subtitle_welcome": "Bienvenue chez",
+    "subtitle_action": "Que souhaitez-vous faire ?",
+    "btn_view_menu": "Voir le menu",
+    "btn_reserve": "Réserver une table"
   }
 }

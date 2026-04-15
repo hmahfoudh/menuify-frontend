@@ -1,0 +1,144 @@
+// ═══════════════════════════════════════════════════════════════════
+// MENUIFY — Shared SCSS Mixins
+// ═══════════════════════════════════════════════════════════════════
+//
+// Components that need shared keyframes or utility classes use:
+//   @use '../menu-shared' as shared;
+// then:
+//   @include shared.backdrop;
+//   @include shared.keyframe-fade;
+//   etc.
+//
+// This approach inlines the styles into each component's scoped CSS,
+// which is exactly what Angular Emulated encapsulation requires.
+
+// ── Keyframes ──────────────────────────────────────────────────────
+@mixin keyframe-spin {
+  @keyframes mp-spin {
+    to { transform: rotate(360deg); }
+  }
+}
+
+@mixin keyframe-fade {
+  @keyframes mp-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+@mixin keyframe-sheet-up {
+  @keyframes mp-sheet-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+
+@mixin keyframe-scale-in {
+  @keyframes mp-scale-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+}
+
+@mixin keyframe-generic-spin {
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+}
+
+// ── Shared component styles ────────────────────────────────────────
+@mixin backdrop {
+  .mp-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: mp-fade 0.2s ease;
+  }
+
+  @media (min-width: 600px) {
+    .mp-backdrop {
+      align-items: center;
+    }
+  }
+}
+
+@mixin close-button {
+  .mp-modal__close {
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+    z-index: 2;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: var(--menuify-surface2);
+    backdrop-filter: blur(4px);
+    color: var(--menuify-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--menuify-tr);
+
+    &:hover {
+      background: var(--menuify-border);
+    }
+  }
+}
+
+@mixin spinner {
+  .mp-ring {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.08);
+    border-top-color: var(--menuify-accent);
+    border-radius: 50%;
+    animation: mp-spin 0.8s linear infinite;
+
+    &--sm {
+      width: 16px;
+      height: 16px;
+      border-width: 2px;
+    }
+
+    &--dark {
+      border-color: color-mix(in srgb, var(--menuify-bg) 75%, transparent) !important;
+      border-top-color: var(--menuify-bg) !important;
+    }
+  }
+}
+
+@mixin required-badge {
+  .mp-required-badge {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    background: rgba(232, 168, 56, 0.14);
+    border: 1px solid rgba(232, 168, 56, 0.28);
+    color: #e8a838;
+  }
+}
+
+@mixin optional-label {
+  .mp-optional {
+    font-weight: 400;
+    font-size: 0.65rem;
+    margin-left: 0.3rem;
+  }
+}
+
+@mixin currency-label {
+  .mp-curr {
+    font-size: 0.58rem;
+    font-family: inherit;
+    opacity: 0.7;
+  }
+}

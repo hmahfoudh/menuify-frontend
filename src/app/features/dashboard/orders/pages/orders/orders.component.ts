@@ -5,10 +5,10 @@ import { CommonModule }  from '@angular/common';
 import {
   OrderResponse, OrderStatus,
   STATUS_META, STATUS_FILTERS
-} from '../models/order.models';
+} from '../../models/order.models';
 import { interval, Subscription } from 'rxjs';
 import { switchMap, startWith }   from 'rxjs/operators';
-import { OrderService } from '../services/order.service';
+import { OrderService } from '../../services/order.service';
 
 @Component({
   selector:    'app-orders',
@@ -56,8 +56,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
   orderTypeLabel = computed(() => {
     const o = this.selectedOrder();
     if (!o) return '';
-    return o.orderType === 'dine_in'  ? `Table ${o.tableNumber ?? '–'}`
-         : o.orderType === 'takeaway' ? 'Takeaway'
+    return o.orderType === 'DINE_IN'  ? `Table ${o.tableNumber ?? '–'}`
+         : o.orderType === 'TAKEAWAY' ? 'Takeaway'
          : 'Delivery';
   });
 

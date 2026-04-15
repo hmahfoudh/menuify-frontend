@@ -1,38 +1,38 @@
 <header class="mp-header">
   <div class="mp-header__inner">
-    @if (tenant.logoUrl) {
-    <img [src]="tenant.logoUrl" [alt]="tenant.name" class="mp-header__logo">
+    @if (tenant?.logoUrl) {
+    <img [src]="tenant?.logoUrl" [alt]="tenant.name" class="mp-header__logo">
     }
     <div class="mp-header__text">
-      <h1 class="mp-header__name">{{ tenant.name }}</h1>
-      @if (tenant.tagline) {
-      <p class="mp-header__tagline">{{ tenant.tagline }}</p>
+      <h1 class="mp-header__name">{{ tenant?.name }}</h1>
+      @if (tenant?.tagline) {
+      <p class="mp-header__tagline">{{ tenant?.tagline }}</p>
       }
     </div>
 
     <!-- ── Language selector ─────────────────────────────────── -->
-    <div class="mp-lang" [class.mp-lang--open]="langMenuOpen" (click)="$event.stopPropagation()">
-      <button class="mp-lang__trigger" (click)="toggleLangMenu.emit()" type="button"
+    <div class="mp-lang" [class.mp-lang--open]="langMenuOpen()" (click)="$event.stopPropagation()">
+      <button class="mp-lang__trigger" (click)="toggleLangMenu()" type="button"
         [attr.aria-label]="'header.language' | translate" aria-haspopup="listbox">
-        <span class="mp-lang__flag">{{ currentLang.flag }}</span>
-        <span class="mp-lang__code">{{ currentLang.code | uppercase }}</span>
+        <span class="mp-lang__flag">{{ currentLang().flag }}</span>
+        <span class="mp-lang__code">{{ currentLang().code | uppercase }}</span>
         <svg class="mp-lang__chevron" width="10" height="10" viewBox="0 0 24 24"
           fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
 
-      @if (langMenuOpen) {
+      @if (langMenuOpen()) {
       <ul class="mp-lang__menu" role="listbox">
-        @for (lang of availableLangs; track lang.code) {
+        @for (lang of availableLangs(); track lang.code) {
         <li class="mp-lang__option"
-          [class.mp-lang__option--active]="currentLang.code === lang.code"
-          (click)="switchLang.emit(lang.code)"
+          [class.mp-lang__option--active]="currentLang().code === lang.code"
+          (click)="switchLang(lang.code)"
           role="option"
-          [attr.aria-selected]="currentLang.code === lang.code">
+          [attr.aria-selected]="currentLang().code === lang.code">
           <span class="mp-lang__flag">{{ lang.flag }}</span>
           <span class="mp-lang__label">{{ lang.label }}</span>
-          @if (currentLang.code === lang.code) {
+          @if (currentLang().code === lang.code) {
           <svg class="mp-lang__check" width="11" height="11" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
             <polyline points="20 6 9 17 4 12" />

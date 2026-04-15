@@ -6,6 +6,8 @@ export type OrderStatus =
   | 'COMPLETED'
   | 'CANCELLED';
 
+export type OrderType = 'DINE_IN' | 'TAKEAWAY' | 'DELIVERY';
+
 export interface OrderLineModifierResponse {
   id:                   string;
   modifierNameSnapshot: string;
@@ -28,7 +30,7 @@ export interface OrderResponse {
   reference:        string;
   customerName:     string | null;
   customerPhone:    string | null;
-  orderType:        'dine_in' | 'takeaway' | 'delivery';
+  orderType:        OrderType;
   tableNumber:      string | null;
   subtotal:         number;
   total:            number;

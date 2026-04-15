@@ -8,6 +8,7 @@ import { PublicItemResponse } from '../../models/public-menu.models';
   standalone: true,
   imports: [CommonModule, ItemCardComponent],
   templateUrl: './menu-grid.component.html',
+  styleUrl: './menu-grid.component.scss',
 })
 export class MenuGridComponent {
   @Input({ required: true }) categories!: any[];

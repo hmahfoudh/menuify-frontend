@@ -21,6 +21,14 @@
 <!-- ── Menu ───────────────────────────────────────────────────────────────── -->
 @if (!loading() && menu(); as m) {
 
+  <!-- Welcome Popup -->
+   <app-welcome-popup
+    [restaurantNameInput]="m.tenant.name"
+    [restaurantLogoInput]="m.tenant.logoUrl"
+    [restaurantTagLineInput]="m.tenant.tagline"
+  >
+  </app-welcome-popup>
+
   <!-- CART TOAST -->
   @if (cartToast(); as toast) {
     <app-cart-toast
@@ -33,11 +41,7 @@
   <!-- HEADER -->
   <app-menu-header
     [tenant]="m.tenant"
-    [langMenuOpen]="langMenuOpen()"
-    [currentLang]="currentLang()"
-    [availableLangs]="availableLangs()"
-    (toggleLangMenu)="toggleLangMenu()"
-    (switchLang)="switchLang($event)">
+    >
   </app-menu-header>
 
   <!-- CATEGORY TABS -->

@@ -45,7 +45,7 @@ export class PosComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
 
   // ── Table selection ──────────────────────────────────────────────────────────
-  // 'no-table' = walk-in / takeaway (explicit valid selection)
+  // 'no-table' = walk-in / TAKEAWAY (explicit valid selection)
   // null = nothing selected yet (initial state on fresh load)
   selectedTableKey = signal<string | null>('no-table');
 
@@ -109,7 +109,7 @@ export class PosComponent implements OnInit, OnDestroy {
   cartIsEmpty = this.cart.isEmpty;
 
   // ── Order options ─────────────────────────────────────────────────────────
-  orderType = signal<PosOrderType>('dine_in');
+  orderType = signal<PosOrderType>('DINE_IN');
   paymentType = signal<PosPaymentType>('cash');
   orderNotes = signal('');
   submitting = signal(false);
@@ -133,9 +133,9 @@ export class PosComponent implements OnInit, OnDestroy {
   readonly tableStatusMeta = TABLE_STATUS_META;
   readonly qtyPresets = [1, 2, 3, 5, 10];
   readonly orderTypes: { value: PosOrderType; label: string }[] = [
-    { value: 'dine_in', label: 'Sur place' },
-    { value: 'takeaway', label: 'À emporter' },
-    { value: 'delivery', label: 'Livraison' },
+    { value: 'DINE_IN', label: 'Sur place' },
+    { value: 'TAKEAWAY', label: 'À emporter' },
+    { value: 'DELIVERY', label: 'Livraison' },
   ];
 
   private tablePoll?: Subscription;
@@ -183,7 +183,7 @@ export class PosComponent implements OnInit, OnDestroy {
     this.selectedTableKey.set(key);
     this.cart.setTable(key);
     // Auto-set order type
-    this.orderType.set(key === 'no-table' ? 'takeaway' : 'dine_in');
+    this.orderType.set(key === 'no-table' ? 'TAKEAWAY' : 'DINE_IN');
     this.submitError.set(null);
   }
 

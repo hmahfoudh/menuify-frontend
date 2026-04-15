@@ -2,13 +2,14 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { QRCodeModule } from 'angularx-qrcode';
 import { TranslatePipe } from '@ngx-translate/core';
-import { SocialLink } from '../../menu-page/menu-page.component';
+import { SocialLink } from '../../pages/menu-page/menu-page.component';
 
 @Component({
   selector: 'app-menu-footer',
   standalone: true,
   imports: [CommonModule, QRCodeModule, TranslatePipe],
   templateUrl: './menu-footer.component.html',
+  styleUrl: './menu-footer.component.scss',
 })
 export class MenuFooterComponent {
   @Input({ required: true }) menu!: any;

@@ -1,0 +1,344 @@
+<div class="page">
+
+  <!-- ── PAGE HEADER ─────────────────────────────────────────────────────── -->
+  <div class="page-head">
+    <div class="page-head-left">
+      <h2 class="page-title">Order History</h2>
+      <p class="page-sub">All orders · sorted by most recent</p>
+    </div>
+
+    <div class="page-head-right">
+      <button class="btn-icon" (click)="refresh()"
+              [class.btn-icon--spinning]="loading()"
+              title="Refresh" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── ERROR ───────────────────────────────────────────────────────────── -->
+  @if (error()) {
+    <div class="alert-error">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ error() }}
+      <button class="alert-close" (click)="error.set(null)">✕</button>
+    </div>
+  }
+
+  <!-- ── FILTER TABS ─────────────────────────────────────────────────────── -->
+  <div class="filter-bar">
+    @for (f of allFilters; track f.value) {
+      <button class="filter-tab"
+              [class.filter-tab--active]="selectedStatus() === f.value"
+              (click)="setFilter(f.value)">
+        {{ f.label }}
+      </button>
+    }
+  </div>
+
+  <!-- ── SEARCH BAR ──────────────────────────────────────────────────────── -->
+  <div class="search-bar">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input class="search-input" type="text"
+           placeholder="Search by reference or customer name..."
+           [value]="searchQuery()"
+           (input)="onSearch($any($event.target).value)">
+    @if (searchQuery()) {
+      <button class="search-clear" (click)="onSearch('')">✕</button>
+    }
+  </div>
+
+  <!-- ── LAYOUT: TABLE + DETAIL ──────────────────────────────────────────── -->
+  <div class="layout" [class.layout--detail-open]="selectedOrder()">
+
+    <!-- ── TABLE ──────────────────────────────────────────────────────────── -->
+    <div class="table-wrap">
+
+      <!-- ── Loading skeletons ────────────────────────────────────────────── -->
+      @if (loading()) {
+        <div class="order-list">
+          @for (i of [1,2,3,4,5]; track i) {
+            <div class="skeleton-row">
+              <div class="sk sk-ref"></div>
+              <div class="sk sk-info"></div>
+              <div class="sk sk-badge"></div>
+              <div class="sk sk-btn"></div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── Rows ─────────────────────────────────────────────────────────── -->
+      @if (!loading() && filteredOrders().length > 0) {
+        <div class="order-list">
+          @for (order of filteredOrders(); track order.id) {
+            <div class="order-row"
+                 [class.order-row--selected]="selectedOrder()?.id === order.id"
+                 (click)="openOrder(order)">
+
+              <!-- Reference + time -->
+              <div class="order-ref-col">
+                <span class="order-ref">{{ order.reference }}</span>
+                <span class="order-time">
+                  {{ formatDate(order.createdAt) }} · {{ formatTime(order.createdAt) }}
+                </span>
+              </div>
+
+              <!-- Customer -->
+              <div class="order-info-col">
+                <span class="order-customer" [class.order-anon]="!order.customerName">
+                  {{ order.customerName ?? 'Anonymous' }}
+                </span>
+                <span class="order-type">
+                  @if (order.orderType === 'DINE_IN') {
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
+                    </svg>
+                    Table {{ order.tableNumber ?? '–' }}
+                  } @else if (order.orderType === 'TAKEAWAY') {
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                      <line x1="3" y1="6" x2="21" y2="6"/>
+                    </svg>
+                    Takeaway
+                  } @else {
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                      <rect x="1" y="3" width="15" height="13" rx="2"/>
+                      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                      <circle cx="5.5" cy="18.5" r="2.5"/>
+                      <circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                    Delivery
+                  }
+                </span>
+              </div>
+
+              <!-- Items count -->
+              <span class="order-items-count">
+                {{ order.lines.length }} item{{ order.lines.length > 1 ? 's' : '' }}
+              </span>
+
+              <!-- Total -->
+              <span class="order-total">
+                {{ order.total | number:'1.3-3' }}
+                <span class="order-currency">DT</span>
+              </span>
+
+              <!-- Status badge -->
+              <span class="status-badge status-badge--{{ getStatusMeta(order.status).color }}">
+                {{ getStatusMeta(order.status).label }}
+              </span>
+            </div>
+          }
+        </div>
+
+        <!-- ── Pagination ─────────────────────────────────────────────────── -->
+        @if (totalPages() > 1) {
+          <div class="pagination">
+            <button class="page-btn" (click)="goToPage(currentPage() - 1)"
+                    [disabled]="currentPage() === 0" title="Previous">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+
+            @for (p of visiblePages; track p) {
+              <button class="page-num"
+                      [class.page-num--active]="p === currentPage()"
+                      (click)="goToPage(p)">
+                {{ p + 1 }}
+              </button>
+            }
+
+            <button class="page-btn" (click)="goToPage(currentPage() + 1)"
+                    [disabled]="currentPage() >= totalPages() - 1" title="Next">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+
+            <span class="page-info">{{ pageRange() }}</span>
+          </div>
+        }
+      }
+
+      <!-- ── Empty state ──────────────────────────────────────────────────── -->
+      @if (!loading() && filteredOrders().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <h3 class="empty-title">
+            @if (searchQuery()) {
+              No matching orders
+            } @else {
+              No orders found
+            }
+          </h3>
+          <p class="empty-sub">
+            @if (searchQuery()) {
+              Try a different search term or clear the search.
+            } @else if (selectedStatus()) {
+              No orders with this status yet.
+            } @else {
+              Orders will appear here once customers place them.
+            }
+          </p>
+        </div>
+      }
+    </div>
+
+    <!-- ── ORDER DETAIL PANEL ─────────────────────────────────────────────── -->
+    @if (selectedOrder(); as order) {
+      <div class="detail-panel">
+
+        <div class="detail-head">
+          <div>
+            <span class="detail-ref">{{ order.reference }}</span>
+            <span class="detail-time">
+              {{ formatDate(order.createdAt) }} at {{ formatTime(order.createdAt) }}
+            </span>
+          </div>
+          <button class="panel-close" (click)="closeDetail()" aria-label="Close">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="detail-status-row">
+          <span class="status-badge status-badge--lg status-badge--{{ getStatusMeta(order.status).color }}">
+            {{ getStatusMeta(order.status).label }}
+          </span>
+        </div>
+
+        <!-- Customer -->
+        <div class="detail-section">
+          <span class="section-label">Customer</span>
+          <div class="customer-card">
+            <div class="customer-row">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              {{ order.customerName ?? 'Anonymous' }}
+            </div>
+            @if (order.customerPhone) {
+              <div class="customer-row">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.61 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <a class="phone-link" (click)="openWhatsApp(order)">{{ order.customerPhone }}</a>
+              </div>
+            }
+            <div class="customer-row">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>
+              </svg>
+              {{ orderTypeLabel() }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        @if (order.notes) {
+          <div class="detail-section">
+            <span class="section-label">Notes</span>
+            <p class="order-notes">{{ order.notes }}</p>
+          </div>
+        }
+
+        <!-- ETA / restaurant message (read-only for history) -->
+        @if (order.estimatedMinutes || order.restaurantMessage) {
+          <div class="detail-section">
+            <span class="section-label">Restaurant update</span>
+            <div class="eta-current">
+              @if (order.estimatedMinutes) {
+                <span class="eta-pill">~{{ order.estimatedMinutes }} min</span>
+              }
+              @if (order.restaurantMessage) {
+                <span class="eta-msg-preview">"{{ order.restaurantMessage }}"</span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Items -->
+        <div class="detail-section detail-section--grow">
+          <span class="section-label">
+            Items <span class="section-count">{{ order.lines.length }}</span>
+          </span>
+          <div class="lines-list">
+            @for (line of order.lines; track line.id) {
+              <div class="line-row">
+                <div class="line-qty">{{ line.quantity }}×</div>
+                <div class="line-info">
+                  <span class="line-name">{{ line.itemNameSnapshot }}</span>
+                  @if (line.variantNameSnapshot) {
+                    <span class="line-variant">{{ line.variantNameSnapshot }}</span>
+                  }
+                  @for (mod of line.selectedModifiers; track mod.id) {
+                    <span class="line-mod">
+                      + {{ mod.modifierNameSnapshot }}
+                      @if (mod.priceDeltaSnapshot > 0) {
+                        <span class="mod-price">+{{ mod.priceDeltaSnapshot | number:'1.3-3' }} DT</span>
+                      }
+                    </span>
+                  }
+                  @if (line.specialInstructions) {
+                    <span class="line-note">📝 {{ line.specialInstructions }}</span>
+                  }
+                </div>
+                <span class="line-total">
+                  {{ line.lineTotal | number:'1.3-3' }}
+                  <span class="line-currency">DT</span>
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Total -->
+        <div class="detail-total">
+          <span class="total-label">Total</span>
+          <span class="total-value">
+            {{ order.total | number:'1.3-3' }}
+            <span class="total-currency">DT</span>
+          </span>
+        </div>
+
+      </div>
+    }
+
+  </div><!-- /layout -->
+
+</div>

@@ -72,6 +72,16 @@ export class DashboardShellComponent implements OnInit {
       icon: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0'
     },
     {
+      label: 'History',
+      route: '/dashboard/history',
+      icon: 'M12 2v20M17 5H9.828l-3.414 3.414A2 2 0 0 0 5 10.052V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V10.052a2 2 0 0 0-.586-1.414L17 5z'
+    },
+    {
+      label: 'Reservations',
+      route: '/dashboard/reservations',
+      icon: 'M15 3a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zM5 7a4 4 0 0 1 8 0v4a4 4 0 0 1-8 0V7z'
+    },
+    {
       label: 'Theme',
       route: '/dashboard/theme',
       icon: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h4M18 12h4M12 2v4M12 18v4'
@@ -80,11 +90,6 @@ export class DashboardShellComponent implements OnInit {
       label: 'Analytics',
       route: '/dashboard/analytics',
       icon: 'M18 20V10M12 20V4M6 20v-6'
-    },
-    {
-      label: 'QR Codes',
-      route: '/dashboard/qr',
-      icon: 'M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2M19 15v2M15 19h2v2M19 21h2M21 17h-2'
     },
     {
       label: 'Staff',

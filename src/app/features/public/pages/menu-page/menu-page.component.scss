@@ -1,0 +1,86 @@
+@use '../../scss/menu-shared' as shared;
+
+@include shared.keyframe-spin;
+@include shared.spinner;
+
+// ── CSS variable aliases ──────────────────────────────────────────────────────
+
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--menuify-font-body), system-ui, sans-serif;
+  background: var(--menuify-bg);
+  color: var(--menuify-text);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+img {
+  display: block;
+}
+
+// ── Shared keyframes (referenced by name inside component SCSS files) ───────
+@keyframes mp-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes mp-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes mp-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes mp-scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.mp-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mp-error {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--menuify-muted);
+  padding: 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+}

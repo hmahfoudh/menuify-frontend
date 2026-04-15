@@ -8,9 +8,10 @@ import { TranslatePipe } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './checkout-modal.component.html',
+  styleUrl: './checkout-modal.component.scss',
 })
 export class CheckoutModalComponent {
-  @Input({ required: true }) orderType!: 'dine_in' | 'takeaway';
+  @Input({ required: true }) orderType!: 'DINE_IN' | 'TAKEAWAY';
   @Input({ required: true }) tableNumber!: string;
   @Input({ required: true }) customerName!: string;
   @Input({ required: true }) customerPhone!: string;

@@ -2,27 +2,42 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-
-/* Global reset */
-*, *::before, *::after {
+// ── Reset ─────────────────────────────────────────────────────────────────────
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
- 
+
+html {
+  scroll-behavior: smooth;
+}
+
 html, body {
   height: 100%;
+  scroll-behavior: smooth;
 }
- 
+
 body {
-  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  font-family: var(--menuify-font-body), system-ui, sans-serif;
+  background: var(--menuify-bg);
+  color: var(--menuify-text);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #0d0c0b;
-  color: #f0ebe2;
-  line-height: 1.5;
+  min-height: 100vh;
 }
- 
+
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+img {
+  display: block;
+}
+
 /* Remove autofill yellow in Chrome */
 input:-webkit-autofill {
   transition: background-color 5000s ease-in-out 0s;
@@ -31,4 +46,26 @@ input:-webkit-autofill {
 :host {
   display: block;
   min-height: 100vh;
+}
+
+:root {
+  --menuify-bg: var(--colors-background, #0e0c0a);
+  --menuify-surface: var(--colors-surface, #1e1c18);
+  --menuify-surface2: var(--colors-surface2, #272420);
+  --menuify-accent: var(--colors-accent, #c9a96e);
+  --menuify-accent-hi: var(--colors-accentHover, #e0c28a);
+  --menuify-text: var(--colors-text, #f0ebe2);
+  --menuify-muted: var(--colors-textMuted, #7a7268);
+  --menuify-border: var(--colors-border, rgba(201, 169, 110, 0.14));
+  --menuify-r-card: var(--shape-cardRadius, 12px);
+  --menuify-r-btn: var(--shape-buttonRadius, 8px);
+  --menuify-img-h: var(--card-imageHeight, 160px);
+  --menuify-font-head: var(--typography-headingFont, 'DM Serif Display');
+  --menuify-font-body: var(--typography-bodyFont, 'DM Sans');
+  --menuify-tr: 0.2s ease;
+
+    // Derived tokens
+  --menuify-accent-bg:   color-mix(in srgb, var(--menuify-accent) 10%, transparent);
+  --menuify-accent-line: color-mix(in srgb, var(--menuify-accent) 22%, transparent);
+  --menuify-border2:     color-mix(in srgb, var(--menuify-accent) 24%, transparent);
 }

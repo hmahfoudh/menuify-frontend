@@ -1,0 +1,218 @@
+@use '../../scss/menu-shared' as shared;
+
+@include shared.keyframe-fade;
+@include shared.keyframe-scale-in;
+@include shared.backdrop;
+
+:host {
+  display: contents;
+}
+
+.mp-success {
+  width: 100%;
+  max-width: 320px;
+  margin: auto;
+  background: var(--menuify-surface);
+  border-radius: 16px;
+  padding: 2rem 1.75rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  animation: mp-scale-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.mp-success__icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(109, 201, 138, 0.14);
+  border: 2px solid rgba(109, 201, 138, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6dc98a;
+}
+
+.mp-success__title {
+  font-family: var(--menuify-font-head), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--menuify-text);
+}
+
+.mp-success__ref {
+  font-size: 0.78rem;
+  color: var(--menuify-muted);
+
+  strong {
+    color: var(--menuify-accent);
+  }
+}
+
+.mp-success__ref-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: color-mix(in srgb, var(--menuify-accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--menuify-accent) 25%, transparent);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin: 0.5rem 0;
+  width: 100%;
+  max-width: 280px;
+}
+
+.mp-success__ref-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.mp-success__ref-code {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--menuify-accent);
+}
+
+.mp-success__ref-hint {
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+.mp-success__desc {
+  font-size: 0.8rem;
+  color: var(--menuify-muted);
+  line-height: 1.55;
+  max-width: 250px;
+}
+
+// Progress steps
+.mp-success__steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0.75rem 0;
+  width: 100%;
+  max-width: 300px;
+}
+
+.mp-success__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  opacity: 0.45;
+  flex: 0 0 auto;
+
+  &--done {
+    opacity: 1;
+  }
+
+  &--active {
+    opacity: 0.85;
+  }
+}
+
+.mp-success__step-line {
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.2;
+  margin-bottom: 1.2rem;
+}
+
+.mp-success__step-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--menuify-accent);
+  color: var(--menuify-bg);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--pulse {
+    background: transparent;
+    border: 2px solid var(--menuify-accent);
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid var(--menuify-accent);
+      animation: ring-pulse 1.6s ease-in-out infinite;
+      opacity: 0;
+    }
+  }
+
+  &--empty {
+    background: transparent;
+    border: 2px solid currentColor;
+    opacity: 0.3;
+  }
+}
+
+@keyframes ring-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+// Action buttons
+.mp-success__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 240px;
+}
+
+.mp-success__btn {
+  padding: 0.7rem 1.75rem;
+  border-radius: var(--menuify-r-btn);
+  border: 1.5px solid var(--menuify-accent);
+  background: transparent;
+  color: var(--menuify-accent);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all var(--menuify-tr);
+  margin-top: 0.25rem;
+
+  &:hover {
+    background: color-mix(in srgb, var(--menuify-accent) 8%, transparent);
+  }
+}
+
+.mp-success__btn--track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: var(--menuify-accent) !important;
+  color: var(--menuify-bg) !important;
+  font-weight: 600;
+}
+
+.mp-success__btn--ghost {
+  background: transparent !important;
+  border: 1px solid var(--menuify-border);
+  color: var(--menuify-muted) !important;
+  font-size: 0.78rem;
+}

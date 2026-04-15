@@ -7,6 +7,7 @@ import { TranslatePipe } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   templateUrl: './cart-toast.component.html',
+  styleUrl: './cart-toast.component.scss',
 })
 export class CartToastComponent {
   @Input({ required: true }) toast!: { name: string; visible: boolean };

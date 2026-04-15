@@ -19,19 +19,19 @@
       <div class="mp-co-field">
         <label class="mp-co-label">{{ 'checkout.order_type_label' | translate }}</label>
         <div class="mp-type-tabs">
-          <button type="button" class="mp-type-tab" [class.mp-type-tab--active]="orderType === 'dine_in'"
+          <button type="button" class="mp-type-tab" [class.mp-type-tab--active]="orderType === 'DINE_IN'"
             (click)="setOrderTypeDineIn.emit()">
-            {{ 'checkout.dine_in' | translate }}
+            {{ 'checkout.DINE_IN' | translate }}
           </button>
-          <button type="button" class="mp-type-tab" [class.mp-type-tab--active]="orderType === 'takeaway'"
+          <button type="button" class="mp-type-tab" [class.mp-type-tab--active]="orderType === 'TAKEAWAY'"
             (click)="setOrderTypeTakeaway.emit()">
-            {{ 'checkout.takeaway' | translate }}
+            {{ 'checkout.TAKEAWAY' | translate }}
           </button>
         </div>
       </div>
 
       <!-- Table number (dine-in only) -->
-      @if (orderType === 'dine_in') {
+      @if (orderType === 'DINE_IN') {
       <div class="mp-co-field">
         <label class="mp-co-label" for="tableNum">{{ 'checkout.table_number' | translate }}</label>
         <input id="tableNum" type="text" class="mp-co-input" [ngModel]="tableNumber"

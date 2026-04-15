@@ -1,215 +1,23 @@
-/*
- * ═══════════════════════════════════════════════════════════════════
- * MENUIFY — Shared Theme Tokens, Reset & Utility Classes
- * ═══════════════════════════════════════════════════════════════════
- *
- * This file is imported by the global styles.scss (or angular.json styles array).
- * It provides CSS custom properties, resets, keyframes and small utility
- * classes that are consumed by multiple child components.
- *
- * Token map (injected at runtime by ThemeInjectorService):
- *   --colors-background  → page background
- *   --colors-surface     → card / header background
- *   --colors-surface2    → inputs / modifiers background
- *   --colors-accent      → primary accent
- *   --colors-accentHover → accent hover
- *   --colors-text        → primary text
- *   --colors-textMuted   → secondary text
- *   --colors-border      → borders
- *   --shape-cardRadius   → card border radius
- *   --shape-buttonRadius → button border radius
- *   --card-imageHeight   → item card image height
- *   --typography-headingFont → heading font family
- *   --typography-bodyFont    → body font family
- */
-
-// ── CSS variable aliases ──────────────────────────────────────────────────────
-:root {
-  --mp-bg: var(--colors-background, #0e0c0a);
-  --mp-surface: var(--colors-surface, #1e1c18);
-  --mp-surface2: var(--colors-surface2, #272420);
-  --mp-accent: var(--colors-accent, #c9a96e);
-  --mp-accent-hi: var(--colors-accentHover, #e0c28a);
-  --mp-text: var(--colors-text, #f0ebe2);
-  --mp-muted: var(--colors-textMuted, #7a7268);
-  --mp-border: var(--colors-border, rgba(201, 169, 110, 0.14));
-  --mp-r-card: var(--shape-cardRadius, 12px);
-  --mp-r-btn: var(--shape-buttonRadius, 8px);
-  --mp-img-h: var(--card-imageHeight, 160px);
-  --mp-font-head: var(--typography-headingFont, 'DM Serif Display');
-  --mp-font-body: var(--typography-bodyFont, 'DM Sans');
-  --mp-tr: 0.2s ease;
-}
-
-// ── Reset ─────────────────────────────────────────────────────────────────────
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: var(--mp-font-body), system-ui, sans-serif;
-  background: var(--mp-bg);
-  color: var(--mp-text);
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-}
-
-button {
-  font-family: inherit;
-  cursor: pointer;
-}
-
-img {
-  display: block;
-}
-
-// ── Shared keyframes ────────────────────────────────────────────────────────
+// ── Shared keyframes (referenced by name inside component SCSS files) ───────
 @keyframes mp-spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes mp-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes mp-sheet-up {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 @keyframes mp-scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-// ── Shared utility classes ──────────────────────────────────────────────────
-.mp-ring {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.08);
-  border-top-color: var(--mp-accent);
-  border-radius: 50%;
-  animation: mp-spin 0.8s linear infinite;
-
-  &--sm {
-    width: 16px;
-    height: 16px;
-    border-width: 2px;
-  }
-
-  &--dark {
-    border-color: color-mix(in srgb, var(--mp-bg) 75%, transparent) !important;
-    border-top-color: var(--mp-bg) !important;
-  }
-}
-
-.mp-optional {
-  font-weight: 400;
-  font-size: 0.65rem;
-  margin-left: 0.3rem;
-}
-
-.mp-curr {
-  font-size: 0.58rem;
-  font-family: inherit;
-  opacity: 0.7;
-}
-
-// ── Shared backdrop ─────────────────────────────────────────────────────────
-.mp-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  animation: mp-fade 0.2s ease;
-}
-
-@media (min-width: 600px) {
-  .mp-backdrop {
-    align-items: center;
-  }
-}
-
-// ── Shared close button ─────────────────────────────────────────────────────
-.mp-modal__close {
-  position: absolute;
-  top: 0.8rem;
-  right: 0.8rem;
-  z-index: 2;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: none;
-  background: var(--mp-surface2);
-  backdrop-filter: blur(4px);
-  color: var(--mp-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background var(--mp-tr);
-
-  &:hover {
-    background: var(--mp-border);
-  }
-}
-
-// ── Shared badge styles ─────────────────────────────────────────────────────
-.mp-required-badge {
-  font-size: 0.58rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.15rem 0.5rem;
-  border-radius: 20px;
-  background: rgba(232, 168, 56, 0.14);
-  border: 1px solid rgba(232, 168, 56, 0.28);
-  color: #e8a838;
-}
-
-// ── Responsive grid breakpoint ──────────────────────────────────────────────
-@media (min-width: 600px) {
-  .mp-grid {
-    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-  }
-}
-
-@media (max-width: 400px) {
-  .mp-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+  to { transform: rotate(360deg); }
 }

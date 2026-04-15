@@ -1,0 +1,310 @@
+<app-menu-header 
+    [tenant]="tenant"
+    >
+</app-menu-header>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       FORM VIEW
+  ═══════════════════════════════════════════════════════════════════ -->
+  @if (viewMode() === 'form') {
+    <div class="rsv-card rsv-card--form">
+
+      <div class="rsv-card__head">
+        <div class="rsv-card__icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+        </div>
+        <h2 class="rsv-card__title">{{ 'rsv.form.title' | translate }}</h2>
+        <p class="rsv-card__sub">{{ 'rsv.form.subtitle' | translate }}</p>
+      </div>
+
+      @if (error()) {
+        <div class="rsv-alert rsv-alert--error">{{ error() }}</div>
+      }
+
+      <div class="rsv-form">
+
+        <!-- Full name -->
+        <div class="rsv-field">
+          <label class="rsv-label">{{ 'rsv.form.full_name_label' | translate }}</label>
+          <input type="text" class="rsv-input"
+                 [value]="fullName()"
+                 (input)="fullName.set($any($event.target).value)"
+                 [placeholder]="'rsv.form.full_name_placeholder' | translate">
+        </div>
+
+        <!-- Phone -->
+        <div class="rsv-field">
+          <label class="rsv-label">{{ 'rsv.form.phone_label' | translate }}</label>
+          <input type="tel" class="rsv-input"
+                 [value]="phoneNumber()"
+                 (input)="phoneNumber.set($any($event.target).value)"
+                 [placeholder]="'rsv.form.phone_placeholder' | translate">
+        </div>
+
+        <!-- Seats -->
+        <div class="rsv-field">
+          <label class="rsv-label">{{ 'rsv.form.guests_label' | translate }}</label>
+          <div class="rsv-stepper">
+            <button class="rsv-stepper__btn" type="button"
+                    [disabled]="seats() <= 1"
+                    (click)="seats.set(seats() - 1)">−</button>
+            <span class="rsv-stepper__value">{{ seats() }}</span>
+            <button class="rsv-stepper__btn" type="button"
+                    [disabled]="seats() >= 50"
+                    (click)="seats.set(seats() + 1)">+</button>
+          </div>
+        </div>
+
+        <!-- Type -->
+        <div class="rsv-field">
+          <label class="rsv-label">{{ 'rsv.form.type_label' | translate }}</label>
+          <div class="rsv-type-row">
+            @for (t of types; track t.value) {
+              <button class="rsv-type-btn"
+                      [class.rsv-type-btn--active]="type() === t.value"
+                      (click)="type.set(t.value)"
+                      type="button">
+                <span class="rsv-type-btn__icon">{{ t.icon }}</span>
+                {{ t.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Date & Time row -->
+        <div class="rsv-row">
+          <div class="rsv-field">
+            <label class="rsv-label">{{ 'rsv.form.date_label' | translate }}</label>
+            <input type="date" class="rsv-input"
+                   [value]="date()"
+                   [min]="minDate"
+                   (input)="date.set($any($event.target).value)">
+          </div>
+          <div class="rsv-field">
+            <label class="rsv-label">{{ 'rsv.form.time_label' | translate }}</label>
+            <input type="time" class="rsv-input"
+                   [value]="time()"
+                   (input)="time.set($any($event.target).value)">
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="rsv-field">
+          <label class="rsv-label">
+            {{ 'rsv.form.notes_label' | translate }}
+            <span class="rsv-label__hint">{{ 'rsv.form.notes_optional' | translate }}</span>
+          </label>
+          <textarea class="rsv-input rsv-textarea"
+                    [value]="notes()"
+                    (input)="notes.set($any($event.target).value)"
+                    [placeholder]="'rsv.form.notes_placeholder' | translate"
+                    rows="3"></textarea>
+        </div>
+
+        <!-- Submit -->
+        <button class="rsv-btn rsv-btn--primary"
+                [disabled]="loading()"
+                (click)="submit()" type="button">
+          @if (loading()) {
+            <span class="rsv-spinner"></span>
+          }
+          {{ 'rsv.form.submit' | translate }}
+        </button>
+        <button class="rsv-btn rsv-btn--ghost" (click)="backToMenu()" type="button">
+          {{ 'rsv.form.back_to_menu' | translate }}
+        </button>
+
+        <!-- Track link -->
+        <button class="rsv-btn rsv-btn--link" (click)="showTrack()" type="button">
+          {{ 'rsv.form.track_link' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       SUCCESS VIEW
+  ═══════════════════════════════════════════════════════════════════ -->
+  @if (viewMode() === 'success') {
+    <div class="rsv-card rsv-card--success">
+
+      <div class="rsv-success-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+
+      <h2 class="rsv-card__title">{{ 'rsv.success.title' | translate }}</h2>
+      <p class="rsv-card__sub">{{ 'rsv.success.subtitle' | translate }}</p>
+
+      @if (reservation(); as r) {
+        <div class="rsv-ref-box">
+          <span class="rsv-ref-label">{{ 'rsv.success.ref_label' | translate }}</span>
+          <span class="rsv-ref-code">{{ r.reference }}</span>
+          <span class="rsv-ref-hint">{{ 'rsv.success.ref_hint' | translate }}</span>
+        </div>
+
+        <div class="rsv-summary">
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.success.summary.name' | translate }}</span>
+            <span class="rsv-summary__value">{{ r.fullName }}</span>
+          </div>
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.success.summary.guests' | translate }}</span>
+            <span class="rsv-summary__value">{{ r.seats }}</span>
+          </div>
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.success.summary.type' | translate }}</span>
+            <span class="rsv-summary__value">{{ r.type }}</span>
+          </div>
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.success.summary.date' | translate }}</span>
+            <span class="rsv-summary__value">{{ formatDate(r.date) }}</span>
+          </div>
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.success.summary.time' | translate }}</span>
+            <span class="rsv-summary__value">{{ formatTime(r.time) }}</span>
+          </div>
+          @if (r.notes) {
+            <div class="rsv-summary__row">
+              <span class="rsv-summary__label">{{ 'rsv.success.summary.notes' | translate }}</span>
+              <span class="rsv-summary__value">{{ r.notes }}</span>
+            </div>
+          }
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.success.summary.status' | translate }}</span>
+            <span class="rsv-status" [class]="statusClass(r.status)">
+              {{ statusLabel(r.status) }}
+            </span>
+          </div>
+        </div>
+      }
+
+      <div class="rsv-success-actions">
+        <button class="rsv-btn rsv-btn--primary" (click)="newReservation()" type="button">
+          {{ 'rsv.success.new_reservation' | translate }}
+        </button>
+        <button class="rsv-btn rsv-btn--ghost" (click)="backToMenu()" type="button">
+          {{ 'rsv.success.back_to_menu' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       TRACK VIEW
+  ═══════════════════════════════════════════════════════════════════ -->
+  @if (viewMode() === 'track') {
+    <div class="rsv-card">
+      <h2 class="rsv-card__title">{{ 'rsv.track.title' | translate }}</h2>
+      <p class="rsv-card__sub">{{ 'rsv.track.subtitle' | translate }}</p>
+
+      @if (error()) {
+        <div class="rsv-alert rsv-alert--error">{{ error() }}</div>
+      }
+
+      <div class="rsv-form">
+        <div class="rsv-field">
+          <label class="rsv-label">{{ 'rsv.track.ref_label' | translate }}</label>
+          <input type="text" class="rsv-input rsv-input--mono"
+                 [value]="trackRef()"
+                 (input)="trackRef.set($any($event.target).value)"
+                 [placeholder]="'rsv.track.ref_placeholder' | translate"
+                 (keyup.enter)="trackReservation()">
+        </div>
+
+        <button class="rsv-btn rsv-btn--primary"
+                [disabled]="loading()"
+                (click)="trackReservation()" type="button">
+          @if (loading()) { <span class="rsv-spinner"></span> }
+          {{ 'rsv.track.submit' | translate }}
+        </button>
+
+        <button class="rsv-btn rsv-btn--ghost" (click)="backToMenu()" type="button">
+          {{ 'rsv.track.back_to_menu' | translate }}
+        </button>
+
+        <button class="rsv-btn rsv-btn--link" (click)="backToForm()" type="button">
+          {{ 'rsv.track.back_to_form' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       TRACK RESULT VIEW
+  ═══════════════════════════════════════════════════════════════════ -->
+  @if (viewMode() === 'track-result') {
+    <div class="rsv-card">
+
+      <h2 class="rsv-card__title">{{ 'rsv.track_result.title' | translate }}</h2>
+
+      @if (trackedRes(); as r) {
+        <div class="rsv-ref-box rsv-ref-box--compact">
+          <span class="rsv-ref-code">{{ r.reference }}</span>
+          <span class="rsv-status" [class]="statusClass(r.status)">
+            {{ statusLabel(r.status) }}
+          </span>
+        </div>
+
+        <div class="rsv-summary">
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.track_result.summary.name' | translate }}</span>
+            <span class="rsv-summary__value">{{ r.fullName }}</span>
+          </div>
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.track_result.summary.phone' | translate }}</span>
+            <span class="rsv-summary__value">{{ r.phoneNumber }}</span>
+          </div>
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.track_result.summary.guests' | translate }}</span>
+            <span class="rsv-summary__value">{{ r.seats }}</span>
+          </div>
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.track_result.summary.type' | translate }}</span>
+            <span class="rsv-summary__value">{{ r.type }}</span>
+          </div>
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.track_result.summary.date' | translate }}</span>
+            <span class="rsv-summary__value">{{ formatDate(r.date) }}</span>
+          </div>
+          <div class="rsv-summary__row">
+            <span class="rsv-summary__label">{{ 'rsv.track_result.summary.time' | translate }}</span>
+            <span class="rsv-summary__value">{{ formatTime(r.time) }}</span>
+          </div>
+          @if (r.tableDisplayName) {
+            <div class="rsv-summary__row">
+              <span class="rsv-summary__label">{{ 'rsv.track_result.summary.table' | translate }}</span>
+              <span class="rsv-summary__value">{{ r.tableDisplayName }}</span>
+            </div>
+          }
+          @if (r.notes) {
+            <div class="rsv-summary__row">
+              <span class="rsv-summary__label">{{ 'rsv.track_result.summary.notes' | translate }}</span>
+              <span class="rsv-summary__value">{{ r.notes }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="rsv-success-actions">
+        <button class="rsv-btn rsv-btn--ghost" (click)="showTrack()" type="button">
+          {{ 'rsv.track_result.track_another' | translate }}
+        </button>
+        <button class="rsv-btn rsv-btn--ghost" (click)="backToMenu()" type="button">
+          {{ 'rsv.track_result.back_to_menu' | translate }}
+        </button>
+        <button class="rsv-btn rsv-btn--link" (click)="backToForm()" type="button">
+          {{ 'rsv.track_result.new_reservation' | translate }}
+        </button>
+      </div>
+    </div>
+  }

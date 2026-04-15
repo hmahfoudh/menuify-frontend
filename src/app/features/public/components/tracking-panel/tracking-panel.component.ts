@@ -8,6 +8,7 @@ import { TrackedOrder, TrackingStatus, TRACKING_STATUS_META } from '../../models
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   templateUrl: './tracking-panel.component.html',
+  styleUrl: './tracking-panel.component.scss',
 })
 export class TrackingPanelComponent {
   @Input({ required: true }) activeOrders!: TrackedOrder[];

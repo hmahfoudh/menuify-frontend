@@ -180,8 +180,8 @@
     "title": "Complete your order",
     "back_aria": "Back",
     "order_type_label": "Order type",
-    "dine_in": "🪑 Dine in",
-    "takeaway": "🥡 Takeaway",
+    "DINE_IN": "🪑 Dine in",
+    "TAKEAWAY": "🥡 Takeaway",
     "table_number": "Table number",
     "table_placeholder": "5",
     "your_name": "Your name",
@@ -223,5 +223,73 @@
   "toast": {
     "added": "Added to cart",
     "view_cart": "View cart"
+  },
+  "rsv": {
+    "form": {
+      "title": "Reserve a Table",
+      "subtitle": "Fill in the details below and we'll confirm your booking",
+      "full_name_label": "Full name",
+      "full_name_placeholder": "Your full name",
+      "phone_label": "Phone number",
+      "phone_placeholder": "+216 XX XXX XXX",
+      "guests_label": "Number of guests",
+      "type_label": "Reservation type",
+      "date_label": "Date",
+      "time_label": "Time",
+      "notes_label": "Notes",
+      "notes_optional": "optional",
+      "notes_placeholder": "Any special requests, allergies, or preferences...",
+      "submit": "Confirm Reservation",
+      "back_to_menu": "Back to menu",
+      "track_link": "Already have a reservation? Track it here"
+    },
+    "success": {
+      "title": "Reservation Submitted!",
+      "subtitle": "We'll confirm your booking shortly",
+      "ref_label": "Your reference code",
+      "ref_hint": "Save this code to track your reservation",
+      "summary": {
+        "name": "Name",
+        "guests": "Guests",
+        "type": "Type",
+        "date": "Date",
+        "time": "Time",
+        "notes": "Notes",
+        "status": "Status"
+      },
+      "new_reservation": "Make another reservation",
+      "back_to_menu": "Back to menu"
+    },
+    "track": {
+      "title": "Track Reservation",
+      "subtitle": "Enter your reference code to check your booking status",
+      "ref_label": "Reference code",
+      "ref_placeholder": "RSV-XXXXXX",
+      "submit": "Track",
+      "back_to_menu": "Back to menu",
+      "back_to_form": "← Back to reservation form"
+    },
+    "track_result": {
+      "title": "Reservation Details",
+      "summary": {
+        "name": "Name",
+        "phone": "Phone",
+        "guests": "Guests",
+        "type": "Type",
+        "date": "Date",
+        "time": "Time",
+        "table": "Table",
+        "notes": "Notes"
+      },
+      "track_another": "Track another",
+      "back_to_menu": "Back to menu",
+      "new_reservation": "← New reservation"
+    }
+  },
+  "wp": {
+    "subtitle_welcome": "Welcome to",
+    "subtitle_action": "What would you like to do?",
+    "btn_view_menu": "View Menu",
+    "btn_reserve": "Reserve a Table"
   }
 }
