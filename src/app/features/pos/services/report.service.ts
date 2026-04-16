@@ -8,13 +8,14 @@ import {
   RangeSummaryResponse,
 } from '../models/report.models';
 import { ApiResponse } from '../../../core/models/api.models';
+import { environment } from '../../../../environments/environment';
  
  
 @Injectable({ providedIn: 'root' })
 export class ReportService {
  
   private readonly http = inject(HttpClient);
-  private readonly base = '/api/pos/reports';
+  private readonly base = environment.apiUrl +'/api/pos/reports';
  
   /** Live X Report for the current open shift */
   getXReport(): Observable<ApiResponse<XReportResponse>> {

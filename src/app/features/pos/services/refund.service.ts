@@ -7,13 +7,14 @@ import {
   IssueRefundRequest,
 } from '../models/refund.models';
 import { ApiResponse } from '../../../core/models/api.models';
+import { environment } from '../../../../environments/environment';
  
  
 @Injectable({ providedIn: 'root' })
 export class RefundService {
  
   private readonly http = inject(HttpClient);
-  private readonly base = '/api/pos/refunds';
+  private readonly base = environment.apiUrl +'/api/pos/refunds';
  
   /**
    * Issue a full or partial refund.

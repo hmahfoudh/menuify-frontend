@@ -17,9 +17,9 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
 
   // Skip public tracking endpoints — they already carry the subdomain header
   // set manually in PublicMenuService
-  if (req.url.includes('/api/menu') || req.url.includes('/api/orders')) {
-    return next(req);
-  }
+  // if (req.url.includes('/api/menu') || req.url.includes('/api/orders')) {
+  //   return next(req);
+  // }
 
   let subdomain: string | null = null;
 

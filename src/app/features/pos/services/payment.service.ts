@@ -7,13 +7,14 @@ import {
   RecordPaymentRequest,
 } from '../models/payment.models';
 import { ApiResponse } from '../../../core/models/api.models';
+import { environment } from '../../../../environments/environment';
  
  
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
  
   private readonly http = inject(HttpClient);
-  private readonly base = '/api/pos/payments';
+  private readonly base = environment.apiUrl +'/api/pos/payments';
  
   /**
    * Record a payment against an order.

@@ -9,6 +9,7 @@ export const POS_ROUTES: Routes = [
     {
         path: '',
         canActivate: [posGuard],
+        //loadComponent: () =>import('./pages/pos-v2/pos-v2.component').then(m => m.PosV2Component),
         loadComponent: () =>import('./pages/pos/pos.component').then(m => m.PosComponent),
     },
     {

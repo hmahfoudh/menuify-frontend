@@ -12,13 +12,14 @@ import {
 } from '../models/menu.models';
 import { CategoryService } from '../services/category.service';
 import { ItemService } from '../services/item.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 type ActivePanel = 'none' | 'category' | 'item' | 'variantGroup' | 'modifierGroup';
 
 @Component({
   selector:    'app-menu-manager',
   standalone:  true,
-  imports:     [CommonModule, FormsModule],
+  imports:     [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './menu-manager.component.html',
   styleUrls:   ['./menu-manager.component.scss']
 })

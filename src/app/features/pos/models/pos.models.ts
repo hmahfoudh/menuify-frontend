@@ -19,8 +19,10 @@ export interface TableStatusResponse {
   displayName:    string;
   active:         boolean;
   status:         TableStatus;
-  activeOrderId:  string | null;
-  activeOrderRef: string | null;
+  orderId:  string | null;
+  orderReference: string | null;
+  qrCode: string;
+  seats: number;
 }
 
 export interface TableStatusMeta {
@@ -30,10 +32,10 @@ export interface TableStatusMeta {
 }
 
 export const TABLE_STATUS_META: Record<TableStatus, TableStatusMeta> = {
-  FREE:     { label: 'Free',     color: 'free',     dot: '#504c44' },
-  PENDING:  { label: 'Pending',  color: 'pending',  dot: '#e8a838' },
-  PREPARING:{ label: 'Preparing',color: 'preparing',dot: '#e8a838' },
-  READY:    { label: 'Ready',    color: 'ready',    dot: '#64c882' },
+  FREE:     { label: 'FREE',     color: 'free',     dot: '#504c44' },
+  PENDING:  { label: 'PENDING',  color: 'pending',  dot: '#e8a838' },
+  PREPARING:{ label: 'PERPARING',color: 'preparing',dot: '#e8a838' },
+  READY:    { label: 'READY',    color: 'ready',    dot: '#64c882' },
 };
 
 // ── POS cart ───────────────────────────────────────────────────────────────────
@@ -59,7 +61,7 @@ export interface PosCartItem {
   quantity:  number;
   unitPrice: number;
   lineTotal: number;
-  note:      string;
+  note?:      string;
 }
 
 // ── Order type & payment ───────────────────────────────────────────────────────

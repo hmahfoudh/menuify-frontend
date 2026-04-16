@@ -9,13 +9,14 @@ import {
   CloseDrawerRequest,
 } from '../models/cash.models';
 import { ApiResponse } from '../../../core/models/api.models';
+import { environment } from '../../../../environments/environment';
  
  
 @Injectable({ providedIn: 'root' })
 export class CashService {
  
   private readonly http = inject(HttpClient);
-  private readonly base = '/api/pos/cash';
+  private readonly base = environment.apiUrl + '/api/pos/cash';
  
   // ── Signals ───────────────────────────────────────────────────────────────
  

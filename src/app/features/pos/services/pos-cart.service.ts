@@ -68,7 +68,7 @@ export class PosCartService {
     modifiers: PosCartModifier[],
     quantity:  number,
     unitPrice: number,
-    note:      string = ''
+    note:      string = '' 
   ): void {
     const current = this.activeItems();
 
@@ -133,6 +133,18 @@ export class PosCartService {
       this.activeItems.set([]);
     }
   }
+
+  setNote(cartId: string, note: string): void {
+      this.activeItems.update(items =>
+        items.map(item =>
+          item.cartId === cartId
+            ? { ...item, note: note.trim() || undefined }
+            : item
+        )
+      );
+      // Also persist to savedCarts if this table is not active
+      // (usually note is only set for the active table, so this is sufficient)
+    }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
 

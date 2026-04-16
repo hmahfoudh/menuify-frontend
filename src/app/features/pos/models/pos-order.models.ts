@@ -46,7 +46,7 @@ export interface PosOrder {
   subtotal:       number;
   discountAmount: number | null;
   total:          number;
-  amountDue:      number;
+  amountDue:      number | null;
   paidAmount:     number | null;
   notes:          string | null;
   createdAt:      string;

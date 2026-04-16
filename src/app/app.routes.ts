@@ -62,6 +62,7 @@ export const routes: Routes = [
       { path: 'settings',      loadComponent: () => import('./features/dashboard/settings/settings/settings.component').then(m => m.SettingsComponent) },
       { path: 'notifications', loadComponent: () => import('./features/dashboard/notifications/notification-bell/notification-bell.component').then(m => m.NotificationBellComponent) },
       { path: 'staff',         loadComponent: () => import('./features/pos/pages/staff/staff.component').then(m => m.StaffComponent) },
+      { path: 'reports',       loadComponent: () => import('./features/dashboard/z-report/z-report.component').then(m => m.ZReportComponent)}
     ],
   },
 

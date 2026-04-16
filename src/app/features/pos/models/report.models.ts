@@ -28,9 +28,9 @@ export interface ReportBody {
   netRevenue:       number;
  
   openingFloat:     number;
-  expectedCash:     number | null;
-  closingActual:    number | null;
-  cashDiscrepancy:  number | null;
+  expectedCash:     number;
+  closingActual:    number;
+  cashDiscrepancy:  number;
  
   byCategory:       CategorySalesRow[];
   byMethod:         MethodSalesRow[];

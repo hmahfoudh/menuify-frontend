@@ -1,0 +1,384 @@
+<div class="zr-page" [class.zr-page--drawer-open]="drawerOpen()">
+
+    <!-- ══════════ PAGE HEADER ══════════ -->
+    <div class="zr-header">
+        <div class="zr-header__left">
+            <h1 class="zr-header__title">{{ 'zr.header.title' | translate }}</h1>
+            <p class="zr-header__sub">{{ 'zr.header.sub' | translate }}</p>
+        </div>
+
+        <!-- Date range selector -->
+        <div class="zr-range">
+            <div class="zr-preset-tabs">
+                @for (p of presets; track p.value) {
+                <button class="zr-preset-tab" [class.zr-preset-tab--active]="preset() === p.value"
+                    (click)="setPreset(p.value)" type="button">
+                    {{ p.label }}
+                </button>
+                }
+            </div>
+
+            @if (preset() === 'custom') {
+            <div class="zr-custom-range">
+                <input type="date" class="zr-date-input" [value]="customFrom()"
+                    (change)="customFrom.set($any($event.target).value)">
+                <span class="zr-date-sep">→</span>
+                <input type="date" class="zr-date-input" [value]="customTo()"
+                    (change)="customTo.set($any($event.target).value)">
+                <button class="zr-apply-btn" (click)="applyCustomRange()" type="button">
+                    {{ 'zr.header.apply' | translate }}
+                </button>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- ══════════ KPI CARDS ══════════ -->
+    @if (summaryLoading()) {
+    <div class="zr-kpi-grid">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) {
+        <div class="zr-kpi-card zr-kpi-card--skeleton"></div>
+        }
+    </div>
+    } @else if (summary()) {
+    <div class="zr-kpi-grid">
+        @for (kpi of kpis(); track kpi.label) {
+        <div class="zr-kpi-card">
+            <div class="zr-kpi-card__label">{{ kpi.label }}</div>
+            <div class="zr-kpi-card__value">
+                {{ kpi.value }}
+                @if (kpi.sub) { <span class="zr-kpi-card__unit">{{ kpi.sub }}</span> }
+            </div>
+        </div>
+        }
+    </div>
+    } @else if (summaryError()) {
+    <div class="zr-error">{{ summaryError() }}</div>
+    }
+
+    <!-- ══════════ MAIN CONTENT: chart + shift list ══════════ -->
+    <div class="zr-body">
+
+        <!-- ── LEFT: Revenue chart + daily breakdown ── -->
+        <div class="zr-chart-col">
+
+            <div class="zr-section-head">
+                <span class="zr-section-title">{{ 'zr.chart.section_title' | translate }}</span>
+                @if (summary()) {
+                <span class="zr-section-badge">{{ activeFrom() | date:'dd/MM' }} – {{ activeTo() | date:'dd/MM' }}</span>
+                }
+            </div>
+
+            @if (summaryLoading()) {
+            <div class="zr-chart-skeleton">
+                <div class="zr-chart-loading">{{ 'zr.chart.loading' | translate }}</div>
+            </div>
+            } @else if (summary()?.dailyBreakdown?.length) {
+            <!-- Bar chart -->
+            <div class="zr-chart">
+                @for (row of summary()!.dailyBreakdown; track row.date) {
+                <div class="zr-bar-col">
+                    <div class="zr-bar-wrap">
+                        <div class="zr-bar" [style.height.%]="barWidth(row)"
+                            [class.zr-bar--positive]="row.netRevenue > 0" [class.zr-bar--zero]="row.netRevenue === 0"
+                            title="{{ fmt(row.netRevenue) }} TND">
+                        </div>
+                    </div>
+                    <div class="zr-bar-label">{{ row.date | date:'dd/MM' }}</div>
+                </div>
+                }
+            </div>
+
+            <!-- Daily table below the chart -->
+            <div class="zr-daily-table">
+                <div class="zr-daily-table__head">
+                    <span>{{ 'zr.chart.table_date' | translate }}</span>
+                    <span>{{ 'zr.chart.table_orders' | translate }}</span>
+                    <span>{{ 'zr.chart.table_revenue' | translate }}</span>
+                    <span>{{ 'zr.chart.table_refunds' | translate }}</span>
+                    <span>{{ 'zr.chart.table_net' | translate }}</span>
+                </div>
+                @for (row of summary()!.dailyBreakdown; track row.date) {
+                <div class="zr-daily-row" [class.zr-daily-row--today]="row.date === activeTo()">
+                    <span>{{ row.date | date:'EEE dd/MM' }}</span>
+                    <span>{{ row.orders }}</span>
+                    <span class="zr-daily-row__rev">{{ fmt(row.revenue) }}</span>
+                    <span class="zr-daily-row__ref">{{ fmt(row.refunds) }}</span>
+                    <span class="zr-daily-row__net">{{ fmt(row.netRevenue) }}</span>
+                </div>
+                }
+            </div>
+
+            } @else {
+            <div class="zr-empty">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <path d="M8 21h8M12 17v4" />
+                </svg>
+                <p>{{ 'zr.chart.empty' | translate }}</p>
+            </div>
+            }
+
+        </div>
+
+        <!-- ── RIGHT: Shift history list ── -->
+        <div class="zr-shifts-col">
+
+            <div class="zr-section-head">
+                <span class="zr-section-title">{{ 'zr.shifts.section_title' | translate }}</span>
+                @if (shiftsTotal() > 0) {
+                <span class="zr-section-badge">{{ shiftsTotal() }} {{ 'zr.shifts.total_suffix' | translate }}</span>
+                }
+            </div>
+
+            @if (shiftsLoading()) {
+            <div class="zr-shifts-list">
+                @for (i of [1,2,3,4,5]; track i) {
+                <div class="zr-shift-row zr-shift-row--skeleton"></div>
+                }
+            </div>
+            } @else if (shifts().length === 0) {
+            <div class="zr-empty zr-empty--sm">
+                <p>{{ 'zr.shifts.empty' | translate }}</p>
+            </div>
+            } @else {
+            <div class="zr-shifts-list">
+                @for (shift of shifts(); track shift.id) {
+                <button class="zr-shift-row" (click)="openShiftReport(shift)" type="button">
+
+                    <!-- Status dot + date -->
+                    <div class="zr-shift-row__main">
+                        <span class="zr-shift-dot zr-shift-dot--{{ shiftStatusClass(shift) }}"></span>
+                        <div class="zr-shift-row__info">
+                            <span class="zr-shift-row__date">{{ shift.openedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+                            <span class="zr-shift-row__by">{{ shift.openedByName }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="zr-shift-row__dur">
+                        {{ formatDuration(shift.durationMinutes) }}
+                    </div>
+
+                    <!-- Orders -->
+                    <div class="zr-shift-row__orders">
+                        {{ shift.totalOrders ?? '—' }}
+                        <span class="zr-shift-row__orders-label">{{ 'zr.shifts.orders_label' | translate }}</span>
+                    </div>
+
+                    <!-- Revenue -->
+                    <div class="zr-shift-row__rev">
+                        {{ fmt(shift.totalRevenue) }}
+                        <span class="zr-shift-row__rev-unit">TND</span>
+                    </div>
+
+                    <!-- Discrepancy -->
+                    @if (shift.status === 'CLOSED') {
+                    <div class="zr-shift-row__disc zr-shift-row__disc--{{ discClass(shift.cashDiscrepancy) }}">
+                        @if (!shift.cashDiscrepancy || shift.cashDiscrepancy === 0) {
+                        <span class="zr-disc-badge zr-disc-badge--exact">{{ 'zr.shifts.disc_exact' | translate }}</span>
+                        } @else {
+                        <span class="zr-disc-badge zr-disc-badge--{{ discClass(shift.cashDiscrepancy) }}">
+                            {{ shift.cashDiscrepancy > 0 ? '+' : '' }}{{ fmt(shift.cashDiscrepancy) }}
+                        </span>
+                        }
+                    </div>
+                    } @else {
+                    <div class="zr-shift-row__disc">
+                        <span class="zr-disc-badge zr-disc-badge--open">{{ 'zr.shifts.disc_open' | translate }}</span>
+                    </div>
+                    }
+
+                    <!-- Chevron -->
+                    <svg class="zr-shift-row__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg>
+
+                </button>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (totalPages > 1) {
+            <div class="zr-pagination">
+                <button class="zr-page-btn" [disabled]="shiftsPage() === 0" (click)="prevPage()"
+                    type="button">←</button>
+                <span class="zr-page-info">{{ shiftsPage() + 1 }} / {{ totalPages }}</span>
+                <button class="zr-page-btn" [disabled]="shiftsPage() === totalPages - 1" (click)="nextPage()"
+                    type="button">→</button>
+            </div>
+            }
+            }
+
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SHIFT Z-REPORT DRAWER
+══════════════════════════════════════════════════════ -->
+@if (drawerOpen()) {
+<!-- Backdrop -->
+<div class="zr-drawer-backdrop" (click)="closeDrawer()"></div>
+
+<!-- Drawer panel -->
+<div class="zr-drawer" [class.zr-drawer--open]="drawerOpen()">
+
+    <!-- Drawer header -->
+    <div class="zr-drawer__head">
+        <div>
+            <div class="zr-drawer__title">{{ 'zr.drawer.title' | translate }}</div>
+            @if (selectedShift()) {
+            <div class="zr-drawer__sub">
+                {{ selectedShift()!.openedAt | date:'dd/MM/yyyy HH:mm' }}
+                · {{ selectedShift()!.openedByName }}
+                · {{ formatDuration(selectedShift()!.durationMinutes) }}
+            </div>
+            }
+        </div>
+        <div class="zr-drawer__head-actions">
+            <button class="zr-drawer__print-btn" (click)="printReport()" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9" />
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                    <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                {{ 'zr.drawer.print' | translate }}
+            </button>
+            <button class="zr-drawer__close" (click)="closeDrawer()" type="button">✕</button>
+        </div>
+    </div>
+
+    <!-- Drawer body -->
+    <div class="zr-drawer__body">
+
+        @if (zReportLoading()) {
+        <div class="zr-drawer__loading">
+            <div class="zr-drawer__spinner"></div>
+            <span>{{ 'zr.drawer.loading' | translate }}</span>
+        </div>
+
+        } @else if (shiftZReport()) {
+        @if (shiftZReport(); as r) {
+        <!-- Session info -->
+        <div class="zr-dr-session">
+            <div class="zr-dr-session__row">
+                <span>{{ 'zr.drawer.session_id' | translate }}</span>
+                <span class="zr-dr-session__val mono">{{ r.shiftId.slice(0,8).toUpperCase() }}</span>
+            </div>
+            <div class="zr-dr-session__row">
+                <span>{{ 'zr.drawer.opened_at' | translate }}</span>
+                <span class="zr-dr-session__val">{{ r.report.openedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            @if (r.report.closedAt) {
+            <div class="zr-dr-session__row">
+                <span>{{ 'zr.drawer.closed_at' | translate }}</span>
+                <span class="zr-dr-session__val">{{ r.report.closedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            }
+            <div class="zr-dr-session__row">
+                <span>{{ 'zr.drawer.generated_at' | translate }}</span>
+                <span class="zr-dr-session__val">{{ r.report.generatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+        </div>
+
+        <!-- Financial summary -->
+        <div class="zr-dr-section">{{ 'zr.drawer.financial_summary' | translate }}</div>
+        <div class="zr-dr-rows">
+            <div class="zr-dr-row">
+                <span>{{ 'zr.drawer.opening_float' | translate }}</span>
+                <span>TND {{ fmt(r.report.openingFloat) }}</span>
+            </div>
+            <div class="zr-dr-row">
+                <span>{{ 'zr.drawer.total_cash' | translate }}</span>
+                <span>TND {{ fmt(r.report.totalCashRevenue) }}</span>
+            </div>
+            <div class="zr-dr-row">
+                <span>{{ 'zr.drawer.total_card' | translate }}</span>
+                <span>TND {{ fmt(r.report.totalCardRevenue) }}</span>
+            </div>
+            <div class="zr-dr-row">
+                <span>{{ 'zr.drawer.tips' | translate }}</span>
+                <span>TND {{ fmt(r.report.totalTips) }}</span>
+            </div>
+            <div class="zr-dr-row">
+                <span>{{ 'zr.drawer.refunds' | translate }}</span>
+                <span class="zr-dr-row__neg">TND {{ fmt(r.report.totalRefunds) }}</span>
+            </div>
+            <div class="zr-dr-row">
+                <span>{{ 'zr.drawer.discounts' | translate }}</span>
+                <span class="zr-dr-row__neg">TND {{ fmt(r.report.totalDiscounts) }}</span>
+            </div>
+            <div class="zr-dr-row zr-dr-row--bold">
+                <span>{{ 'zr.drawer.expected_cash' | translate }}</span>
+                <span>TND {{ fmt(r.report.expectedCash) }}</span>
+            </div>
+            <div class="zr-dr-row zr-dr-row--bold">
+                <span>{{ 'zr.drawer.actual_cash' | translate }}</span>
+                <span>TND {{ fmt(r.report.closingActual) }}</span>
+            </div>
+            <div class="zr-dr-row zr-dr-row--diff">
+                <span>{{ 'zr.drawer.difference' | translate }}</span>
+                <span class="zr-dr-diff zr-dr-diff--{{ discClass(r.report.cashDiscrepancy) }}">
+                    TND {{ fmt(r.report.cashDiscrepancy) }}
+                    <span class="zr-dr-diff__badge">{{ discLabel(r.report.cashDiscrepancy) }}</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Order statistics -->
+        <div class="zr-dr-section">{{ 'zr.drawer.order_stats' | translate }}</div>
+        <div class="zr-dr-rows">
+            <div class="zr-dr-row">
+                <span>{{ 'zr.drawer.total_orders' | translate }}</span>
+                <span>{{ r.report.totalOrders }}</span>
+            </div>
+            <div class="zr-dr-row zr-dr-row--bold">
+                <span>{{ 'zr.drawer.gross_revenue' | translate }}</span>
+                <span>TND {{ fmt(r.report.grossRevenue) }}</span>
+            </div>
+            <div class="zr-dr-row zr-dr-row--bold">
+                <span>{{ 'zr.drawer.net_revenue' | translate }}</span>
+                <span>TND {{ fmt(r.report.netRevenue) }}</span>
+            </div>
+        </div>
+
+        <!-- Payment method breakdown -->
+        <div class="zr-dr-methods">
+            <div class="zr-dr-method zr-dr-method--cash">
+                <div class="zr-dr-method__label">{{ 'zr.drawer.method_cash' | translate }}</div>
+                <div class="zr-dr-method__val">TND {{ fmt(r.report.totalCashRevenue) }}</div>
+            </div>
+            <div class="zr-dr-method zr-dr-method--card">
+                <div class="zr-dr-method__label">{{ 'zr.drawer.method_card' | translate }}</div>
+                <div class="zr-dr-method__val">TND {{ fmt(r.report.totalCardRevenue) }}</div>
+            </div>
+        </div>
+
+        <!-- Category breakdown -->
+        @if (r?.report?.byCategory?.length) {
+        <div class="zr-dr-section">{{ 'zr.drawer.by_category' | translate }}</div>
+        <div class="zr-dr-rows">
+            @for (cat of r.report.byCategory; track cat.categoryName) {
+            <div class="zr-dr-row">
+                <span>{{ cat.categoryName || ('zr.drawer.no_category' | translate) }}</span>
+                <span>TND {{ fmt(cat.revenue) }}</span>
+            </div>
+            }
+        </div>
+        }
+        }
+
+
+        } @else {
+        <div class="zr-drawer__empty">
+            <p>{{ 'zr.drawer.empty' | translate }}</p>
+        </div>
+        }
+
+    </div>
+</div>
+}

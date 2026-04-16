@@ -37,7 +37,7 @@ export interface OrderPaymentSummary {
 export interface RecordPaymentRequest {
   orderId:          string;
   method:           PaymentMethod;
-  amountPaid:       number;
+  amountPaid:       number | null;  
   amountTendered?:  number;   // required for CASH
   tip?:             number;
   notes?:           string;

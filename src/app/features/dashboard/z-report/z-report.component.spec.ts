@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CategoriesComponent } from './categories.component';
+import { ZReportComponent } from './z-report.component';
 
-describe('CategoriesComponent', () => {
-  let component: CategoriesComponent;
-  let fixture: ComponentFixture<CategoriesComponent>;
+describe('ZReportComponent', () => {
+  let component: ZReportComponent;
+  let fixture: ComponentFixture<ZReportComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CategoriesComponent]
+      imports: [ZReportComponent]
     })
     .compileComponents();
-    
-    fixture = TestBed.createComponent(CategoriesComponent);
+
+    fixture = TestBed.createComponent(ZReportComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

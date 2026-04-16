@@ -3,13 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Shift, OpenShiftRequest, CloseShiftRequest } from '../models/shift.models';
 import { ApiResponse, PageResponse } from '../../../core/models/api.models';
+import { environment } from '../../../../environments/environment';
  
  
 @Injectable({ providedIn: 'root' })
 export class ShiftService {
  
   private readonly http = inject(HttpClient);
-  private readonly base = '/api/pos/shifts';
+  private readonly base = environment.apiUrl +'/api/pos/shifts';
  
   /** Currently open shift — null if no shift is open */
   currentShift = signal<Shift | null>(null);

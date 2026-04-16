@@ -24,15 +24,7 @@ export class PosService {
   private posAuth = inject(PosAuthService);
   private base = environment.apiUrl;
 
-  /**
-   * Auth headers — Bearer token for protected endpoints (tables, orders, staff).
-   */
-  private get headers(): HttpHeaders {
-    const token = this.posAuth.getPosToken();
-    return token
-      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
-      : new HttpHeaders();
-  }
+
 
   /**
    * The tenant's subdomain — read from the currentTenant stored in localStorage
@@ -56,13 +48,7 @@ export class PosService {
    * so the backend resolves the correct tenant, plus auth so the POS
    * can reach it (the /api/menu endpoint may require tenant context).
    */
-  private get menuHeaders(): HttpHeaders {
-    const token = this.posAuth.getPosToken();
-    const subdomain = this.tenantSubdomain;
-    let h = new HttpHeaders({ 'X-Tenant-Subdomain': subdomain });
-    if (token) h = h.set('Authorization', `Bearer ${token}`);
-    return h;
-  }
+
 
   // ── Tables ──────────────────────────────────────────────────────────────────
 
@@ -70,7 +56,6 @@ export class PosService {
     return this.http
       .get<ApiResponse<TableStatusResponse[]>>(
         `${this.base}/api/pos/tables/status`,
-        { headers: this.headers }
       )
       .pipe(map(r => r.data));
   }
@@ -83,7 +68,6 @@ export class PosService {
     return this.http
       .get<ApiResponse<PublicMenuResponse>>(
         `${this.base}/api/menu`,
-        { headers: this.menuHeaders }
       )
       .pipe(map(r => r.data));
   }
@@ -95,7 +79,6 @@ export class PosService {
       .post<ApiResponse<OrderResponse>>(
         `${this.base}/api/orders`,
         payload,
-        { headers: this.menuHeaders }
       )
       .pipe(map(r => r.data));
   }
@@ -106,7 +89,6 @@ export class PosService {
     return this.http
       .get<ApiResponse<StaffResponse[]>>(
         `${this.base}/api/dashboard/staff`,
-        { headers: this.headers }
       )
       .pipe(map(r => r.data));
   }

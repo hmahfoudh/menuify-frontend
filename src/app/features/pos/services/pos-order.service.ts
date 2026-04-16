@@ -1,28 +1,28 @@
-// pos-order.service.ts
+// pos-order-v2.service.ts
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import {
   PosOrder,
   PosCreateOrderRequest,
+  PosOrderLineRequest,
   PosUpdateStatusRequest,
   OrderStatus,
   isActiveStatus,
 } from '../models/pos-order.models';
 import { ApiResponse } from '../../../core/models/api.models';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class PosOrderService {
 
   private readonly http = inject(HttpClient);
-  private readonly base = '/api/pos/orders';
+  private readonly base = environment.apiUrl + '/api/pos/orders';
 
   // ── Signal-based active orders state ─────────────────────────────────────
 
-  /** All currently active orders for the POS view */
   activeOrders = signal<PosOrder[]>([]);
 
-  /** Active orders grouped by table number */
   ordersByTable = computed(() => {
     const map = new Map<string, PosOrder[]>();
     for (const order of this.activeOrders()) {
@@ -39,7 +39,6 @@ export class PosOrderService {
     return this.http.post<ApiResponse<PosOrder>>(this.base, req).pipe(
       tap(res => {
         if (res.success) {
-          // Optimistically add to active orders
           this.activeOrders.update(orders => [res.data, ...orders]);
         }
       })
@@ -58,6 +57,31 @@ export class PosOrderService {
     return this.http.get<ApiResponse<PosOrder>>(`${this.base}/${id}`);
   }
 
+  /**
+   * Appends new lines to an existing active order.
+   * Hits: PATCH /api/pos/orders/{id}/lines
+   * Returns the full updated order with all lines and recalculated totals.
+   */
+  addLines(
+    orderId: string,
+    lines: PosOrderLineRequest[]
+  ): Observable<ApiResponse<PosOrder>> {
+    return this.http
+      .patch<ApiResponse<PosOrder>>(`${this.base}/${orderId}/lines`, { lines })
+      .pipe(
+        tap(res => {
+          if (!res.success) return;
+          // Update the order in the active orders list if present
+          const updated = res.data;
+          this.activeOrders.update(orders => {
+            const idx = orders.findIndex(o => o.id === updated.id);
+            if (idx === -1) return orders;
+            return orders.map(o => o.id === updated.id ? updated : o);
+          });
+        })
+      );
+  }
+
   updateStatus(
     id: string,
     req: PosUpdateStatusRequest
@@ -69,27 +93,21 @@ export class PosOrderService {
           if (!res.success) return;
           const updated = res.data;
           this.activeOrders.update(orders => {
-            // If the order is no longer active, remove it from the list
             if (!isActiveStatus(updated.status)) {
               return orders.filter(o => o.id !== updated.id);
             }
-            // Otherwise update in place
             return orders.map(o => o.id === updated.id ? updated : o);
           });
         })
       );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
-  /** Get the active order for a specific table, if any */
   getOrderForTable(tableNumber: string): PosOrder | undefined {
     return this.activeOrders().find(
       o => o.tableNumber === tableNumber && isActiveStatus(o.status)
     );
   }
 
-  /** Refresh active orders from server (call on POS init and after reconnect) */
   refresh(): void {
     this.loadActiveOrders().subscribe();
   }

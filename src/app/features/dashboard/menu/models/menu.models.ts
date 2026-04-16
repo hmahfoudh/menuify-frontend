@@ -48,6 +48,7 @@ export interface ItemResponse {
   spicy:          boolean;
   tags:           string | null;
   position:       number;
+  hasVariants: boolean;
   variantGroups:  VariantGroupResponse[];
   modifierGroups: ModifierGroupResponse[];
   createdAt:      string;
