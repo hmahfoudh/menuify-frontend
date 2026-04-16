@@ -9,6 +9,8 @@ import { OrderNotificationService } from '../../orders/services/order-notificati
 import { EmailVerificationBannerComponent } from '../../../../shared/components/email-verification-banner/email-verification-banner.component';
 import { ImpersonationBannerComponent } from '../../../../shared/components/impersonation-banner/impersonation-banner.component';
 import { LocalStorageService } from '../../../../core/services/local-storage.service';
+import { LangSwitcherComponent } from '../../../../shared/components/lang-switcher/lang-switcher.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface NavItem {
   label: string;
@@ -21,7 +23,12 @@ export interface NavItem {
 @Component({
   selector: 'app-dashboard-shell',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, EmailVerificationBannerComponent, ImpersonationBannerComponent],
+  imports: [
+    CommonModule, RouterLink, RouterLinkActive, 
+    RouterOutlet, EmailVerificationBannerComponent, 
+    ImpersonationBannerComponent, LangSwitcherComponent,
+    TranslatePipe  
+  ],
   templateUrl: './dashboard-shell.component.html',
   styleUrls: ['./dashboard-shell.component.scss']
 })
@@ -57,52 +64,57 @@ export class DashboardShellComponent implements OnInit {
   // ── Navigation ─────────────────────────────────────────────────────────────
   readonly navItems: NavItem[] = [
     {
-      label: 'POS',
+      label: 'shell.sidebar.POS',
       route: '/pos',
       icon: 'M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M9 7h6'
     },
     {
-      label: 'Menu',
+      label: 'shell.sidebar.MENU',
       route: '/dashboard/menu',
       icon: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2'
     },
     {
-      label: 'Orders',
+      label: 'shell.sidebar.ORDERS',
       route: '/dashboard/orders',
       icon: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0'
     },
     {
-      label: 'History',
+      label: 'shell.sidebar.HISTORY',
       route: '/dashboard/history',
       icon: 'M12 2v20M17 5H9.828l-3.414 3.414A2 2 0 0 0 5 10.052V19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V10.052a2 2 0 0 0-.586-1.414L17 5z'
     },
     {
-      label: 'Reservations',
+      label: 'shell.sidebar.RESERVATIONS',
       route: '/dashboard/reservations',
       icon: 'M15 3a4 4 0 0 1 4 4v4a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4zM5 7a4 4 0 0 1 8 0v4a4 4 0 0 1-8 0V7z'
     },
     {
-      label: 'Theme',
-      route: '/dashboard/theme',
-      icon: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h4M18 12h4M12 2v4M12 18v4'
-    },
-    {
-      label: 'Analytics',
-      route: '/dashboard/analytics',
-      icon: 'M18 20V10M12 20V4M6 20v-6'
-    },
-    {
-      label: 'Staff',
+      label: 'shell.sidebar.STAFF',
       route: '/dashboard/staff',
       icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75'
     },
     {
-      label: 'Tables',
+      label: 'shell.sidebar.TABLES',
       route: '/dashboard/tables',
       icon: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z'
     },
     {
-      label: 'Settings',
+      label: 'shell.sidebar.Z-REPORTS',
+      route: '/dashboard/reports',
+      icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8'
+    },
+    {
+      label: 'shell.sidebar.ANALYTICS',
+      route: '/dashboard/analytics',
+      icon: 'M18 20V10M12 20V4M6 20v-6'
+    },
+    {
+      label: 'shell.sidebar.THEME',
+      route: '/dashboard/theme',
+      icon: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h4M18 12h4M12 2v4M12 18v4'
+    },
+    {
+      label: 'shell.sidebar.SETTINGS',
       route: '/dashboard/settings',
       icon: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z'
     }

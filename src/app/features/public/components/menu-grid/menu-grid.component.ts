@@ -1,13 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
 import { ItemCardComponent } from '../item-card/item-card.component';
 import { PublicItemResponse } from '../../models/public-menu.models';
 
 @Component({
   selector: 'app-menu-grid',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, ItemCardComponent],
+  imports: [CommonModule, ItemCardComponent],
   templateUrl: './menu-grid.component.html',
   styleUrl: './menu-grid.component.scss',
 })

@@ -48,6 +48,7 @@ export interface ItemResponse {
   spicy:          boolean;
   tags:           string | null;
   position:       number;
+  hasVariants: boolean;
   variantGroups:  VariantGroupResponse[];
   modifierGroups: ModifierGroupResponse[];
   createdAt:      string;
@@ -153,15 +154,6 @@ export interface ModifierRequest {
   priceDelta:  number;
   available:   boolean;
   isDefault:   boolean;
-}
-
-// ── API wrapper ───────────────────────────────────────────────────────────────
-
-export interface ApiResponse<T> {
-  success:   boolean;
-  message:   string;
-  data:      T;
-  timestamp: string;
 }
 
 // ── UI state helpers ──────────────────────────────────────────────────────────

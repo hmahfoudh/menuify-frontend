@@ -34,13 +34,6 @@ export interface ThemeResponse {
   customCss:      string | null;
 }
 
-export interface ApiResponse<T> {
-  success:   boolean;
-  message:   string;
-  data:      T;
-  timestamp: string;
-}
-
 // ── Token structure ────────────────────────────────────────────────────────────
 // Mirrors the JSON structure stored in preset.tokens / customTokens
 export interface ThemeTokens {

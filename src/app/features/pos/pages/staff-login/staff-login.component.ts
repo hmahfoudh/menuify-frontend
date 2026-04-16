@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { Router }       from '@angular/router';
 import { PosAuthService } from '../../services/pos-auth.service';
 import { StaffResponse } from '../../models/pos.models';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector:    'app-staff-login',
@@ -15,7 +16,7 @@ import { StaffResponse } from '../../models/pos.models';
 })
 export class StaffLoginComponent implements OnInit {
 
-  private posAuth = inject(PosAuthService);
+  private authService = inject(AuthService);
   private router  = inject(Router);
 
   // ── State ───────────────────────────────────────────────────────────────────
@@ -32,12 +33,12 @@ export class StaffLoginComponent implements OnInit {
     // On app.menuify.tn: if the owner is already logged in, skip the staff
     // login screen and go straight to the POS. On blackrabbit.menuify.tn
     // this will always be false — owner tokens don't exist on the tablet.
-    if (this.posAuth.isOwner()) {
+    if (this.authService.isOwner()) {
       this.router.navigateByUrl('/pos');
       return;
     }
 
-    this.posAuth.getLoginCards().subscribe({
+    this.authService.getLoginCards().subscribe({
       next: list => {
         this.staff.set(list.filter(s => s.active));
         this.loading.set(false);
@@ -89,7 +90,7 @@ export class StaffLoginComponent implements OnInit {
     this.logging.set(true);
     this.error.set(null);
 
-    this.posAuth.staffLogin(staff.id, this.pin()).subscribe({
+    this.authService.staffLogin(staff.id, this.pin()).subscribe({
       next: () => {
         this.logging.set(false);
         this.router.navigateByUrl('/pos');

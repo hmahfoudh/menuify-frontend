@@ -4,8 +4,9 @@ import { Observable } from 'rxjs';
 import { map }        from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
 import {
-  AnalyticsSummaryResponse, ApiResponse, Period
+  AnalyticsSummaryResponse, Period
 } from '../models/analytics.models';
+import { ApiResponse } from '../../../../core/models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsService {

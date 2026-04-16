@@ -17,13 +17,6 @@ export type NotificationType =
   | 'domain_verified'
   | 'staff_added';
 
-export interface ApiResponse<T> {
-  success:   boolean;
-  message:   string;
-  data:      T;
-  timestamp: string;
-}
-
 // Icon path + accent color per notification type
 export interface NotifMeta {
   icon:  string;   // SVG path

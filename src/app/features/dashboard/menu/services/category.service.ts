@@ -4,9 +4,10 @@ import { Observable }         from 'rxjs';
 import { map }                from 'rxjs/operators';
 import {
   CategoryResponse, CategoryRequest,
-  ReorderRequest, ApiResponse
+  ReorderRequest
 } from '../models/menu.models';
 import { environment } from '../../../../../environments/environment';
+import { ApiResponse } from '../../../../core/models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class CategoryService {

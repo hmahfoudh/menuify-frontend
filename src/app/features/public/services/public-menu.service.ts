@@ -7,9 +7,10 @@ import { environment }                     from '../../../../environments/enviro
 import { SubdomainService }                from '../../../core/services/subdomain.service';
 import {
   PublicMenuResponse, ThemeResponse,
-  CreateOrderRequest, SubmittedOrder, ApiResponse,
+  CreateOrderRequest, SubmittedOrder,
   TrackedOrder
 } from '../models/public-menu.models';
+import { ApiResponse } from '../../../core/models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class PublicMenuService {

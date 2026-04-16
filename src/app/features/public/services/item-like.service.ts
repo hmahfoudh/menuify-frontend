@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable, tap } from 'rxjs';
 import { ItemLikeDetailDto, ItemLikeLeaderboardDto, ItemLikeToggleResponse, ItemLikeTrendDto } from '../models/item-like.models';
-import { ApiResponse } from '../models/public-menu.models';
 import { environment } from '../../../../environments/environment';
+import { ApiResponse } from '../../../core/models/api.models';
 
 @Injectable({
   providedIn: 'root'

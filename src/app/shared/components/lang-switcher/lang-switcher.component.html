@@ -1,0 +1,44 @@
+<div class="lang-switcher" [class.lang-switcher--open]="open()">
+
+  <!-- Trigger button -->
+  <button
+    class="lang-trigger"
+    type="button"
+    (click)="toggle()"
+    [attr.aria-expanded]="open()"
+    [attr.aria-label]="'Switch language, current: ' + currentOption().label"
+  >
+    <span class="lang-flag">{{ currentOption().flag }}</span>
+    <span class="lang-code">{{ currentOption().code | uppercase }}</span>
+    <svg class="lang-chevron" width="10" height="10" viewBox="0 0 24 24"
+         fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  </button>
+
+  <!-- Dropdown -->
+  @if (open()) {
+  <div class="lang-dropdown" role="listbox" [attr.aria-label]="'Language options'">
+    @for (lang of langs; track lang.code) {
+    <button
+      class="lang-option"
+      [class.lang-option--active]="lang.code === currentLang()"
+      type="button"
+      role="option"
+      [attr.aria-selected]="lang.code === currentLang()"
+      (click)="select(lang.code)"
+    >
+      <span class="lang-flag">{{ lang.flag }}</span>
+      <span class="lang-option-label">{{ lang.label }}</span>
+      @if (lang.code === currentLang()) {
+      <svg class="lang-check" width="12" height="12" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+      }
+    </button>
+    }
+  </div>
+  }
+
+</div>

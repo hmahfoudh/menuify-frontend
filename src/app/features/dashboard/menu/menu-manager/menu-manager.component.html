@@ -3,10 +3,10 @@
   <!-- ── PAGE HEADER ─────────────────────────────────────────────────────── -->
   <div class="page-head">
     <div>
-      <h2 class="page-title">Menu</h2>
+      <h2 class="page-title">{{ 'menu_mgr.page.title' | translate }}</h2>
       <p class="page-sub">
-        {{ categories().length }} categories ·
-        {{ visibleCount() }} visible
+        {{ categories().length }} {{ 'menu_mgr.page.sub_categories' | translate }} ·
+        {{ visibleCount() }} {{ 'menu_mgr.page.sub_visible' | translate }}
       </p>
     </div>
   </div>
@@ -40,9 +40,9 @@
     <!-- ── CATEGORY SIDEBAR ────────────────────────────────────────────────── -->
     <aside class="cat-sidebar">
       <div class="cat-sidebar-head">
-        <span class="cat-sidebar-label">Categories</span>
+        <span class="cat-sidebar-label">{{ 'menu_mgr.cat_sidebar.label' | translate }}</span>
         <button class="btn-icon-sm" (click)="openCreateCategory()"
-                title="Add category" type="button">
+                [title]="'menu_mgr.cat_sidebar.add_title' | translate" type="button">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
             <line x1="12" y1="5" x2="12" y2="19"/>
@@ -65,9 +65,9 @@
       @if (!loadingCats()) {
         @if (categories().length === 0) {
           <div class="cat-empty">
-            <p>No categories yet</p>
+            <p>{{ 'menu_mgr.cat_sidebar.empty_text' | translate }}</p>
             <button class="btn-ghost-sm" (click)="openCreateCategory()">
-              Add first category
+              {{ 'menu_mgr.cat_sidebar.empty_btn' | translate }}
             </button>
           </div>
         }
@@ -90,14 +90,14 @@
 
             <div class="cat-info">
               <span class="cat-name">{{ cat.name }}</span>
-              <span class="cat-count">{{ cat.itemCount }} items</span>
+              <span class="cat-count">{{ cat.itemCount }} {{ 'menu_mgr.cat_sidebar.item_count' | translate }}</span>
             </div>
 
             <!-- Visibility toggle -->
             <button class="cat-vis-btn"
                     [class.cat-vis-btn--hidden]="!cat.visible"
                     (click)="$event.stopPropagation(); toggleCategoryVisibility(cat)"
-                    [title]="cat.visible ? 'Hide' : 'Show'"
+                    [title]="cat.visible ? ('menu_mgr.cat_sidebar.vis_hide' | translate) : ('menu_mgr.cat_sidebar.vis_show' | translate)"
                     type="button">
               @if (cat.visible) {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
@@ -118,7 +118,7 @@
             <!-- Edit button -->
             <button class="cat-edit-btn"
                     (click)="$event.stopPropagation(); openEditCategory(cat)"
-                    title="Edit" type="button">
+                    [title]="'menu_mgr.cat_sidebar.edit_title' | translate" type="button">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -141,7 +141,7 @@
             <h3 class="item-area-title">
               @if (cat.icon) { {{ cat.icon }}&nbsp; }{{ cat.name }}
             </h3>
-            <p class="item-area-sub">{{ cat.itemCount }} items</p>
+            <p class="item-area-sub">{{ cat.itemCount }} {{ 'menu_mgr.item_area.item_count' | translate }}</p>
           </div>
           <button class="btn-primary" (click)="openCreateItem()" type="button">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
@@ -149,7 +149,7 @@
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            Add item
+            {{ 'menu_mgr.item_area.add_item' | translate }}
           </button>
         </div>
       }
@@ -180,9 +180,9 @@
               <polyline points="21 15 16 10 5 21"/>
             </svg>
           </div>
-          <h3 class="item-empty-title">No items yet</h3>
-          <p class="item-empty-sub">Add your first item to this category</p>
-          <button class="btn-primary" (click)="openCreateItem()">Add item</button>
+          <h3 class="item-empty-title">{{ 'menu_mgr.item_area.empty_title' | translate }}</h3>
+          <p class="item-empty-sub">{{ 'menu_mgr.item_area.empty_sub' | translate }}</p>
+          <button class="btn-primary" (click)="openCreateItem()">{{ 'menu_mgr.item_area.empty_add' | translate }}</button>
         </div>
       }
 
@@ -195,10 +195,10 @@
               <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
             </svg>
           </div>
-          <h3 class="item-empty-title">No categories yet</h3>
-          <p class="item-empty-sub">Create your first category to start adding items</p>
+          <h3 class="item-empty-title">{{ 'menu_mgr.item_area.no_cat_title' | translate }}</h3>
+          <p class="item-empty-sub">{{ 'menu_mgr.item_area.no_cat_sub' | translate }}</p>
           <button class="btn-primary" (click)="openCreateCategory()">
-            Add category
+            {{ 'menu_mgr.item_area.no_cat_add' | translate }}
           </button>
         </div>
       }
@@ -234,7 +234,7 @@
                   <span class="item-badge item-badge--featured">★</span>
                 }
                 @if (!item.available) {
-                  <span class="item-badge item-badge--off">Off</span>
+                  <span class="item-badge item-badge--off">{{ 'menu_mgr.item_area.item_badge_off' | translate }}</span>
                 }
               </div>
 
@@ -252,7 +252,7 @@
                       {{ formatPrice(item.basePrice) }}
                     } @else if (item.variantGroups.length > 0) {
                       <span class="item-card-variants">
-                        {{ item.variantGroups[0].variants.length }} options
+                        {{ item.variantGroups[0].variants.length }} {{ 'menu_mgr.item_area.options_label' | translate }}
                       </span>
                     } @else {
                       <span class="item-card-ask">—</span>
@@ -269,7 +269,7 @@
               <!-- Quick toggle availability -->
               <button class="item-avail-btn"
                       [class.item-avail-btn--on]="item.available"
-                      [title]="item.available ? 'Mark unavailable' : 'Mark available'"
+                      [title]="item.available ? ('menu_mgr.item_area.item_avail_on' | translate) : ('menu_mgr.item_area.item_avail_off' | translate)"
                       (click)="$event.stopPropagation(); toggleItemAvailability(item)"
                       type="button">
                 {{ item.available ? '✓' : '✗' }}
@@ -295,7 +295,7 @@
         <div class="panel-head">
           <div>
             <h3 class="panel-title">
-              {{ panelMode() === 'create' ? 'New category' : 'Edit category' }}
+              {{ panelMode() === 'create' ? ('menu_mgr.cat_panel.title_create' | translate) : ('menu_mgr.cat_panel.title_edit' | translate) }}
             </h3>
           </div>
           <button class="panel-close" (click)="closePanel()">
@@ -311,7 +311,7 @@
 
           <!-- Icon + name -->
           <div class="field">
-            <label class="field-label">Icon & Name</label>
+            <label class="field-label">{{ 'menu_mgr.cat_panel.icon_name_label' | translate }}</label>
             <div class="icon-name-row">
               <button class="icon-pick-btn" (click)="toggleIconPicker()"
                       type="button">
@@ -330,7 +330,7 @@
               <input type="text" class="field-input"
                      [value]="catName()"
                      (input)="setCatName($any($event.target).value)"
-                     placeholder="e.g. Hot Drinks"
+                     [placeholder]="'menu_mgr.cat_panel.name_placeholder' | translate"
                      autofocus>
             </div>
           </div>
@@ -352,13 +352,13 @@
                        [value]="customIconInput()"
                        (input)="setCustomIconInput($any($event.target).value)"
                        (keydown.enter)="confirmCustomIcon()"
-                       placeholder="Paste emoji…"
+                       [placeholder]="'menu_mgr.cat_panel.emoji_placeholder' | translate"
                        maxlength="4">
                 <button class="icon-picker-custom-btn"
                         (click)="confirmCustomIcon()"
                         [disabled]="!customIconInput().trim()"
                         type="button">
-                  Use
+                  {{ 'menu_mgr.cat_panel.emoji_use' | translate }}
                 </button>
               </div>
             </div>
@@ -367,9 +367,9 @@
           <!-- Visibility toggle -->
           <div class="field-toggle">
             <div>
-              <span class="field-label">Visible on menu</span>
+              <span class="field-label">{{ 'menu_mgr.cat_panel.visible_label' | translate }}</span>
               <span class="field-hint-inline">
-                Hidden categories won't appear to customers
+                {{ 'menu_mgr.cat_panel.visible_hint' | translate }}
               </span>
             </div>
             <button class="toggle"
@@ -387,21 +387,21 @@
                       [disabled]="deletingId() === editingCat()!.id"
                       (click)="deleteCategory(editingCat()!)"
                       type="button">
-                Delete category
+                {{ 'menu_mgr.cat_panel.delete_btn' | translate }}
               </button>
-              <span class="danger-hint">This will remove all items inside</span>
+              <span class="danger-hint">{{ 'menu_mgr.cat_panel.delete_hint' | translate }}</span>
             </div>
           }
         </div>
 
         <div class="panel-foot">
           <button class="btn-ghost" (click)="closePanel()" type="button">
-            Cancel
+            {{ 'menu_mgr.cat_panel.cancel' | translate }}
           </button>
           <button class="btn-primary" [disabled]="saving() || !catName().trim()"
                   (click)="saveCategory()" type="button">
             @if (saving()) { <span class="spinner-sm spinner-sm--dark"></span> }
-            Save category
+            {{ 'menu_mgr.cat_panel.save' | translate }}
           </button>
         </div>
       </div>
@@ -413,11 +413,11 @@
         <div class="panel-head">
           <div>
             <h3 class="panel-title">
-              {{ panelMode() === 'create' ? 'New item' : editingItem()?.name }}
+              {{ panelMode() === 'create' ? ('menu_mgr.item_panel.title_create' | translate) : editingItem()?.name }}
             </h3>
             @if (panelMode() === 'edit' && editingItem()) {
               <span class="panel-sub">
-                {{ editingItem()!.available ? '✓ Available' : '✗ Unavailable' }}
+                {{ editingItem()!.available ? ('menu_mgr.item_panel.available_label' | translate) : ('menu_mgr.item_panel.unavailable_label' | translate) }}
               </span>
             }
           </div>
@@ -434,7 +434,7 @@
 
           <!-- Image upload -->
           <div class="field">
-            <label class="field-label">Photo</label>
+            <label class="field-label">{{ 'menu_mgr.item_panel.photo_label' | translate }}</label>
             <div class="img-upload-area">
               @if (itemImagePreview()) {
                 <div class="img-preview-wrap">
@@ -452,8 +452,8 @@
                     <line x1="12" y1="12" x2="12" y2="21"/>
                     <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
                   </svg>
-                  <span>Upload photo</span>
-                  <span class="img-hint">PNG, JPG · Max 5MB</span>
+                  <span>{{ 'menu_mgr.item_panel.photo_upload' | translate }}</span>
+                  <span class="img-hint">{{ 'menu_mgr.item_panel.photo_hint' | translate }}</span>
                 </label>
               }
               <input id="itemImg" type="file" accept="image/*"
@@ -465,32 +465,32 @@
           <!-- Name -->
           <div class="field">
             <label class="field-label" for="itemName">
-              Name <span class="req">*</span>
+              {{ 'menu_mgr.item_panel.name_label' | translate }} <span class="req">{{ 'menu_mgr.item_panel.name_req' | translate }}</span>
             </label>
             <input id="itemName" type="text" class="field-input"
                    [value]="itemName()"
                    (input)="setItemName($any($event.target).value)"
-                   placeholder="e.g. Espresso">
+                   [placeholder]="'menu_mgr.item_panel.name_placeholder' | translate">
           </div>
 
           <!-- Description -->
           <div class="field">
             <label class="field-label" for="itemDesc">
-              Description
-              <span class="field-optional">optional</span>
+              {{ 'menu_mgr.item_panel.desc_label' | translate }}
+              <span class="field-optional">{{ 'menu_mgr.item_panel.desc_optional' | translate }}</span>
             </label>
             <textarea id="itemDesc" class="field-input field-textarea"
                       [value]="itemDesc()"
                       (input)="setItemDesc($any($event.target).value)"
-                      placeholder="Short description shown on the menu…"
+                      [placeholder]="'menu_mgr.item_panel.desc_placeholder' | translate"
                       rows="2"></textarea>
           </div>
 
           <!-- Price -->
           <div class="field">
             <label class="field-label" for="itemPrice">
-              Base price (DT)
-              <span class="field-optional">leave empty if using variants</span>
+              {{ 'menu_mgr.item_panel.price_label' | translate }}
+              <span class="field-optional">{{ 'menu_mgr.item_panel.price_optional' | translate }}</span>
             </label>
             <input id="itemPrice" type="number" class="field-input"
                    [value]="itemPrice() ?? ''"
@@ -503,62 +503,62 @@
           <div class="flags-grid">
             <button class="flag-btn" [class.flag-btn--on]="itemAvailable()"
                     (click)="toggleAvailable()" type="button">
-              <span>{{ itemAvailable() ? '✓' : '✗' }}</span> Available
+              <span>{{ itemAvailable() ? '✓' : '✗' }}</span> {{ 'menu_mgr.item_panel.flag_available' | translate }}
             </button>
             <button class="flag-btn" [class.flag-btn--gold]="itemFeatured()"
                     (click)="toggleFeatured()" type="button">
-              <span>★</span> Featured
+              <span>★</span> {{ 'menu_mgr.item_panel.flag_featured' | translate }}
             </button>
             <button class="flag-btn" [class.flag-btn--on]="itemVeg()"
                     (click)="toggleVeg()" type="button">
-              🌿 Vegetarian
+              {{ 'menu_mgr.item_panel.flag_vegetarian' | translate }}
             </button>
             <button class="flag-btn" [class.flag-btn--on]="itemVegan()"
                     (click)="toggleVegan()" type="button">
-              🌱 Vegan
+              {{ 'menu_mgr.item_panel.flag_vegan' | translate }}
             </button>
             <button class="flag-btn" [class.flag-btn--on]="itemGluten()"
                     (click)="toggleGluten()" type="button">
-              🌾 Gluten free
+              {{ 'menu_mgr.item_panel.flag_gluten' | translate }}
             </button>
             <button class="flag-btn" [class.flag-btn--on]="itemSpicy()"
                     (click)="toggleSpicy()" type="button">
-              🌶️ Spicy
+              {{ 'menu_mgr.item_panel.flag_spicy' | translate }}
             </button>
           </div>
 
           <!-- Tags -->
           <div class="field">
             <label class="field-label" for="itemTags">
-              Tags
-              <span class="field-optional">comma-separated</span>
+              {{ 'menu_mgr.item_panel.tags_label' | translate }}
+              <span class="field-optional">{{ 'menu_mgr.item_panel.tags_optional' | translate }}</span>
             </label>
             <input id="itemTags" type="text" class="field-input"
                    [value]="itemTags()"
                    (input)="setItemTags($any($event.target).value)"
-                   placeholder="bestseller, new, seasonal">
+                   [placeholder]="'menu_mgr.item_panel.tags_placeholder' | translate">
           </div>
 
           <!-- Variants & Modifiers — only when editing -->
           @if (panelMode() === 'edit' && editingItem(); as item) {
 
             <div class="section-divider">
-              <span>Options</span>
+              <span>{{ 'menu_mgr.item_panel.options_section' | translate }}</span>
             </div>
 
             <!-- ── VARIANT GROUPS ──────────────────────────────────────── -->
             <div class="options-section">
               <div class="options-section-head">
-                <h4 class="options-title">Variant groups</h4>
+                <h4 class="options-title">{{ 'menu_mgr.variant_groups.title' | translate }}</h4>
                 <button class="btn-ghost-sm" (click)="openAddVariantGroup()"
-                        type="button">+ Add</button>
+                        type="button">{{ 'menu_mgr.variant_groups.add' | translate }}</button>
               </div>
               <p class="options-hint">
-                Size, milk type, etc. Each variant sets the price.
+                {{ 'menu_mgr.variant_groups.hint' | translate }}
               </p>
 
               @if (item.variantGroups.length === 0) {
-                <p class="options-empty">No variant groups yet</p>
+                <p class="options-empty">{{ 'menu_mgr.variant_groups.empty' | translate }}</p>
               }
 
               @for (g of item.variantGroups; track g.id) {
@@ -570,14 +570,14 @@
                       <span class="ogc-name">{{ g.name }}</span>
                       <span class="ogc-badge"
                             [class.ogc-badge--required]="g.required">
-                        {{ g.required ? 'Required' : 'Optional' }}
+                        {{ g.required ? ('menu_mgr.variant_groups.required' | translate) : ('menu_mgr.variant_groups.optional' | translate) }}
                       </span>
                       <span class="ogc-badge ogc-badge--type">{{ g.uiType }}</span>
                     </div>
                     <div class="ogc-actions">
                       <button class="btn-icon-sm"
                               (click)="openEditVariantGroup(g)"
-                              title="Edit group" type="button">
+                              [title]="'menu_mgr.variant_groups.edit_title' | translate" type="button">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2"
                              stroke-linecap="round">
@@ -587,7 +587,7 @@
                       </button>
                       <button class="btn-icon-sm btn-icon-sm--danger"
                               (click)="deleteVariantGroup(item.id, g.id)"
-                              title="Delete group" type="button">
+                              [title]="'menu_mgr.variant_groups.delete_title' | translate" type="button">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2"
                              stroke-linecap="round">
@@ -611,13 +611,13 @@
                             {{ formatPrice(v.price) }}
                           </span>
                           @if (!v.available) {
-                            <span class="ogc-item-off">off</span>
+                            <span class="ogc-item-off">{{ 'menu_mgr.variant_groups.off' | translate }}</span>
                           }
                         </div>
                       }
                     </div>
                   } @else {
-                    <p class="ogc-empty">No variants — click Edit to add some</p>
+                    <p class="ogc-empty">{{ 'menu_mgr.variant_groups.no_variants' | translate }}</p>
                   }
 
                 </div>
@@ -627,16 +627,16 @@
             <!-- ── MODIFIER GROUPS ─────────────────────────────────────── -->
             <div class="options-section">
               <div class="options-section-head">
-                <h4 class="options-title">Modifier groups</h4>
+                <h4 class="options-title">{{ 'menu_mgr.modifier_groups.title' | translate }}</h4>
                 <button class="btn-ghost-sm" (click)="openAddModifierGroup()"
-                        type="button">+ Add</button>
+                        type="button">{{ 'menu_mgr.modifier_groups.add' | translate }}</button>
               </div>
               <p class="options-hint">
-                Extras, sauces, add-ons. Each modifier adjusts the price.
+                {{ 'menu_mgr.modifier_groups.hint' | translate }}
               </p>
 
               @if (item.modifierGroups.length === 0) {
-                <p class="options-empty">No modifier groups yet</p>
+                <p class="options-empty">{{ 'menu_mgr.modifier_groups.empty' | translate }}</p>
               }
 
               @for (g of item.modifierGroups; track g.id) {
@@ -648,17 +648,17 @@
                       <span class="ogc-name">{{ g.name }}</span>
                       <span class="ogc-badge"
                             [class.ogc-badge--required]="g.required">
-                        {{ g.required ? 'Required' : 'Optional' }}
+                        {{ g.required ? ('menu_mgr.modifier_groups.required' | translate) : ('menu_mgr.modifier_groups.optional' | translate) }}
                       </span>
                       <span class="ogc-badge ogc-badge--type">{{ g.uiType }}</span>
                       @if (g.maxSelect > 1) {
-                        <span class="ogc-badge">max {{ g.maxSelect }}</span>
+                        <span class="ogc-badge">{{ 'menu_mgr.modifier_groups.max' | translate }} {{ g.maxSelect }}</span>
                       }
                     </div>
                     <div class="ogc-actions">
                       <button class="btn-icon-sm"
                               (click)="openEditModifierGroup(g)"
-                              title="Edit group" type="button">
+                              [title]="'menu_mgr.modifier_groups.edit_title' | translate" type="button">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2"
                              stroke-linecap="round">
@@ -668,7 +668,7 @@
                       </button>
                       <button class="btn-icon-sm btn-icon-sm--danger"
                               (click)="deleteModifierGroup(item.id, g.id)"
-                              title="Delete group" type="button">
+                              [title]="'menu_mgr.modifier_groups.delete_title' | translate" type="button">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
                              stroke="currentColor" stroke-width="2"
                              stroke-linecap="round">
@@ -690,16 +690,16 @@
                               +{{ formatPrice(m.priceDelta) }}
                             </span>
                           } @else {
-                            <span class="ogc-item-free">free</span>
+                            <span class="ogc-item-free">{{ 'menu_mgr.modifier_groups.free' | translate }}</span>
                           }
                           @if (!m.available) {
-                            <span class="ogc-item-off">off</span>
+                            <span class="ogc-item-off">{{ 'menu_mgr.modifier_groups.off' | translate }}</span>
                           }
                         </div>
                       }
                     </div>
                   } @else {
-                    <p class="ogc-empty">No modifiers — click Edit to add some</p>
+                    <p class="ogc-empty">{{ 'menu_mgr.modifier_groups.no_modifiers' | translate }}</p>
                   }
 
                 </div>
@@ -712,7 +712,7 @@
                       [disabled]="deletingId() === item.id"
                       (click)="deleteItem(item)"
                       type="button">
-                Delete item
+                {{ 'menu_mgr.item_panel.delete_btn' | translate }}
               </button>
             </div>
           }
@@ -720,14 +720,14 @@
 
         <div class="panel-foot">
           <button class="btn-ghost" (click)="closePanel()" type="button">
-            Cancel
+            {{ 'menu_mgr.item_panel.cancel' | translate }}
           </button>
           <button class="btn-primary"
                   [disabled]="saving() || !itemName().trim()"
                   (click)="saveItem()"
                   type="button">
             @if (saving()) { <span class="spinner-sm spinner-sm--dark"></span> }
-            {{ panelMode() === 'create' ? 'Create item' : 'Save changes' }}
+            {{ panelMode() === 'create' ? ('menu_mgr.item_panel.create' | translate) : ('menu_mgr.item_panel.save' | translate) }}
           </button>
         </div>
       </div>
@@ -739,10 +739,10 @@
         <div class="panel-head">
           <div>
             <button class="panel-back" (click)="backToItem()" type="button">
-              ← Back to item
+              {{ 'menu_mgr.variant_group_panel.back' | translate }}
             </button>
             <h3 class="panel-title">
-              {{ panelMode() === 'create' ? 'New variant group' : 'Edit variant group' }}
+              {{ panelMode() === 'create' ? ('menu_mgr.variant_group_panel.title_create' | translate) : ('menu_mgr.variant_group_panel.title_edit' | translate) }}
             </h3>
           </div>
           <button class="panel-close" (click)="closePanel()">
@@ -758,27 +758,27 @@
 
           <div class="field">
             <label class="field-label" for="vgName">
-              Group name <span class="req">*</span>
+              {{ 'menu_mgr.variant_group_panel.name_label' | translate }} <span class="req">{{ 'menu_mgr.variant_group_panel.name_req' | translate }}</span>
             </label>
             <input id="vgName" type="text" class="field-input"
                    [value]="vgName()"
                    (input)="setVgName($any($event.target).value)"
-                   placeholder="e.g. Size, Milk type">
+                   [placeholder]="'menu_mgr.variant_group_panel.name_placeholder' | translate">
           </div>
 
           <div class="form-row">
             <div class="field">
-              <label class="field-label">Display style</label>
+              <label class="field-label">{{ 'menu_mgr.variant_group_panel.display_label' | translate }}</label>
               <select class="field-input"
                       [value]="vgUiType()"
                       (change)="setVgUiType($any($event.target).value)">
-                <option value="pills">Pills</option>
-                <option value="dropdown">Dropdown</option>
-                <option value="cards">Cards</option>
+                <option value="pills">{{ 'menu_mgr.variant_group_panel.opt_pills' | translate }}</option>
+                <option value="dropdown">{{ 'menu_mgr.variant_group_panel.opt_dropdown' | translate }}</option>
+                <option value="cards">{{ 'menu_mgr.variant_group_panel.opt_cards' | translate }}</option>
               </select>
             </div>
             <div class="field-toggle field-toggle--inline">
-              <span class="field-label">Required</span>
+              <span class="field-label">{{ 'menu_mgr.variant_group_panel.required_label' | translate }}</span>
               <button class="toggle" [class.toggle--on]="vgRequired()"
                       (click)="toggleVgRequired()" type="button">
                 <span class="toggle-knob"></span>
@@ -789,14 +789,14 @@
           <!-- Save group before adding variants -->
           @if (panelMode() === 'create') {
             <div class="inline-hint">
-              Save the group first, then add variants below.
+              {{ 'menu_mgr.variant_group_panel.save_hint' | translate }}
             </div>
           }
 
           <!-- Variants list (only when editing) -->
           @if (panelMode() === 'edit' && editingVGroup(); as group) {
 
-            <div class="section-divider"><span>Variants</span></div>
+            <div class="section-divider"><span>{{ 'menu_mgr.variant_group_panel.section_variants' | translate }}</span></div>
 
             @for (v of group.variants; track v.id) {
               <div class="variant-row">
@@ -823,13 +823,14 @@
               <input type="text" class="field-input"
                      [value]="newVariantName()"
                      (input)="setNewVarName($any($event.target).value)"
-                     placeholder="Variant name (e.g. Large)">
+                     [placeholder]="'menu_mgr.variant_group_panel.var_name_placeholder' | translate">
               <input type="number" class="field-input field-input--sm"
                      [value]="newVariantPrice()"
                      (input)="setNewVarPrice($any($event.target).value)"
-                     placeholder="Price" step="0.001" min="0">
+                     [placeholder]="'menu_mgr.variant_group_panel.var_price_placeholder' | translate"
+                     step="0.001" min="0">
               <button class="btn-primary-sm" (click)="addVariant()" type="button">
-                Add
+                {{ 'menu_mgr.variant_group_panel.add_btn' | translate }}
               </button>
             </div>
           }
@@ -837,14 +838,14 @@
 
         <div class="panel-foot">
           <button class="btn-ghost" (click)="backToItem()" type="button">
-            Cancel
+            {{ 'menu_mgr.variant_group_panel.cancel' | translate }}
           </button>
           <button class="btn-primary"
                   [disabled]="saving() || !vgName().trim()"
                   (click)="saveVariantGroup()"
                   type="button">
             @if (saving()) { <span class="spinner-sm spinner-sm--dark"></span> }
-            {{ panelMode() === 'create' ? 'Create group' : 'Save group' }}
+            {{ panelMode() === 'create' ? ('menu_mgr.variant_group_panel.create_group' | translate) : ('menu_mgr.variant_group_panel.save_group' | translate) }}
           </button>
         </div>
       </div>
@@ -856,10 +857,10 @@
         <div class="panel-head">
           <div>
             <button class="panel-back" (click)="backToItem()" type="button">
-              ← Back to item
+              {{ 'menu_mgr.modifier_group_panel.back' | translate }}
             </button>
             <h3 class="panel-title">
-              {{ panelMode() === 'create' ? 'New modifier group' : 'Edit modifier group' }}
+              {{ panelMode() === 'create' ? ('menu_mgr.modifier_group_panel.title_create' | translate) : ('menu_mgr.modifier_group_panel.title_edit' | translate) }}
             </h3>
           </div>
           <button class="panel-close" (click)="closePanel()">
@@ -875,45 +876,45 @@
 
           <div class="field">
             <label class="field-label" for="mgName">
-              Group name <span class="req">*</span>
+              {{ 'menu_mgr.modifier_group_panel.name_label' | translate }} <span class="req">{{ 'menu_mgr.modifier_group_panel.name_req' | translate }}</span>
             </label>
             <input id="mgName" type="text" class="field-input"
                    [value]="mgName()"
                    (input)="setMgName($any($event.target).value)"
-                   placeholder="e.g. Extras, Sauces">
+                   [placeholder]="'menu_mgr.modifier_group_panel.name_placeholder' | translate">
           </div>
 
           <div class="field">
             <label class="field-label" for="mgDesc">
-              Description
-              <span class="field-optional">optional</span>
+              {{ 'menu_mgr.modifier_group_panel.desc_label' | translate }}
+              <span class="field-optional">{{ 'menu_mgr.modifier_group_panel.desc_optional' | translate }}</span>
             </label>
             <input id="mgDesc" type="text" class="field-input"
                    [value]="mgDesc()"
                    (input)="setMgDesc($any($event.target).value)"
-                   placeholder="Shown to customer">
+                   [placeholder]="'menu_mgr.modifier_group_panel.desc_placeholder' | translate">
           </div>
 
           <div class="form-row form-row--3col">
             <div class="field">
-              <label class="field-label">Display</label>
+              <label class="field-label">{{ 'menu_mgr.modifier_group_panel.display_label' | translate }}</label>
               <select class="field-input"
                       [value]="mgUiType()"
                       (change)="setMgUiType($any($event.target).value)">
-                <option value="checkbox">Checkbox</option>
-                <option value="radio">Radio</option>
-                <option value="stepper">Stepper</option>
+                <option value="checkbox">{{ 'menu_mgr.modifier_group_panel.opt_checkbox' | translate }}</option>
+                <option value="radio">{{ 'menu_mgr.modifier_group_panel.opt_radio' | translate }}</option>
+                <option value="stepper">{{ 'menu_mgr.modifier_group_panel.opt_stepper' | translate }}</option>
               </select>
             </div>
             <div class="field">
-              <label class="field-label">Min select</label>
+              <label class="field-label">{{ 'menu_mgr.modifier_group_panel.min_label' | translate }}</label>
               <input type="number" class="field-input"
                      [value]="mgMin()"
                      (input)="setMgMin($any($event.target).value)"
                      min="0">
             </div>
             <div class="field">
-              <label class="field-label">Max select</label>
+              <label class="field-label">{{ 'menu_mgr.modifier_group_panel.max_label' | translate }}</label>
               <input type="number" class="field-input"
                      [value]="mgMax()"
                      (input)="setMgMax($any($event.target).value)"
@@ -923,9 +924,9 @@
 
           <div class="field-toggle">
             <div>
-              <span class="field-label">Required</span>
+              <span class="field-label">{{ 'menu_mgr.modifier_group_panel.required_label' | translate }}</span>
               <span class="field-hint-inline">
-                Customer must pick at least {{ mgMin() }}
+                {{ 'menu_mgr.modifier_group_panel.required_hint' | translate: { min: mgMin() } }}
               </span>
             </div>
             <button class="toggle" [class.toggle--on]="mgRequired()"
@@ -936,14 +937,14 @@
 
           @if (panelMode() === 'create') {
             <div class="inline-hint">
-              Save the group first, then add modifiers below.
+              {{ 'menu_mgr.modifier_group_panel.save_hint' | translate }}
             </div>
           }
 
           <!-- Modifier list -->
           @if (panelMode() === 'edit' && editingMGroup(); as group) {
 
-            <div class="section-divider"><span>Modifiers</span></div>
+            <div class="section-divider"><span>{{ 'menu_mgr.modifier_group_panel.section_modifiers' | translate }}</span></div>
 
             @for (m of group.modifiers; track m.id) {
               <div class="variant-row">
@@ -951,7 +952,7 @@
                 @if (m.priceDelta > 0) {
                   <span class="variant-price">+{{ formatPrice(m.priceDelta) }}</span>
                 } @else {
-                  <span class="variant-price variant-price--free">Free</span>
+                  <span class="variant-price variant-price--free">{{ 'menu_mgr.modifier_group_panel.free' | translate }}</span>
                 }
                 <button class="btn-icon-sm btn-icon-sm--danger"
                         (click)="deleteModifier(editingItem()!.id, group.id, m.id)"
@@ -971,13 +972,14 @@
               <input type="text" class="field-input"
                      [value]="newModName()"
                      (input)="setNewModName($any($event.target).value)"
-                     placeholder="Modifier (e.g. Extra cheese)">
+                     [placeholder]="'menu_mgr.modifier_group_panel.mod_name_placeholder' | translate">
               <input type="number" class="field-input field-input--sm"
                      [value]="newModPrice()"
                      (input)="setNewModPrice($any($event.target).value)"
-                     placeholder="+Price" step="0.001" min="0">
+                     [placeholder]="'menu_mgr.modifier_group_panel.mod_price_placeholder' | translate"
+                     step="0.001" min="0">
               <button class="btn-primary-sm" (click)="addModifier()" type="button">
-                Add
+                {{ 'menu_mgr.modifier_group_panel.add_btn' | translate }}
               </button>
             </div>
           }
@@ -985,14 +987,14 @@
 
         <div class="panel-foot">
           <button class="btn-ghost" (click)="backToItem()" type="button">
-            Cancel
+            {{ 'menu_mgr.modifier_group_panel.cancel' | translate }}
           </button>
           <button class="btn-primary"
                   [disabled]="saving() || !mgName().trim()"
                   (click)="saveModifierGroup()"
                   type="button">
             @if (saving()) { <span class="spinner-sm spinner-sm--dark"></span> }
-            {{ panelMode() === 'create' ? 'Create group' : 'Save group' }}
+            {{ panelMode() === 'create' ? ('menu_mgr.modifier_group_panel.create_group' | translate) : ('menu_mgr.modifier_group_panel.save_group' | translate) }}
           </button>
         </div>
       </div>

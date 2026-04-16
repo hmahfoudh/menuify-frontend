@@ -6,24 +6,18 @@
   <!-- ══════════════════════════════════════════════════════════════════════
        SIDEBAR
   ═══════════════════════════════════════════════════════════════════════ -->
-  <aside class="sidebar" role="navigation" aria-label="Main navigation">
+  <aside class="sidebar" role="navigation" [attr.aria-label]="'shell.sidebar.aria_label' | translate">
 
     <!-- Brand -->
     <div class="sidebar-brand">
       <a routerLink="/dashboard" class="brand-link" (click)="closeSidebar()">
-        <!-- <span class="brand-icon" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 11l19-9-9 19-2-8-8-2z" />
-          </svg>
-        </span>
-        <span class="brand-name">Menuify</span> -->
         <img src="/assets/brand/logo-dark.svg" alt="Menuify" height="36">
       </a>
 
       <!-- Desktop collapse toggle -->
       <button class="collapse-btn" (click)="toggleCollapsed()"
-        [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'" type="button">
+        [attr.aria-label]="sidebarCollapsed() ? ('shell.sidebar.expand_aria' | translate) : ('shell.sidebar.collapse_aria' | translate)"
+        type="button">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round">
           @if (sidebarCollapsed()) {
@@ -47,7 +41,7 @@
         }
       </div>
       <div class="tenant-info">
-        <span class="tenant-name">{{ tenant()?.name ?? 'My Restaurant' }}</span>
+        <span class="tenant-name">{{ tenant()?.name ?? ('shell.sidebar.tenant_fallback_name' | translate) }}</span>
         <span class="tenant-plan" [class]="'plan-' + (tenant()?.plan ?? 'starter' | lowercase)">
           {{ planLabel() }}
         </span>
@@ -63,7 +57,7 @@
         @for (item of navItems; track item.route) {
         <li>
           <a [routerLink]="item.route" routerLinkActive="nav-link--active" class="nav-link"
-            [title]="sidebarCollapsed() ? item.label : ''" (click)="closeSidebar()">
+            [title]="sidebarCollapsed() ? (item.label | translate) : ''" (click)="closeSidebar()">
 
             <!-- Icon -->
             <span class="nav-icon" aria-hidden="true">
@@ -74,12 +68,12 @@
             </span>
 
             <!-- Label (hidden when collapsed) -->
-            <span class="nav-label">{{ item.label }}</span>
+            <span class="nav-label">{{ item.label | translate }}</span>
 
             <!-- Pending orders badge — only shown on the Orders nav item -->
             @if (item.route === '/dashboard/orders' && pendingOrderCount() > 0) {
             <span class="nav-badge" [class.nav-badge--pulse]="hasNewOrder()"
-              [attr.aria-label]="pendingOrderCount() + ' pending orders'">
+              [attr.aria-label]="'shell.sidebar.pending_orders_aria' | translate: { count: pendingOrderCount() }">
               {{ pendingOrderCount() }}
             </span>
             }
@@ -98,7 +92,7 @@
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
           </span>
-          <span class="nav-label">Admin panel</span>
+          <span class="nav-label">{{ 'shell.sidebar.admin_panel' | translate }}</span>
         </a>
         }
       </ul>
@@ -111,13 +105,13 @@
     @if (!pushEnabled()) {
     <div class="sidebar-push-prompt">
       <button class="push-prompt-btn" (click)="enablePushNotifications()" type="button"
-        title="Get notified of new orders even when this tab is in the background">
+        [title]="'shell.sidebar.push_prompt_title' | translate">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
-        <span class="push-prompt-label">Enable notifications</span>
+        <span class="push-prompt-label">{{ 'shell.sidebar.push_prompt_label' | translate }}</span>
       </button>
     </div>
     }
@@ -132,7 +126,10 @@
         <span class="user-name">{{ user()?.fullName ?? user()?.email }}</span>
         <span class="user-role">{{ user()?.role | titlecase }}</span>
       </div>
-      <button class="logout-btn" (click)="logout()" title="Sign out" aria-label="Sign out" type="button">
+      <button class="logout-btn" (click)="logout()"
+        [title]="'shell.sidebar.sign_out_title' | translate"
+        [attr.aria-label]="'shell.sidebar.sign_out_aria' | translate"
+        type="button">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -153,7 +150,9 @@
     <header class="topbar">
 
       <!-- Mobile hamburger -->
-      <button class="hamburger" (click)="toggleSidebar()" aria-label="Toggle navigation" type="button">
+      <button class="hamburger" (click)="toggleSidebar()"
+        [attr.aria-label]="'shell.topbar.hamburger_aria' | translate"
+        type="button">
         <span></span><span></span><span></span>
       </button>
 
@@ -171,32 +170,36 @@
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
-          Trial active
+          {{ 'shell.topbar.trial_chip' | translate }}
         </a>
         }
 
         <!-- Menu URL shortcut -->
         @if (tenant()?.subdomain) {
         <a [href]="'https://' + tenant()!.subdomain + '.menuify.tn'" target="_blank" rel="noopener"
-          class="menu-link-btn" title="Open your menu page">
+          class="menu-link-btn"
+          [title]="'shell.topbar.view_menu_title' | translate">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
             <polyline points="15 3 21 3 21 9" />
             <line x1="10" y1="14" x2="21" y2="3" />
           </svg>
-          <span class="menu-link-text">View menu</span>
+          <span class="menu-link-text">{{ 'shell.topbar.view_menu_label' | translate }}</span>
         </a>
         }
 
+        <app-lang-switcher />
+
         <!-- Notification bell -->
-        <button class="notif-btn" routerLink="/dashboard/notifications" aria-label="Notifications" type="button">
+        <button class="notif-btn" routerLink="/dashboard/notifications"
+          [attr.aria-label]="'shell.topbar.notifications_aria' | translate"
+          type="button">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
-          <!-- Unread dot — wire to NotificationService later -->
           <span class="notif-dot" aria-hidden="true"></span>
         </button>
 

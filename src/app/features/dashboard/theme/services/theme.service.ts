@@ -5,8 +5,9 @@ import { map }                from 'rxjs/operators';
 import { environment }        from '../../../../../environments/environment';
 import {
   TenantThemeResponse, TemplateResponse,
-  PresetResponse, ThemeResponse, ApiResponse
+  PresetResponse, ThemeResponse
 } from '../models/theme.models';
+import { ApiResponse } from '../../../../core/models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {

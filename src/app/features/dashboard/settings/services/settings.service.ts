@@ -4,8 +4,9 @@ import { Observable }         from 'rxjs';
 import { map }                from 'rxjs/operators';
 import { environment }        from '../../../../../environments/environment';
 import {
-  TenantResponse, TenantSettingsRequest, ApiResponse
+  TenantResponse, TenantSettingsRequest
 } from '../models/settings.models';
+import { ApiResponse } from '../../../../core/models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
