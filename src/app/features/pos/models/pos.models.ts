@@ -1,5 +1,7 @@
 // ── Staff ──────────────────────────────────────────────────────────────────────
 
+import { PosOrderLineRequest } from "./pos-order.models";
+
 export interface StaffResponse {
   id:        string;
   name:      string;
@@ -83,6 +85,10 @@ export interface PosOrderPayload {
     modifierIds:         string[];
     specialInstructions: string | null;
   }[];
+}
+
+export interface AddOrderLinesRequest{
+  lines: PosOrderLineRequest[];
 }
 
 // ── Category accent colours ────────────────────────────────────────────────────

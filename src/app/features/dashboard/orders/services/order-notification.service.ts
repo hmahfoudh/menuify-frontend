@@ -1,41 +1,21 @@
 import { Injectable, signal, inject, PLATFORM_ID, OnDestroy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { interval, Subscription } from 'rxjs';
-import { switchMap, startWith, map } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
+import { AuthService } from '../../../../core/services/auth.service';
 
-/**
- * Shared singleton that bridges the Orders component (which knows about
- * new orders) and the Dashboard Shell (which owns the sidebar badge).
- *
- * Handles three notification channels:
- *   1. Sound      — Web Audio API beeps (no asset required)
- *   2. Badge      — sidebar pulse via hasNewOrder signal
- *   3. Push       — browser Notification API (works when tab is backgrounded)
- *
- * Push notifications use the browser's built-in Notification API directly —
- * no service worker or VAPID keys required for same-origin notifications.
- * The notification appears in the OS notification tray while the tab is open.
- */
 @Injectable({ providedIn: 'root' })
 export class OrderNotificationService implements OnDestroy {
 
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-  private http      = inject(HttpClient);
+  private auth      = inject(AuthService);
 
-  // Live count of PENDING orders — read by Shell sidebar badge
   readonly pendingCount = signal(0);
+  readonly hasNewOrder  = signal(false);
+  readonly pushEnabled  = signal(false);
 
-  // True for 4 seconds after a new order arrives — drives the pulse animation
-  readonly hasNewOrder = signal(false);
-
-  // Whether push permission has been granted
-  readonly pushEnabled = signal(false);
-
-  private previousCount = -1;   // -1 = not yet initialised
-  private poll?: Subscription;
-  private alertTimeout?: ReturnType<typeof setTimeout>;
+  private eventSource:     EventSource | null = null;
+  private reconnectTimer:  ReturnType<typeof setTimeout> | null = null;
+  private alertTimeout:    ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     if (this.isBrowser && 'Notification' in window) {
@@ -44,102 +24,92 @@ export class OrderNotificationService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.poll?.unsubscribe();
-    clearTimeout(this.alertTimeout);
+    this.stopStream();
+    clearTimeout(this.alertTimeout ?? undefined);
   }
 
   // ── Public API ─────────────────────────────────────────────────────────────
 
   /**
-   * Starts the background poll for pending order count.
-   * Call once from DashboardShellComponent.ngOnInit() — runs for the
-   * entire dashboard session regardless of which page the owner is on.
-   * Safe to call multiple times — stops any previous poll first.
+   * Opens the SSE connection.
+   * Call once from DashboardShellComponent.ngOnInit().
+   * Safe to call multiple times — closes any existing connection first.
    */
   startPolling(): void {
-    this.poll?.unsubscribe();
-    this.previousCount = -1;  // reset so first result sets baseline cleanly
-
-    this.poll = interval(30_000)
-      .pipe(
-        startWith(0),
-        switchMap(() =>
-          this.http.get<any>(
-            `${environment.apiUrl}/api/dashboard/orders`,
-            { params: new HttpParams()
-                .set('status', 'PENDING')
-                .set('page', 0)
-                .set('size', 1) }
-          ).pipe(map((r: any) => (r.data?.totalElements ?? 0) as number))
-        )
-      )
-      .subscribe({
-        next: count => this.handlePollResult(count),
-        error: ()    => { /* silent — next tick will retry */ }
-      });
+    if (!this.isBrowser) return;
+    this.stopStream();
+    this.connect();
   }
 
   /**
-   * Stops the background poll. Call on logout.
+   * Closes the SSE connection. Call on logout.
    */
   stopPolling(): void {
-    this.poll?.unsubscribe();
-    this.previousCount = -1;
+    this.stopStream();
     this.pendingCount.set(0);
   }
 
-  private handlePollResult(count: number): void {
-    if (this.previousCount === -1) {
-      // First result — establish baseline, no alert
-      this.previousCount = count;
-      this.pendingCount.set(count);
-      return;
-    }
-
-    const newOrders = count - this.previousCount;
-    this.previousCount = count;
-    this.pendingCount.set(count);
-
-    if (newOrders > 0) {
-      this.triggerAlert(newOrders);
-    }
-  }
-
-  /**
-   * Requests push notification permission from the browser.
-   * Call this on a user gesture (e.g. clicking an "Enable notifications" button).
-   * Returns true if permission was granted.
-   */
   async requestPushPermission(): Promise<boolean> {
     if (!this.isBrowser || !('Notification' in window)) return false;
-    if (Notification.permission === 'granted') {
-      this.pushEnabled.set(true);
-      return true;
-    }
+    if (Notification.permission === 'granted') { this.pushEnabled.set(true); return true; }
     if (Notification.permission === 'denied') return false;
 
-    const result = await Notification.requestPermission();
+    const result  = await Notification.requestPermission();
     const granted = result === 'granted';
     this.pushEnabled.set(granted);
     return granted;
   }
 
-  // ── Internal ───────────────────────────────────────────────────────────────
+  // ── SSE ────────────────────────────────────────────────────────────────────
 
-  private triggerAlert(newOrderCount: number): void {
-    this.playSound();
-    this.sendPushNotification(newOrderCount);
+  private connect(): void {
+    const tenantId = this.auth.currentTenant()?.id;
 
-    // Pulse the badge for 4 seconds
-    this.hasNewOrder.set(true);
-    clearTimeout(this.alertTimeout);
-    this.alertTimeout = setTimeout(() => this.hasNewOrder.set(false), 4000);
+    if (!tenantId) return;
+
+    const url = `${environment.apiUrl}/api/orders/stream`
+              + `?tenantId=${encodeURIComponent(tenantId)}`;
+
+    this.eventSource = new EventSource(url);
+
+    this.eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'NEW_ORDER') {
+          this.pendingCount.update(n => n + 1);
+          this.triggerAlert();
+        }
+      } catch {
+        console.warn('SSE parse error', event.data);
+      }
+    };
+
+    this.eventSource.onerror = () => {
+      this.stopStream();
+      this.reconnectTimer = setTimeout(() => this.connect(), 5_000);
+    };
   }
 
-  /**
-   * Three short beeps via Web Audio API — no audio file required.
-   * Gracefully silent if the browser blocks autoplay.
-   */
+  private stopStream(): void {
+    this.eventSource?.close();
+    this.eventSource = null;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+  }
+
+  // ── Alert ──────────────────────────────────────────────────────────────────
+
+  private triggerAlert(): void {
+    this.playSound();
+    this.sendPushNotification();
+
+    this.hasNewOrder.set(true);
+    if (this.alertTimeout) clearTimeout(this.alertTimeout);
+    this.alertTimeout = setTimeout(() => this.hasNewOrder.set(false), 4_000);
+  }
+
   private playSound(): void {
     if (!this.isBrowser) return;
     try {
@@ -161,41 +131,22 @@ export class OrderNotificationService implements OnDestroy {
       play(now + 0.18);
       play(now + 0.36);
       setTimeout(() => ctx.close(), 800);
-    } catch {
-      // AudioContext blocked — fail silently
-    }
+    } catch { /* autoplay blocked — fail silently */ }
   }
 
-  /**
-   * Fires a browser push notification visible in the OS tray.
-   * Only sends if permission has been granted.
-   * Clicking the notification focuses the dashboard tab.
-   */
-  private sendPushNotification(count: number): void {
+  private sendPushNotification(): void {
     if (!this.isBrowser) return;
     if (!('Notification' in window)) return;
     if (Notification.permission !== 'granted') return;
 
-    const title = count === 1
-      ? '🔔 New order received'
-      : `🔔 ${count} new orders received`;
-
-    const body = count === 1
-      ? 'A customer placed a new order. Tap to review it.'
-      : `${count} new orders are waiting for your confirmation.`;
-
-    const notif = new Notification(title, {
-      body,
-      icon:  '/assets/brand/favicon.ico',
-      badge: '/assets/brand/favicon.ico',
-      tag:   'menuify-new-order',   // replaces previous unread notification
+    const notif = new Notification('🔔 New order received', {
+      body:              'A customer placed a new order. Tap to review it.',
+      icon:              '/assets/brand/favicon.ico',
+      badge:             '/assets/brand/favicon.ico',
+      tag:               'menuify-new-order',
       requireInteraction: false,
     });
 
-    // Clicking the notification brings the dashboard tab to the foreground
-    notif.onclick = () => {
-      window.focus();
-      notif.close();
-    };
+    notif.onclick = () => { window.focus(); notif.close(); };
   }
 }

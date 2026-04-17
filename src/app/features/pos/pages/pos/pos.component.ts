@@ -4,7 +4,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { interval, Subscription, forkJoin } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
@@ -14,6 +13,7 @@ import {
   PosOrderType, PosPaymentType,
   PosCartItem, PosCartModifier,
   CATEGORY_ACCENT_PALETTE,
+  AddOrderLinesRequest,
 } from '../../models/pos.models';
 import {
   PublicCategoryResponse, PublicItemResponse,
@@ -31,8 +31,7 @@ import { OpenShiftRequest, CloseShiftRequest } from '../../models/shift.models';
 import { CashMovementRequest } from '../../models/cash.models';
 import { PaymentMethod } from '../../models/payment.models';
 import { IssueRefundRequest } from '../../models/refund.models';
-import { PosOrder, PosCreateOrderRequest, PosOrderLineRequest, isActiveStatus } from '../../models/pos-order.models';
-import { environment } from '../../../../../environments/environment';
+import { PosOrder } from '../../models/pos-order.models';
 import { ZReportResponse } from '../../models/report.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -62,7 +61,6 @@ export class PosComponent implements OnInit, OnDestroy {
   private refundSvc  = inject(RefundService);
   private reportSvc  = inject(ReportService);
   private orderSvc   = inject(PosOrderService);
-  private http       = inject(HttpClient);
 
   parseFloat = parseFloat;
 
@@ -579,7 +577,9 @@ export class PosComponent implements OnInit, OnDestroy {
 
     // ── APPEND MODE: add lines to an existing order ──────────────────────────
     if (appendOrderId) {
-      const linesPayload = this.cartItems().map(c => ({
+      let linesPayload: AddOrderLinesRequest = {lines: []} ;
+
+      linesPayload.lines = this.cartItems().map(c => ({
         itemId:      c.itemId,
         variantId:   c.variant?.id,
         quantity:    c.quantity,
@@ -587,18 +587,10 @@ export class PosComponent implements OnInit, OnDestroy {
         modifierIds: c.modifiers.map(m => m.id),
       }));
 
-      this.http.post<any>(
-        `${environment.apiUrl}/api/pos/orders/${appendOrderId}/lines`,
-        { lines: linesPayload }
-      ).subscribe({
-        next: res => {
-          if (!res.success) {
-            this.submitting.set(false);
-            this.submitError.set('Impossible d\'ajouter les articles.');
-            return;
-          }
+      this.posSvc.addLines(appendOrderId, linesPayload).subscribe({
+        next: data => {
           // Update the displayed order and go back to table order view
-          this.tableActiveOrder.set(res.data);
+          this.tableActiveOrder.set(data);
           this.addingToOrderId.set(null);
           this.cart.clearTable(tableKey ?? 'no-table');
           this.orderNotes.set('');
