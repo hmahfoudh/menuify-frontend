@@ -1,0 +1,175 @@
+.pos-tbl-order {
+  flex: 1;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  animation: fadeUp 0.25s ease-out;
+}
+
+.pos-tbl-order__header {
+  padding: 12px 14px 8px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.pos-tbl-order__ref {
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+}
+
+.pos-tbl-order__status {
+  padding: 3px 9px;
+  border-radius: 3px;
+  font-size: 0.63rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  &--blue  { background: rgba(74,144,232,0.15); color: #4a90e8; }
+  &--amber { background: var(--amb-bg);         color: var(--amber); }
+  &--green { background: var(--grn-bg);         color: var(--green); }
+  &--teal  { background: rgba(90,195,220,0.15); color: #5ac3dc; }
+  &--gray  { background: var(--ink4);           color: var(--fog); }
+  &--red   { background: rgba(224,112,112,0.15);color: var(--red); }
+}
+
+.pos-tbl-order__lines {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 14px;
+}
+
+.pos-tbl-order__line {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  &:last-child { border-bottom: none; }
+}
+
+.pos-tbl-order__qty {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gold);
+  font-family: monospace;
+  min-width: 24px;
+}
+
+.pos-tbl-order__info {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 1px;
+}
+
+.pos-tbl-order__name  { font-size: 12px; font-weight: 600; color: var(--cream2); }
+.pos-tbl-order__sub   { font-size: 11px; color: var(--fog); }
+.pos-tbl-order__mod   { font-size: 10px; color: var(--fog2); }
+.pos-tbl-order__note  {
+  font-size: 10px;
+  color: var(--gold);
+  font-style: italic;
+  opacity: 0.85;
+}
+
+.pos-tbl-order__price {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--gold);
+  font-family: monospace;
+}
+
+.pos-tbl-order__totals {
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.pos-tbl-order__sub-row,
+.pos-tbl-order__discount-row {
+  display: flex; justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--fog);
+  margin-bottom: 4px;
+  font-family: monospace;
+}
+
+.pos-tbl-order__discount-row { color: var(--green); }
+
+.pos-tbl-order__total-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
+  margin-top: 6px;
+  span:first-child {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--cream2);
+    font-weight: 600;
+  }
+}
+
+.pos-tbl-order__total-val {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gold);
+  font-family: monospace;
+}
+
+.pos-tbl-order__actions {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 8px;
+  padding: 0 14px 14px;
+  flex-shrink: 0;
+}
+
+.pos-tbl-order__add-btn {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 11px 14px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--r);
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+
+  &:hover {
+    background: var(--gold-bg);
+    transform: translateY(-1px);
+  }
+}
+
+.pos-tbl-order__pay-btn {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  padding: 11px 14px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: var(--r);
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+
+  &:hover:not(:disabled) {
+    background: var(--gold2);
+    transform: translateY(-1px);
+  }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.pos-tbl-order__spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--line2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}

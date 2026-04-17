@@ -1,0 +1,24 @@
+.pos-disc-tabs {
+  display: flex; gap: 4px;
+  background: var(--ink3);
+  padding: 3px;
+  border-radius: 4px;
+}
+
+.pos-disc-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--fog);
+  padding: 8px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--r);
+  &:hover { color: var(--cream2); }
+  &--active {
+    background: var(--gold);
+    color: var(--ink);
+  }
+}

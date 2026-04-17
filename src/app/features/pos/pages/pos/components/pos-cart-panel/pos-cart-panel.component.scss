@@ -1,0 +1,201 @@
+.pos-order-lines {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 11px;
+}
+
+.pos-order-line {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  &:last-child { border-bottom: none; }
+}
+
+.pos-order-line__qty {
+  display: flex; align-items: center; gap: 2px;
+  flex-shrink: 0;
+}
+
+.pos-qty-btn {
+  width: 20px; height: 20px;
+  background: var(--ink3);
+  border: 1px solid var(--line2);
+  color: var(--cream2);
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0;
+  &:hover {
+    background: var(--gold);
+    color: var(--ink);
+    border-color: var(--gold);
+  }
+}
+
+.pos-qty-val {
+  min-width: 18px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.pos-order-line__info { flex: 1; min-width: 0; }
+.pos-order-line__name { font-size: 0.78rem; font-weight: 600; color: var(--cream2); }
+.pos-order-line__sub  { font-size: 0.65rem; color: var(--fog); }
+.pos-order-line__mod  { font-size: 0.62rem; color: var(--fog2); }
+.pos-order-line__price { font-size: 0.78rem; color: var(--gold); flex-shrink: 0; }
+.pos-order-line__remove {
+  background: transparent; border: none; color: var(--fog2);
+  cursor: pointer; font-size: 0.75rem; flex-shrink: 0;
+  transition: var(--r);
+  &:hover { color: var(--red); }
+}
+
+.pos-order-totals {
+  padding: 9px 13px;
+  border-top: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.pos-order-totals__sub {
+  display: flex; justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--fog);
+  margin-bottom: 5px;
+}
+
+.pos-order-totals__total {
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+
+.pos-order-totals__total-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cream2);
+  font-weight: 600;
+}
+
+.pos-order-totals__total-val {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gold);
+  font-family: monospace;
+}
+
+.pos-order-notes {
+  padding: 0 13px;
+  input {
+    width: 100%;
+    background: var(--ink3);
+    border: 1px solid var(--line);
+    color: var(--cream);
+    padding: 7px 11px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-family: inherit;
+    outline: none;
+    transition: var(--r);
+    &:focus { border-color: var(--gold); }
+    &::placeholder { color: var(--fog2); }
+  }
+}
+
+.pos-payment-btns {
+  display: flex; gap: 5px;
+  padding: 8px 11px 0;
+  flex-shrink: 0;
+}
+
+.pos-pay-btn {
+  flex: 1;
+  background: var(--ink3);
+  border: 1px solid var(--line);
+  color: var(--cream2);
+  padding: 7px 0;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--r);
+  &:hover {
+    border-color: var(--gold);
+    color: var(--cream);
+  }
+  &--active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--ink);
+    font-weight: 700;
+  }
+}
+
+// ── Cart line actions (note + remove) ──────────────────────────────────────────
+.pos-order-line__actions {
+  display: flex; align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pos-order-line__note-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--fog);
+  padding: 3px 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: var(--r);
+  display: flex; align-items: center;
+  &:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+  &--has-note {
+    color: var(--gold);
+    border-color: var(--gold);
+    background: var(--gold-bg);
+  }
+}
+
+.pos-order-line__note {
+  font-size: 0.65rem;
+  color: var(--gold);
+  font-style: italic;
+  margin-top: 2px;
+  display: flex; align-items: center; gap: 3px;
+  opacity: 0.85;
+}
+
+// ── Append banner ──────────────────────────────────────────────────────────────
+.pos-append-banner {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--grn-bg);
+  border: 1px solid rgba(100,200,130,0.3);
+  color: var(--green);
+  padding: 8px 12px;
+  margin: 8px 11px 0;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  svg { flex-shrink: 0; }
+}
+
+.pos-append-banner__cancel {
+  background: transparent;
+  border: none;
+  color: var(--green);
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border-radius: 2px;
+  transition: var(--r);
+  &:hover {
+    background: rgba(100,200,130,0.15);
+  }
+}

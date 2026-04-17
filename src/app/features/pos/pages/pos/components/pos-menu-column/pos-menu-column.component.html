@@ -1,0 +1,73 @@
+<div class="pos-menu-col">
+
+  <div class="pos-cat-sidebar">
+    <button class="pos-cat-item"
+            [class.pos-cat-item--active]="activeCatId === null"
+            (click)="categoryChange.emit(null)"
+            type="button">
+      <span class="pos-cat-icon">⊞</span>
+      <span class="pos-cat-label">{{ 'pos.menu.all' | translate }}</span>
+    </button>
+    @for (cat of categories; track cat.id) {
+      <button class="pos-cat-item"
+              [class.pos-cat-item--active]="activeCatId === cat.id"
+              (click)="categoryChange.emit(cat.id)"
+              type="button">
+        <span class="pos-cat-dot" [style.background]="accentForFn(cat.id)"></span>
+        <span class="pos-cat-label">{{ cat.name }}</span>
+        <span class="pos-cat-count">{{ cat.items.length }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="pos-items-area">
+
+    <div class="pos-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" [placeholder]="'pos.menu.search_placeholder' | translate"
+             [value]="searchQuery"
+             (input)="searchChange.emit($any($event.target).value)">
+    </div>
+
+    <div class="pos-item-grid">
+      @if (loading) {
+        @for (i of itemSkeletons; track i) {
+          <div class="pos-item-card pos-item-card--skeleton"></div>
+        }
+      } @else if (filteredItems.length === 0) {
+        <div class="pos-items-empty"><p>{{ 'pos.menu.no_items' | translate }}</p></div>
+      } @else {
+        @for (item of filteredItems; track item.id) {
+          <button class="pos-item-card" (click)="itemTap.emit(item)" type="button">
+            <div class="pos-item-card__accent" [style.background]="item._accent"></div>
+            <div class="pos-item-card__body">
+              <div class="pos-item-card__name">{{ item.name }}</div>
+              <div class="pos-item-card__price" [style.color]="item._accent">
+                {{ fmtFn(item.displayPrice ?? item.basePrice ?? 0) }} DT
+              </div>
+            </div>
+          </button>
+        }
+      }
+    </div>
+
+    <div class="pos-qty-bar">
+      <span class="pos-qty-bar__label">{{ 'pos.menu.qty_label' | translate }}</span>
+      <div class="pos-qty-bar__current">{{ qtyPreset }}</div>
+      @for (p of qtyPresets; track p) {
+        <button class="pos-qty-preset"
+                [class.pos-qty-preset--active]="qtyPreset === p"
+                (click)="qtyPresetChange.emit(p)"
+                type="button">{{ p }}</button>
+      }
+      <button class="pos-qty-preset pos-qty-preset--clear"
+              (click)="qtyPresetChange.emit(1)"
+              type="button">C</button>
+    </div>
+
+  </div>
+</div>

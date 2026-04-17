@@ -1,0 +1,61 @@
+<div class="pos-tbl-order">
+
+  <div class="pos-tbl-order__header">
+    <div class="pos-tbl-order__ref">{{ order.reference }}</div>
+    <span class="pos-tbl-order__status pos-tbl-order__status--{{ orderStatusClassFn(order.status) }}">
+      {{ orderStatusLabelFn(order.status) }}
+    </span>
+  </div>
+
+  <div class="pos-tbl-order__lines">
+    @for (line of order.lines; track line.id) {
+      <div class="pos-tbl-order__line">
+        <span class="pos-tbl-order__qty">{{ line.quantity }}×</span>
+        <div class="pos-tbl-order__info">
+          <span class="pos-tbl-order__name">{{ line.itemName }}</span>
+          @if (line.variantName) {
+            <span class="pos-tbl-order__sub">{{ line.variantName }}</span>
+          }
+          @for (m of line.modifierNames; track m) {
+            <span class="pos-tbl-order__mod">+ {{ m }}</span>
+          }
+          @if (line.notes) {
+            <span class="pos-tbl-order__note">↳ {{ line.notes }}</span>
+          }
+        </div>
+        <span class="pos-tbl-order__price">{{ fmtFn(line.lineTotal) }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="pos-tbl-order__totals">
+    <div class="pos-tbl-order__sub-row">
+      <span>{{ 'pos.order.subtotal_label' | translate }}</span>
+      <span>{{ fmtFn(order.subtotal) }} DT</span>
+    </div>
+    @if (order.discountAmount) {
+      <div class="pos-tbl-order__discount-row">
+        <span>{{ 'pos.order.discount_label' | translate }}</span>
+        <span>-{{ fmtFn(order.discountAmount!) }} DT</span>
+      </div>
+    }
+    <div class="pos-tbl-order__total-row">
+      <span>{{ 'pos.order.total_due' | translate }}</span>
+      <span class="pos-tbl-order__total-val">{{ fmtFn(order.amountDue ?? order.total) }} DT</span>
+    </div>
+  </div>
+
+  <div class="pos-tbl-order__actions">
+    <button class="pos-tbl-order__add-btn" (click)="enterAddItems.emit()" type="button">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      {{ 'pos.order.add_items' | translate }}
+    </button>
+    <button class="pos-tbl-order__pay-btn"
+            [disabled]="!isShiftOpen"
+            (click)="payOrder.emit()" type="button">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
+      {{ 'pos.order.collect' | translate }}
+    </button>
+  </div>
+
+</div>

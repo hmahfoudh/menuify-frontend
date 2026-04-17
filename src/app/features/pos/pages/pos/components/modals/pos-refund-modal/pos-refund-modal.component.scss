@@ -1,0 +1,21 @@
+.pos-refund-row {
+  display: flex; justify-content: space-between; align-items: center;
+  width: 100%;
+  background: var(--ink3);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: var(--r);
+  text-align: left;
+  &:hover {
+    border-color: var(--gold);
+    background: var(--gold-bg);
+  }
+}
+
+.pos-refund-row__left { display: flex; flex-direction: column; gap: 2px; }
+.pos-refund-row__ref  { font-size: 13px; font-weight: 700; color: var(--cream); font-family: monospace; }
+.pos-refund-row__meta { font-size: 11px; color: var(--fog); }
+.pos-refund-row__amount { font-size: 13px; font-weight: 700; color: var(--cream); }

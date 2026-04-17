@@ -1,0 +1,42 @@
+<div class="pos-modal-backdrop pos-modal-backdrop--blocking">
+  <div class="pos-shift-modal" (click)="$event.stopPropagation()">
+
+    <div class="pos-shift-modal__icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+      </svg>
+    </div>
+
+    <h2 class="pos-shift-modal__title">{{ 'pos.shift_open.title' | translate }}</h2>
+    <p class="pos-shift-modal__desc">{{ 'pos.shift_open.desc' | translate }}</p>
+
+    <div class="pos-shift-modal__field">
+      <label class="pos-shift-modal__label">{{ 'pos.shift_open.float_label' | translate }}</label>
+      <div class="pos-pay-field__input-row">
+        <input type="number" step="0.001" min="0"
+               class="pos-pay-field__input"
+               [value]="openFloatInput"
+               (input)="openFloatInputChange.emit($any($event.target).value)"
+               placeholder="50.000"
+               autocomplete="off">
+        <span class="pos-pay-field__unit">DT</span>
+      </div>
+    </div>
+
+    @if (shiftError) {
+      <p class="pos-order-error">{{ shiftError }}</p>
+    }
+
+    <button class="pos-place-btn pos-place-btn--full"
+            [disabled]="shiftLoading"
+            (click)="confirm.emit()"
+            type="button">
+      @if (shiftLoading) {
+        <span class="pos-place-spinner"></span> {{ 'pos.shift_open.opening' | translate }}
+      } @else {
+        {{ 'pos.shift_open.open' | translate }}
+      }
+    </button>
+
+  </div>
+</div>

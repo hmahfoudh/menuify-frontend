@@ -1,0 +1,31 @@
+<div class="pos-modal-backdrop" (click)="close.emit()">
+  <div class="pos-modal pos-modal--note" (click)="$event.stopPropagation()">
+
+    <div class="pos-modal__head">
+      <div>
+        <h3 class="pos-modal__name">{{ 'pos.note_modal.title' | translate }}</h3>
+        <p class="pos-modal__subtitle">{{ 'pos.note_modal.subtitle' | translate }}</p>
+      </div>
+      <button class="pos-modal__close" (click)="close.emit()" type="button">✕</button>
+    </div>
+
+    <div class="pos-modal__note-body">
+      <textarea class="pos-modal__note-input"
+                rows="3"
+                [placeholder]="'pos.note_modal.placeholder' | translate"
+                [value]="noteInput"
+                (input)="noteInputChange.emit($any($event.target).value)"
+                maxlength="300">
+      </textarea>
+      <div class="pos-modal__note-chars">{{ noteInput.length }}/300</div>
+    </div>
+
+    <div class="pos-modal__foot">
+      <button class="pos-modal__cancel" (click)="close.emit()" type="button">{{ 'pos.note_modal.cancel' | translate }}</button>
+      <button class="pos-modal__add" (click)="save.emit()" type="button">
+        {{ 'pos.note_modal.save' | translate }}
+      </button>
+    </div>
+
+  </div>
+</div>

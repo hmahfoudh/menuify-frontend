@@ -1,0 +1,76 @@
+<div class="pos-modal-backdrop" (click)="dismiss.emit()">
+  <div class="pos-shift-modal" (click)="$event.stopPropagation()">
+
+    <div class="pos-shift-modal__icon pos-shift-modal__icon--amber">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </div>
+
+    <h2 class="pos-shift-modal__title">{{ 'pos.shift_close.title' | translate }}</h2>
+
+    @if (currentShift) {
+      <div class="pos-shift-summary">
+        <div class="pos-shift-summary__row">
+          <span>{{ 'pos.shift_close.orders' | translate }}</span>
+          <span>{{ currentShift.totalOrders ?? 0 }}</span>
+        </div>
+        <div class="pos-shift-summary__row">
+          <span>{{ 'pos.shift_close.gross_revenue' | translate }}</span>
+          <span>{{ fmtFn(currentShift.totalRevenue ?? 0) }} DT</span>
+        </div>
+        <div class="pos-shift-summary__row">
+          <span>{{ 'pos.shift_close.opening_float' | translate }}</span>
+          <span>{{ fmtFn(currentShift?.openingFloat ?? 0) }} DT</span>
+        </div>
+        <div class="pos-shift-summary__row pos-shift-summary__row--total">
+          <span>{{ 'pos.shift_close.expected_drawer' | translate }}</span>
+          <span>{{ drawerBalance }} DT</span>
+        </div>
+      </div>
+    }
+
+    <div class="pos-shift-modal__field">
+      <label class="pos-shift-modal__label">{{ 'pos.shift_close.counted_label' | translate }}</label>
+      <div class="pos-pay-field__input-row">
+        <input type="number" step="0.001" min="0"
+               class="pos-pay-field__input"
+               [value]="closeCountInput"
+               (input)="closeCountInputChange.emit($any($event.target).value)"
+               placeholder="{{ drawerBalance }}"
+               autocomplete="off">
+        <span class="pos-pay-field__unit">DT</span>
+      </div>
+    </div>
+
+    <div class="pos-shift-modal__field">
+      <label class="pos-shift-modal__label">{{ 'pos.shift_close.notes_label' | translate }}</label>
+      <input type="text"
+             class="pos-pay-field__input"
+             [value]="closeNotesInput"
+             (input)="closeNotesInputChange.emit($any($event.target).value)"
+             [placeholder]="'pos.shift_close.notes_placeholder' | translate">
+    </div>
+
+    @if (shiftError) {
+      <p class="pos-order-error">{{ shiftError }}</p>
+    }
+
+    <div class="pos-shift-modal__actions">
+      <button class="pos-pay-skip-btn" (click)="dismiss.emit()" type="button">
+        {{ 'pos.shift_close.cancel' | translate }}
+      </button>
+      <button class="pos-place-btn pos-place-btn--danger"
+              [disabled]="shiftLoading"
+              (click)="confirm.emit()"
+              type="button">
+        @if (shiftLoading) {
+          <span class="pos-place-spinner"></span> {{ 'pos.shift_close.closing' | translate }}
+        } @else {
+          {{ 'pos.shift_close.close' | translate }}
+        }
+      </button>
+    </div>
+
+  </div>
+</div>

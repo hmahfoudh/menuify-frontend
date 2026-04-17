@@ -1,0 +1,11 @@
+<div class="pos-order-sent">
+  <div class="pos-order-sent__check">✓</div>
+  <div class="pos-order-sent__title">{{ 'pos.order_sent.title' | translate }}</div>
+  <div class="pos-order-sent__ref">{{ lastOrderRef }}</div>
+  <button class="pos-btn-print" (click)="print.emit()" type="button">
+    {{ 'pos.order_sent.print' | translate }}
+  </button>
+  <button class="pos-btn-neworder" (click)="newOrder.emit()" type="button">
+    {{ 'pos.order_sent.new_order' | translate }}
+  </button>
+</div>

@@ -1,0 +1,21 @@
+<div class="pos-modal-backdrop" (click)="dismiss.emit()">
+  <div class="pos-modal pos-modal--sm" (click)="$event.stopPropagation()">
+    <div class="pos-modal__head">
+      <h3 class="pos-modal__name">{{ 'pos.promo.title' | translate }}</h3>
+      <button class="pos-modal__close" (click)="dismiss.emit()" type="button">✕</button>
+    </div>
+    <div class="pos-modal__sm-body">
+      <input class="pos-field__input pos-field__input--promo"
+             type="text"
+             [value]="promoInput"
+             (input)="promoInputChange.emit($any($event.target).value)"
+             [placeholder]="'pos.promo.placeholder' | translate">
+    </div>
+    <div class="pos-modal__sm-actions">
+      <button class="pos-modal__confirm-btn pos-modal__confirm-btn--pink pos-modal__confirm-btn--full"
+              (click)="apply.emit()" type="button">
+        {{ 'pos.promo.confirm' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

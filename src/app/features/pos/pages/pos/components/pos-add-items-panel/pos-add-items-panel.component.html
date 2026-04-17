@@ -1,0 +1,61 @@
+<div class="pos-append-header">
+  <div class="pos-append-header__info">
+    <span class="pos-append-header__label">{{ 'pos.order.append_label' | translate }}</span>
+    <span class="pos-append-header__ref">{{ order.reference }}</span>
+  </div>
+  <button class="pos-append-header__cancel" (click)="cancel.emit()" type="button">
+    {{ 'pos.order.append_cancel' | translate }}
+  </button>
+</div>
+
+<div class="pos-append-existing">
+  @for (line of order.lines; track line.id) {
+    <div class="pos-append-line">
+      <span class="pos-append-line__qty">{{ line.quantity }}×</span>
+      <span class="pos-append-line__name">{{ line.itemName }}</span>
+      <span class="pos-append-line__price">{{ fmtFn(line.lineTotal) }}</span>
+    </div>
+  }
+  <div class="pos-append-existing__divider">
+    <span>{{ 'pos.order.append_divider' | translate }}</span>
+  </div>
+</div>
+
+@if (cartIsEmpty) {
+  <div class="pos-order-empty pos-order-empty--sm">
+    <p>{{ 'pos.order.append_tap' | translate }}</p>
+  </div>
+} @else {
+  <div class="pos-order-lines">
+    @for (line of cartItems; track line.cartId) {
+      <div class="pos-order-line">
+        <div class="pos-order-line__qty">
+          <button class="pos-qty-btn" (click)="updateQty.emit({ cartId: line.cartId, qty: line.quantity - 1 })" type="button">−</button>
+          <span class="pos-qty-val">{{ line.quantity }}</span>
+          <button class="pos-qty-btn" (click)="updateQty.emit({ cartId: line.cartId, qty: line.quantity + 1 })" type="button">+</button>
+        </div>
+        <div class="pos-order-line__info">
+          <div class="pos-order-line__name">{{ line.itemName }}</div>
+          @if (line.variant) { <div class="pos-order-line__sub">{{ line.variant.name }}</div> }
+          @for (m of line.modifiers; track m.id) { <div class="pos-order-line__mod">+ {{ m.name }}</div> }
+        </div>
+        <div class="pos-order-line__price">{{ fmtFn(line.lineTotal) }}</div>
+        <button class="pos-order-line__remove" (click)="removeItem.emit(line.cartId)" type="button">✕</button>
+      </div>
+    }
+  </div>
+}
+
+@if (error) {
+  <p class="pos-order-error">{{ error }}</p>
+}
+
+<button class="pos-place-btn pos-place-btn--append"
+        [disabled]="cartIsEmpty || loading"
+        (click)="confirm.emit()" type="button">
+  @if (loading) {
+    <span class="pos-place-spinner"></span> {{ 'pos.order.append_adding' | translate }}
+  } @else {
+    {{ 'pos.order.append_confirm' | translate: { count: cartCount } }}
+  }
+</button>

@@ -1,0 +1,62 @@
+@if (mode === 'list') {
+  <div class="pos-modal-backdrop" (click)="dismiss.emit()">
+    <div class="pos-modal pos-modal--list" (click)="$event.stopPropagation()">
+      <div class="pos-modal__head">
+        <h3 class="pos-modal__name">{{ 'pos.refund.title' | translate }}</h3>
+        <button class="pos-modal__close" (click)="dismiss.emit()" type="button">✕</button>
+      </div>
+      <div class="pos-modal__list-body">
+        @if (refundLoading) {
+          <div class="pos-modal__loading">{{ 'pos.refund.loading' | translate }}</div>
+        } @else if (refundOrders.length === 0) {
+          <div class="pos-modal__loading">{{ 'pos.refund.no_orders' | translate }}</div>
+        } @else {
+          @for (order of refundOrders; track order.id) {
+            <button class="pos-refund-row" (click)="selectOrder.emit(order)" type="button">
+              <div class="pos-refund-row__left">
+                <span class="pos-refund-row__ref">#{{ order.reference.slice(-7).toUpperCase() }}</span>
+                <span class="pos-refund-row__meta">{{ order.createdAt | date:'dd/MM HH:mm' }} — {{ order.tableNumber ?? ('pos.refund.counter' | translate) }}</span>
+              </div>
+              <span class="pos-refund-row__amount">{{ fmtFn(order.amountDue ?? order.total) }} TND</span>
+            </button>
+          }
+        }
+      </div>
+    </div>
+  </div>
+}
+
+@if (mode === 'detail' && selectedRefundOrder) {
+  <div class="pos-modal-backdrop" (click)="backToList.emit()">
+    <div class="pos-modal pos-modal--sm" (click)="$event.stopPropagation()">
+      <div class="pos-modal__head">
+        <h3 class="pos-modal__name">{{ 'pos.refund.detail_title' | translate: { ref: selectedRefundOrder.reference.slice(-7).toUpperCase() } }}</h3>
+        <button class="pos-modal__close" (click)="backToList.emit()" type="button">✕</button>
+      </div>
+      <div class="pos-modal__sm-body">
+        <div class="pos-field">
+          <label class="pos-field__label">{{ 'pos.refund.amount_label' | translate }}</label>
+          <input class="pos-field__input" type="number" step="0.001" min="0"
+                 [value]="refundAmount"
+                 (input)="refundAmountChange.emit($any($event.target).value)">
+        </div>
+        <div class="pos-field">
+          <label class="pos-field__label">{{ 'pos.refund.reason_label' | translate }} <span class="pos-field__req">*</span></label>
+          <textarea class="pos-field__textarea" rows="3"
+                    [value]="refundReason"
+                    (input)="refundReasonChange.emit($any($event.target).value)"
+                    [placeholder]="'pos.refund.reason_placeholder' | translate"></textarea>
+        </div>
+        @if (refundError) { <p class="pos-modal__error">{{ refundError }}</p> }
+      </div>
+      <div class="pos-modal__sm-actions">
+        <button class="pos-modal__ghost-btn" (click)="backToList.emit()" type="button">{{ 'pos.refund.back' | translate }}</button>
+        <button class="pos-modal__confirm-btn pos-modal__confirm-btn--orange"
+                [disabled]="refundSubmitting"
+                (click)="confirm.emit()" type="button">
+          {{ refundSubmitting ? '...' : ('pos.refund.confirm' | translate) }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

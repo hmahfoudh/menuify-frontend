@@ -1,0 +1,23 @@
+.pos-receipt { display: none; }
+
+@media print {
+  :host > * { display: none !important; }
+  .pos-receipt {
+    display: block !important;
+    position: fixed; inset: 0;
+    background: white;
+    color: black;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    z-index: 9999;
+  }
+  .pos-receipt__head { text-align: center; margin-bottom: 10px; }
+  .pos-receipt__restaurant { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+  .pos-receipt__table, .pos-receipt__ref, .pos-receipt__date { font-size: 11px; }
+  .pos-receipt__divider { text-align: center; margin: 8px 0; }
+  .pos-receipt__line { display: flex; justify-content: space-between; margin: 2px 0; }
+  .pos-receipt__line--mod { font-size: 10px; color: #555; }
+  .pos-receipt__total { display: flex; justify-content: space-between; font-size: 14px; margin-top: 6px; }
+  .pos-receipt__footer { text-align: center; margin-top: 12px; font-size: 10px; }
+}

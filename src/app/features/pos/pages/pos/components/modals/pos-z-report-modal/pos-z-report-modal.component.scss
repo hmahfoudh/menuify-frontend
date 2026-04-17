@@ -1,0 +1,71 @@
+.pos-zr-header {
+  display: flex; gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.pos-zr-header__icon { font-size: 28px; flex-shrink: 0; }
+.pos-zr-header__info { flex: 1; }
+.pos-zr-header__tenant { font-size: 14px; font-weight: 700; color: var(--cream); }
+.pos-zr-header__type   { font-size: 13px; font-weight: 600; color: var(--fog); }
+.pos-zr-header__meta   { font-size: 11px; color: var(--fog2); margin-top: 2px; }
+
+.pos-zr-section {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--fog);
+  font-weight: 700;
+  padding: 14px 18px 6px;
+}
+
+.pos-zr-rows { padding: 0 18px; }
+
+.pos-zr-row {
+  display: flex; justify-content: space-between;
+  padding: 6px 0;
+  font-size: 12px;
+  color: var(--cream2);
+  font-family: monospace;
+  border-bottom: 1px dashed var(--line);
+  &:last-child { border-bottom: none; }
+  &--bold   { font-weight: 700; color: var(--cream); }
+  &--diff   { padding: 10px 0; border-top: 1px solid var(--line2); border-bottom: none; }
+}
+
+.pos-zr-diff {
+  display: flex; align-items: center; gap: 8px;
+  &--exact { color: var(--green); }
+  &--short { color: var(--red); }
+  &--over  { color: var(--amber); }
+}
+
+.pos-zr-diff__badge {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: currentColor;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.pos-zr-methods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 6px 18px 18px;
+}
+
+.pos-zr-method {
+  padding: 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.pos-zr-method__label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--fog2); margin-bottom: 4px; }
+.pos-zr-method__val   { font-size: 14px; font-weight: 700; }
+.pos-zr-method--cash  { background: rgba(100,200,130,0.08); .pos-zr-method__val { color: var(--green); } }
+.pos-zr-method--card  { background: rgba(74,144,232,0.08);  .pos-zr-method__val { color: #4a90e8; } }
+.pos-zr-method--mixed { background: rgba(232,168,56,0.08);  .pos-zr-method__val { color: var(--amber); } }

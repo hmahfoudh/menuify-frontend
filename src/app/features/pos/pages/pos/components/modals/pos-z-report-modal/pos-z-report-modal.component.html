@@ -1,0 +1,70 @@
+<div class="pos-modal-backdrop" (click)="dismiss.emit()">
+  <div class="pos-modal pos-modal--report" (click)="$event.stopPropagation()">
+    <div class="pos-modal__head">
+      <h3 class="pos-modal__name">{{ 'pos.z_report.title' | translate }}</h3>
+      <button class="pos-modal__ghost-btn" (click)="print.emit()" type="button">{{ 'pos.z_report.print' | translate }}</button>
+    </div>
+    @if (zReportLoading) {
+      <div class="pos-modal__loading">{{ 'pos.z_report.generating' | translate }}</div>
+    } @else if (zReport) {
+      @if (zReport; as r) {
+        <div class="pos-modal__report-body">
+
+          <div class="pos-zr-header">
+            <div class="pos-zr-header__icon">📄</div>
+            <div class="pos-zr-header__info">
+              <div class="pos-zr-header__tenant">{{ r.report.tenantName }}</div>
+              <div class="pos-zr-header__type">{{ 'pos.z_report.title' | translate }}</div>
+              <div class="pos-zr-header__meta">{{ r.report.openedAt | date:'MMM d, y HH:mm' }} .. {{ r.report.closedAt ? ('pos.z_report.status_closed' | translate) : ('pos.z_report.status_open' | translate) }}</div>
+              <div class="pos-zr-header__meta">{{ 'pos.z_report.session_id' | translate }} {{ r.shiftId.slice(0,8).toUpperCase() }}&nbsp;&nbsp;{{ 'pos.z_report.opened' | translate }} {{ r.report.openedAt | date:'MMM d HH:mm' }}</div>
+              <div class="pos-zr-header__meta">{{ 'pos.z_report.printed' | translate }} {{ now | date:'MMM d, y HH:mm' }}</div>
+            </div>
+          </div>
+
+          <div class="pos-zr-section">{{ 'pos.z_report.financial_summary' | translate }}</div>
+          <div class="pos-zr-rows">
+            <div class="pos-zr-row"><span>{{ 'pos.z_report.opening_float' | translate }}</span><span>TND {{ fmtFn(r.report.openingFloat) }}</span></div>
+            <div class="pos-zr-row"><span>{{ 'pos.z_report.total_cash' | translate }}</span><span>TND {{ fmtFn(r.report.totalCashRevenue) }}</span></div>
+            <div class="pos-zr-row"><span>{{ 'pos.z_report.total_card' | translate }}</span><span>TND {{ fmtFn(r.report.totalCardRevenue) }}</span></div>
+            <div class="pos-zr-row"><span>{{ 'pos.z_report.total_mixed' | translate }}</span><span>TND 0.000</span></div>
+            <div class="pos-zr-row"><span>{{ 'pos.z_report.manual_cash_in' | translate }}</span><span>TND 0.000</span></div>
+            <div class="pos-zr-row"><span>{{ 'pos.z_report.manual_cash_out' | translate }}</span><span>TND 0.000</span></div>
+            <div class="pos-zr-row pos-zr-row--bold"><span>{{ 'pos.z_report.expected_balance' | translate }}</span><span>TND {{ fmtFn(r.report.expectedCash) }}</span></div>
+            <div class="pos-zr-row pos-zr-row--bold"><span>{{ 'pos.z_report.actual_balance' | translate }}</span><span>TND {{ fmtFn(r.report.closingActual) }}</span></div>
+            <div class="pos-zr-row pos-zr-row--diff">
+              <span>{{ 'pos.z_report.difference' | translate }}</span>
+              <span class="pos-zr-diff pos-zr-diff--{{ zrDiffClassFn(r.report.cashDiscrepancy) }}">
+                TND {{ fmtFn(r.report.cashDiscrepancy) }}
+                <span class="pos-zr-diff__badge">{{ zrDiffLabelFn(r.report.cashDiscrepancy) }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="pos-zr-section">{{ 'pos.z_report.order_stats' | translate }}</div>
+          <div class="pos-zr-rows">
+            <div class="pos-zr-row"><span>{{ 'pos.z_report.total_orders' | translate }}</span><span>{{ r.report.totalOrders }}</span></div>
+            <div class="pos-zr-row pos-zr-row--bold"><span>{{ 'pos.z_report.total_revenue' | translate }}</span><span>TND {{ fmtFn(r.report.grossRevenue) }}</span></div>
+          </div>
+
+          <div class="pos-zr-methods">
+            <div class="pos-zr-method pos-zr-method--cash">
+              <div class="pos-zr-method__label">{{ 'pos.z_report.method_cash' | translate }}</div>
+              <div class="pos-zr-method__val">TND {{ fmtFn(r.report.totalCashRevenue) }}</div>
+            </div>
+            <div class="pos-zr-method pos-zr-method--card">
+              <div class="pos-zr-method__label">{{ 'pos.z_report.method_card' | translate }}</div>
+              <div class="pos-zr-method__val">TND {{ fmtFn(r.report.totalCardRevenue) }}</div>
+            </div>
+            <div class="pos-zr-method pos-zr-method--mixed">
+              <div class="pos-zr-method__label">{{ 'pos.z_report.method_mixed' | translate }}</div>
+              <div class="pos-zr-method__val">TND 0.000</div>
+            </div>
+          </div>
+
+        </div>
+      }
+    } @else {
+      <div class="pos-modal__loading">{{ 'pos.z_report.error' | translate }}</div>
+    }
+  </div>
+</div>

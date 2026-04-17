@@ -1,0 +1,97 @@
+<div class="pos-order-col">
+
+  <div class="pos-order-head">
+    <span class="pos-order-head__title">{{ 'pos.order.title' | translate }}</span>
+    @if (selectedTableKey && selectedTableKey !== 'no-table') {
+      <span class="pos-order-head__table">
+        {{ selectedTable?.displayName ?? ('T-' + selectedTableKey) }}
+      </span>
+    } @else {
+      <span class="pos-order-head__walkin">{{ 'pos.order.walk_in' | translate }}</span>
+    }
+  </div>
+
+  @if (view === 'payment') {
+    <app-pos-payment-screen
+      [pendingOrderRef]="pendingOrderRef"
+      [pendingTotal]="pendingTotal"
+      [paymentType]="paymentType"
+      [tenderedInput]="tenderedInput"
+      [tipInput]="tipInput"
+      [changeAmount]="changeAmount"
+      [isTenderedSufficient]="isTenderedSufficient"
+      [paymentError]="paymentError"
+      [paymentLoading]="paymentLoading"
+      [fmtFn]="fmtFn"
+      (paymentTypeChange)="paymentTypeChange.emit($event)"
+      (tenderedInputChange)="tenderedInputChange.emit($event)"
+      (tipInputChange)="tipInputChange.emit($event)"
+      (confirm)="recordPayment.emit()"
+      (skip)="skipPayment.emit()">
+    </app-pos-payment-screen>
+
+  } @else if (view === 'orderSent') {
+    <app-pos-order-sent
+      [lastOrderRef]="lastOrderRef"
+      (print)="printReceipt.emit()"
+      (newOrder)="newOrder.emit()">
+    </app-pos-order-sent>
+
+  } @else {
+
+    @if (tableActiveOrderLoading) {
+      <div class="pos-order-empty">
+        <span class="pos-tbl-order__spinner"></span>
+        <p>{{ 'pos.order.loading' | translate }}</p>
+      </div>
+
+    } @else if (tableActiveOrder && !addingToExistingOrder) {
+      <app-pos-table-active-order
+        [order]="tableActiveOrder"
+        [isShiftOpen]="isShiftOpen"
+        [orderStatusLabelFn]="orderStatusLabelFn"
+        [orderStatusClassFn]="orderStatusClassFn"
+        [fmtFn]="fmtFn"
+        (enterAddItems)="enterAddItems.emit()"
+        (payOrder)="payTableOrder.emit()">
+      </app-pos-table-active-order>
+
+    } @else if (tableActiveOrder && addingToExistingOrder) {
+      <app-pos-add-items-panel
+        [order]="tableActiveOrder"
+        [cartItems]="cartItems"
+        [cartIsEmpty]="cartIsEmpty"
+        [cartCount]="cartCount"
+        [loading]="addingToOrderLoading"
+        [error]="addingToOrderError"
+        [fmtFn]="fmtFn"
+        (cancel)="cancelAddItems.emit()"
+        (updateQty)="updateQty.emit($event)"
+        (removeItem)="removeItem.emit($event)"
+        (confirm)="confirmAddItems.emit()">
+      </app-pos-add-items-panel>
+
+    } @else {
+      <app-pos-cart-panel
+        [cartItems]="cartItems"
+        [cartIsEmpty]="cartIsEmpty"
+        [cartSubtotal]="cartSubtotal"
+        [orderNotes]="orderNotes"
+        [paymentType]="paymentType"
+        [submitting]="submitting"
+        [submitError]="submitError"
+        [isShiftOpen]="isShiftOpen"
+        [addingToOrderId]="addingToOrderId"
+        [cartLineHasNoteFn]="cartLineHasNoteFn"
+        [getCartLineNoteFn]="getCartLineNoteFn"
+        [fmtFn]="fmtFn"
+        (updateQty)="updateQty.emit($event)"
+        (removeItem)="removeItem.emit($event)"
+        (openNote)="openNote.emit($event)"
+        (orderNotesChange)="orderNotesChange.emit($event)"
+        (paymentTypeChange)="paymentTypeChange.emit($event)"
+        (placeOrder)="placeOrder.emit()">
+      </app-pos-cart-panel>
+    }
+  }
+</div>

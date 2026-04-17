@@ -1,0 +1,55 @@
+.pos-shift-modal {
+  background: var(--ink2);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  width: min(420px, 90vw);
+  padding: 2rem;
+  display: flex; flex-direction: column; gap: 14px;
+  text-align: center;
+  animation: scaleIn 0.2s;
+}
+
+.pos-shift-modal__icon {
+  width: 56px; height: 56px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--gold-bg);
+  color: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  &--amber {
+    background: var(--amb-bg);
+    color: var(--amber);
+  }
+}
+
+.pos-shift-modal__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--cream);
+  margin: 0;
+}
+
+.pos-shift-modal__desc {
+  font-size: 0.82rem;
+  color: var(--fog);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.pos-shift-modal__field {
+  display: flex; flex-direction: column; gap: 6px;
+  text-align: left;
+}
+
+.pos-shift-modal__label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fog);
+  font-weight: 600;
+}
+
+.pos-shift-modal__actions {
+  display: flex; gap: 8px;
+  margin-top: 6px;
+}

@@ -3,7 +3,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { interval, Subscription, forkJoin } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
@@ -34,18 +33,49 @@ import { IssueRefundRequest } from '../../models/refund.models';
 import { PosOrder } from '../../models/pos-order.models';
 import { ZReportResponse } from '../../models/report.models';
 import { AuthService } from '../../../../core/services/auth.service';
-import { TranslatePipe } from '@ngx-translate/core';
-import { LangSwitcherComponent } from '../../../../shared/components/lang-switcher/lang-switcher.component';
+
+// ── Child components ──────────────────────────────────────────────────────────
+import { PosTopbarComponent } from './components/pos-topbar/pos-topbar.component';
+import { PosTablesColumnComponent } from './components/pos-tables-column/pos-tables-column.component';
+import { PosMenuColumnComponent } from './components/pos-menu-column/pos-menu-column.component';
+import { PosOrderColumnComponent } from './components/pos-order-column/pos-order-column.component';
+import { PosReceiptComponent } from './components/pos-receipt/pos-receipt.component';
+
+import { PosItemModalComponent } from './components/modals/pos-item-modal/pos-item-modal.component';
+import { PosItemNoteModalComponent } from './components/modals/pos-item-note-modal/pos-item-note-modal.component';
+import { PosOpenShiftModalComponent } from './components/modals/pos-open-shift-modal/pos-open-shift-modal.component';
+import { PosCloseShiftModalComponent } from './components/modals/pos-close-shift-modal/pos-close-shift-modal.component';
+import { PosCashMovementModalComponent } from './components/modals/pos-cash-movement-modal/pos-cash-movement-modal.component';
+import { PosDiscountModalComponent } from './components/modals/pos-discount-modal/pos-discount-modal.component';
+import { PosPromoModalComponent } from './components/modals/pos-promo-modal/pos-promo-modal.component';
+import { PosRefundModalComponent } from './components/modals/pos-refund-modal/pos-refund-modal.component';
+import { PosZReportModalComponent } from './components/modals/pos-z-report-modal/pos-z-report-modal.component';
 
 // ── View states ───────────────────────────────────────────────────────────────
-type PosView = 'pos' | 'payment' | 'orderSent';
-type ModalView = 'none' | 'item' | 'openShift' | 'closeShift' | 'itemNote'
+export type PosView = 'pos' | 'payment' | 'orderSent';
+export type ModalView = 'none' | 'item' | 'openShift' | 'closeShift' | 'itemNote'
   | 'cashIn' | 'cashOut' | 'discount' | 'promo' | 'refund' | 'refundDetail' | 'zReport';
 
 @Component({
   selector: 'app-pos',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, TranslatePipe, LangSwitcherComponent],
+  imports: [
+    CommonModule, FormsModule,
+    PosTopbarComponent,
+    PosTablesColumnComponent,
+    PosMenuColumnComponent,
+    PosOrderColumnComponent,
+    PosReceiptComponent,
+    PosItemModalComponent,
+    PosItemNoteModalComponent,
+    PosOpenShiftModalComponent,
+    PosCloseShiftModalComponent,
+    PosCashMovementModalComponent,
+    PosDiscountModalComponent,
+    PosPromoModalComponent,
+    PosRefundModalComponent,
+    PosZReportModalComponent,
+  ],
   templateUrl: './pos.component.html',
   styleUrls: ['./pos.component.scss'],
 })
@@ -94,11 +124,8 @@ export class PosComponent implements OnInit, OnDestroy {
   });
 
   // ── Active order for the selected table ───────────────────────────────────
-  // Loaded from backend when a table with an active order is selected.
-  // Shown read-only in the order panel so the cashier can see what was ordered.
   tableActiveOrder        = signal<PosOrder | null>(null);
   tableActiveOrderLoading = signal(false);
-  // When set, "Valider" will append items to this order instead of creating new
   addingToOrderId         = signal<string | null>(null);
 
   // ── Category / menu navigation ────────────────────────────────────────────
@@ -160,7 +187,6 @@ export class PosComponent implements OnInit, OnDestroy {
   submitError  = signal<string | null>(null);
 
   // ── Payment modal state ───────────────────────────────────────────────────
-  // Shown after order is created — records the actual payment
   pendingOrderId  = signal<string | null>(null);
   pendingOrderRef = signal<string | null>(null);
   pendingTotal    = signal<number>(0);
@@ -217,25 +243,20 @@ export class PosComponent implements OnInit, OnDestroy {
     this.loadAll();
     this.cart.setTable('no-table');
 
-    // Load shift state on init
     this.shiftSvc.loadCurrentShift().subscribe({
       next: () => {
-        // If no open shift, show the open-shift modal
         if (!this.isShiftOpen) this.activeModal.set('openShift');
         else this.cashSvc.loadDrawer().subscribe();
       },
       error: () => {
-        // 404 = no open shift
         this.activeModal.set('openShift');
       }
     });
 
-    // Poll table status every 30s
     this.tablePoll = interval(30_000)
       .pipe(startWith(0), switchMap(() => this.posSvc.getTableStatus()))
       .subscribe({ next: t => this.tables.set(t), error: () => {} });
 
-    // Poll shift totals every 60s (live X-Report)
     this.shiftPoll = interval(60_000)
       .pipe(startWith(0), switchMap(() => this.shiftSvc.loadCurrentShift()))
       .subscribe({ error: () => {} });
@@ -290,7 +311,6 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   openCloseShiftModal(): void {
-    // Pre-fill with expected balance as a starting point
     const expected = this.drawerState()?.expectedBalance ?? 0;
     this.closeCountInput.set(expected.toFixed(3));
     this.closeNotesInput.set('');
@@ -313,7 +333,7 @@ export class PosComponent implements OnInit, OnDestroy {
     this.shiftSvc.closeShift(req).subscribe({
       next: () => {
         this.shiftLoading.set(false);
-        this.activeModal.set('openShift'); // Prompt to open next shift
+        this.activeModal.set('openShift');
       },
       error: err => {
         this.shiftLoading.set(false);
@@ -330,11 +350,9 @@ export class PosComponent implements OnInit, OnDestroy {
     this.orderType.set(key === 'no-table' ? 'TAKEAWAY' : 'DINE_IN');
     this.submitError.set(null);
 
-    // Reset any previously loaded table order
     this.tableActiveOrder.set(null);
     this.addingToOrderId.set(null);
 
-    // If this table has an active order, load its full details
     if (key !== 'no-table') {
       const table = this.tables().find(t => String(t.number) === key);
       if (table?.orderId) {
@@ -380,30 +398,22 @@ export class PosComponent implements OnInit, OnDestroy {
 
   // ── Adding items to an existing table order ───────────────────────────────
 
-  /**
-   * True when the cashier is in "add items" mode on an existing table order.
-   * The cart is used as a temporary staging area — on confirm, lines are
-   * PATCHed onto the existing order via PATCH /api/pos/orders/{id}/lines.
-   */
   addingToExistingOrder = signal(false);
   addingToOrderLoading  = signal(false);
   addingToOrderError    = signal<string | null>(null);
 
-  /** Enter "add items" mode — keep showing the existing order above, enable cart below */
   enterAddItemsMode(): void {
     this.cart.clearTable(this.selectedTableKey() ?? 'no-table');
     this.addingToExistingOrder.set(true);
     this.addingToOrderError.set(null);
   }
 
-  /** Cancel — go back to the read-only order view without changing anything */
   cancelAddItems(): void {
     this.cart.clearTable(this.selectedTableKey() ?? 'no-table');
     this.addingToExistingOrder.set(false);
     this.addingToOrderError.set(null);
   }
 
-  /** PATCH the staged cart items onto the existing order as new lines */
   confirmAddItems(): void {
     const order = this.tableActiveOrder();
     if (!order || this.cartIsEmpty() || this.addingToOrderLoading()) return;
@@ -422,7 +432,6 @@ export class PosComponent implements OnInit, OnDestroy {
     this.orderSvc.addLines(order.id, lines).subscribe({
       next: res => {
         if (res.success) {
-          // Refresh the displayed order with the updated data from backend
           this.tableActiveOrder.set(res.data);
         }
         this.cart.clearTable(this.selectedTableKey() ?? 'no-table');
@@ -438,7 +447,6 @@ export class PosComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Status label for a PosOrder status string */
   orderStatusLabel(status: string): string {
     const labels: Record<string, string> = {
       NEW: 'Nouveau', PENDING: 'En attente', CONFIRMED: 'Confirmé',
@@ -449,7 +457,6 @@ export class PosComponent implements OnInit, OnDestroy {
     return labels[status] ?? status;
   }
 
-  /** CSS class for the order status badge */
   orderStatusClass(status: string): string {
     const map: Record<string, string> = {
       NEW: 'blue', PENDING: 'blue', CONFIRMED: 'blue',
@@ -575,7 +582,6 @@ export class PosComponent implements OnInit, OnDestroy {
     this.submitting.set(true);
     this.submitError.set(null);
 
-    // ── APPEND MODE: add lines to an existing order ──────────────────────────
     if (appendOrderId) {
       let linesPayload: AddOrderLinesRequest = {lines: []} ;
 
@@ -589,7 +595,6 @@ export class PosComponent implements OnInit, OnDestroy {
 
       this.posSvc.addLines(appendOrderId, linesPayload).subscribe({
         next: data => {
-          // Update the displayed order and go back to table order view
           this.tableActiveOrder.set(data);
           this.addingToOrderId.set(null);
           this.cart.clearTable(tableKey ?? 'no-table');
@@ -604,7 +609,6 @@ export class PosComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // ── CREATE MODE: place a brand new order ─────────────────────────────────
     const payload = {
       orderType:   this.orderType(),
       tableNumber: tableKey === 'no-table' ? null : tableKey,
@@ -661,7 +665,6 @@ export class PosComponent implements OnInit, OnDestroy {
     const total   = this.pendingTotal();
     const tip     = parseFloat(this.tipInput()) || 0;
 
-    // Cash validation
     if (method === 'cash' && !this.isTenderedSufficient()) {
       this.paymentError.set('Amount tendered must cover the total and tip.');
       return;
@@ -686,7 +689,6 @@ export class PosComponent implements OnInit, OnDestroy {
 
     this.paymentSvc.recordPayment(req).subscribe({
       next: () => {
-        // Refresh drawer balance
         this.cashSvc.loadDrawer().subscribe();
         this.paymentLoading.set(false);
         this.view.set('orderSent');
@@ -699,7 +701,6 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   skipPayment(): void {
-    // Staff may skip payment recording (e.g. pay later / owner override)
     this.view.set('orderSent');
   }
 
@@ -781,7 +782,6 @@ export class PosComponent implements OnInit, OnDestroy {
   // ── Discount ───────────────────────────────────────────────────────────────
   discountMode  = signal<'fixed' | 'percent'>('fixed');
   discountInput = signal('');
-  // Applied discount — shown on totals and passed to order
   discountAmount = signal(0);
 
   openDiscount(): void {
@@ -808,7 +808,6 @@ export class PosComponent implements OnInit, OnDestroy {
   openPromo(): void { this.promoInput.set(''); this.activeModal.set('promo'); }
 
   applyPromo(): void {
-    // TODO: wire to promo endpoint when backend is ready
     this.activeModal.set('none');
   }
 
@@ -842,7 +841,6 @@ export class PosComponent implements OnInit, OnDestroy {
     this.refundAmount.set((order.amountDue ?? order.total).toFixed(3));
     this.refundReason.set('');
     this.refundError.set(null);
-    // Load payments for this order to get paymentId
     this.paymentSvc.getOrderPayments(order.id).subscribe({
       next: res => {
         if (res.success) {

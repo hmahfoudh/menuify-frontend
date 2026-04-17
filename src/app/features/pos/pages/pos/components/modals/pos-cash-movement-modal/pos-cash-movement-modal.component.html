@@ -1,0 +1,34 @@
+<div class="pos-modal-backdrop" (click)="dismiss.emit()">
+  <div class="pos-modal pos-modal--sm" (click)="$event.stopPropagation()">
+    <div class="pos-modal__head">
+      <div class="pos-modal__icon" [class]="'pos-modal__icon ' + iconClass">{{ iconChar }}</div>
+      <h3 class="pos-modal__name">{{ titleKey | translate }}</h3>
+      <button class="pos-modal__close" (click)="dismiss.emit()" type="button">✕</button>
+    </div>
+    <div class="pos-modal__sm-body">
+      <div class="pos-field">
+        <label class="pos-field__label">{{ amountLabelKey | translate }}</label>
+        <input class="pos-field__input" type="number" step="0.001" min="0"
+               [value]="amount"
+               (input)="amountChange.emit($any($event.target).value)"
+               placeholder="0.00" autocomplete="off">
+      </div>
+      <div class="pos-field">
+        <label class="pos-field__label">{{ reasonLabelKey | translate }} <span class="pos-field__req">*</span></label>
+        <textarea class="pos-field__textarea" rows="3"
+                  [value]="reason"
+                  (input)="reasonChange.emit($any($event.target).value)"
+                  [placeholder]="reasonPlaceholderKey | translate"></textarea>
+      </div>
+      @if (error) { <p class="pos-modal__error">{{ error }}</p> }
+    </div>
+    <div class="pos-modal__sm-actions">
+      <button class="pos-modal__ghost-btn" (click)="dismiss.emit()" type="button">{{ cancelKey | translate }}</button>
+      <button class="pos-modal__confirm-btn" [class]="'pos-modal__confirm-btn ' + btnColorClass"
+              [disabled]="loading"
+              (click)="confirm.emit()" type="button">
+        {{ loading ? '...' : (confirmKey | translate) }}
+      </button>
+    </div>
+  </div>
+</div>

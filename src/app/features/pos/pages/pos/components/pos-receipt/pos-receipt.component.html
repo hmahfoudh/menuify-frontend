@@ -1,0 +1,33 @@
+<div class="pos-receipt">
+  <div class="pos-receipt__head">
+    <div class="pos-receipt__restaurant">{{ tenantName }}</div>
+    @if (receiptTable) {
+      <div class="pos-receipt__table">{{ 'pos.receipt.table' | translate }} {{ receiptTable }}</div>
+    }
+    <div class="pos-receipt__ref">{{ 'pos.receipt.ref' | translate }} {{ lastOrderRef }}</div>
+    <div class="pos-receipt__date">{{ now | date:'dd/MM/yyyy HH:mm' }}</div>
+  </div>
+  <div class="pos-receipt__divider">--------------------------------</div>
+  @for (line of receiptLines; track line.cartId) {
+    <div class="pos-receipt__line">
+      <span>{{ line.quantity }}× {{ line.itemName }}@if (line.variant) { ({{ line.variant.name }}) }</span>
+      <span>{{ fmtFn(line.lineTotal) }} DT</span>
+    </div>
+    @if (line.note) {
+      <div class="pos-receipt__line pos-receipt__line--mod">
+        <span>&nbsp;&nbsp;↳ {{ line.note }}</span><span></span>
+      </div>
+    }
+    @for (mod of line.modifiers; track mod.id) {
+      <div class="pos-receipt__line pos-receipt__line--mod">
+        <span>&nbsp;&nbsp;+ {{ mod.name }}</span><span></span>
+      </div>
+    }
+  }
+  <div class="pos-receipt__divider">--------------------------------</div>
+  <div class="pos-receipt__total">
+    <strong>{{ 'pos.receipt.total' | translate }}</strong>
+    <strong>{{ fmtFn(receiptSubtotal) }} DT</strong>
+  </div>
+  <div class="pos-receipt__footer">{{ 'pos.receipt.thank_you' | translate }}</div>
+</div>

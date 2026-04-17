@@ -1,0 +1,60 @@
+<div class="pos-modal-backdrop" (click)="close.emit()">
+  <div class="pos-modal" (click)="$event.stopPropagation()">
+
+    <div class="pos-modal__head">
+      <div>
+        <div class="pos-modal__accent" [style.background]="item._accent"></div>
+        <h3 class="pos-modal__name">{{ item.name }}</h3>
+      </div>
+      <button class="pos-modal__close" (click)="close.emit()" type="button">✕</button>
+    </div>
+
+    @for (g of item.variantGroups; track g.id) {
+      <div class="pos-modal__section">
+        <div class="pos-modal__section-label">
+          {{ g.name }}
+          @if (g.required) { <span class="pos-modal__required">{{ 'pos.item_modal.required' | translate }}</span> }
+        </div>
+        <div class="pos-modal__options">
+          @for (v of g.variants; track v.id) {
+            <button class="pos-modal__option"
+                    [class.pos-modal__option--active]="modalVariant?.id === v.id"
+                    (click)="selectVariant.emit(v)" type="button">
+              <span>{{ v.name }}</span>
+              <span class="pos-modal__option-price">{{ fmtFn(v.price) }} DT</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    @for (g of item.modifierGroups; track g.id) {
+      <div class="pos-modal__section">
+        <div class="pos-modal__section-label">
+          {{ g.name }}
+          @if (g.required) { <span class="pos-modal__required">{{ 'pos.item_modal.required' | translate }}</span> }
+        </div>
+        <div class="pos-modal__options">
+          @for (m of g.modifiers; track m.id) {
+            <button class="pos-modal__option"
+                    [class.pos-modal__option--active]="isModSelectedFn(m.id)"
+                    (click)="toggleMod.emit({ modId: m.id, group: g })" type="button">
+              <span>{{ m.name }}</span>
+              @if (m.priceDelta > 0) {
+                <span class="pos-modal__option-price">+{{ fmtFn(m.priceDelta) }}</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="pos-modal__foot">
+      <div class="pos-modal__unit-price">{{ fmtFn(modalUnitPrice) }} DT × {{ qtyPreset }}</div>
+      <button class="pos-modal__add" (click)="addToCart.emit()" type="button">
+        {{ 'pos.item_modal.add' | translate: { price: fmtFn(modalUnitPrice * qtyPreset) } }}
+      </button>
+    </div>
+
+  </div>
+</div>

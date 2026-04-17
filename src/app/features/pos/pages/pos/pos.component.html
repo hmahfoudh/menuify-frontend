@@ -1,1257 +1,264 @@
 <div class="pos-root">
 
-  <!-- ══════════════════════════════════════════
-       TOP BAR
-  ══════════════════════════════════════════ -->
-  <div class="pos-topbar">
-    <div class="pos-topbar__left">
-      <div class="pos-brand-dot"></div>
-      <span class="pos-brand-name">Menuify POS</span>
-    </div>
+  <!-- TOP BAR -->
+  <app-pos-topbar
+    [orderTypes]="orderTypes"
+    [orderType]="orderType()"
+    [isShiftOpen]="isShiftOpen"
+    [drawerState]="drawerState()"
+    [drawerBalance]="drawerBalance"
+    [currentShift]="currentShift()"
+    [shiftRevenue]="shiftRevenue"
+    [activeTableCount]="activeTableCount()"
+    [staffName]="staffName"
+    (orderTypeChange)="setOrderType($event)"
+    (cashIn)="openCashIn()"
+    (cashOut)="openCashOut()"
+    (refund)="openRefund()"
+    (discount)="openDiscount()"
+    (promo)="openPromo()"
+    (print)="printReceipt()"
+    (zReport)="openZReport()"
+    (closeShift)="openCloseShiftModal()"
+    (logout)="logout()">
+  </app-pos-topbar>
 
-    <!-- Order type toggle -->
-    <div class="pos-order-type">
-      @for (ot of orderTypes; track ot.value) {
-        <button class="pos-ot-btn"
-                [class.pos-ot-btn--active]="orderType() === ot.value"
-                (click)="setOrderType(ot.value)"
-                type="button">
-          {{ ot.label }}
-        </button>
-      }
-    </div>
-
-    <div class="pos-topbar__right">
-      <!-- Cash drawer balance -->
-      @if (isShiftOpen && drawerState()) {
-        <div class="pos-drawer-chip">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="7" width="20" height="14" rx="2"/>
-            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-            <line x1="12" y1="12" x2="12" y2="16"/>
-            <line x1="10" y1="14" x2="14" y2="14"/>
-          </svg>
-          {{ drawerBalance }} DT
-        </div>
-      }
-
-      <!-- Shift revenue badge -->
-      @if (isShiftOpen && currentShift()?.totalRevenue !== null) {
-        <div class="pos-shift-chip">
-          {{ shiftRevenue }} DT
-        </div>
-      }
-
-      <!-- Active orders count -->
-      @if (activeTableCount() > 0) {
-        <div class="pos-active-chip">
-          <span class="pos-active-chip__dot"></span>
-          {{ activeTableCount() }} {{ 'pos.topbar.active' | translate }}
-        </div>
-      }
-
-      <div class="pos-staff-chip">{{ staffName }}</div>
-
-      <!-- ── Toolbar buttons ── -->
-      <div class="pos-toolbar">
-
-        <!-- Cash In -->
-        <button class="pos-tool-btn" [title]="'pos.toolbar.cash_in' | translate" (click)="openCashIn()" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-        </button>
-
-        <!-- Cash Out -->
-        <button class="pos-tool-btn" [title]="'pos.toolbar.cash_out' | translate" (click)="openCashOut()" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
-        </button>
-
-        <!-- Park -->
-        <button class="pos-tool-btn" [title]="'pos.toolbar.park' | translate" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M10 8h4a2 2 0 0 1 0 4h-4V8zM10 12h4"/></svg>
-        </button>
-
-        <!-- Refund -->
-        <button class="pos-tool-btn" [title]="'pos.toolbar.refund' | translate" (click)="openRefund()" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.66"/></svg>
-        </button>
-
-        <!-- Discount -->
-        <button class="pos-tool-btn" [title]="'pos.toolbar.discount' | translate" (click)="openDiscount()" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
-        </button>
-
-        <!-- Promo Code -->
-        <button class="pos-tool-btn" [title]="'pos.toolbar.promo' | translate" (click)="openPromo()" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        </button>
-
-        <!-- Print ticket -->
-        <button class="pos-tool-btn" [title]="'pos.toolbar.print' | translate" (click)="printReceipt()" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        </button>
-
-        <!-- Z-Report -->
-        <button class="pos-tool-btn" [title]="'pos.toolbar.z_report' | translate" (click)="openZReport()" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        </button>
-
-      </div>
-
-      <!-- Close shift button (owner only) -->
-      @if (isShiftOpen) {
-        <button class="pos-shift-close-btn" (click)="openCloseShiftModal()" type="button">
-          {{ 'pos.topbar.end_shift' | translate }}
-        </button>
-      }
-
-      <app-lang-switcher />
-
-      <button class="pos-exit-btn" (click)="logout()" type="button">
-        @if (staffName === 'Owner') { {{ 'pos.topbar.dashboard' | translate }} } @else { {{ 'pos.topbar.sign_out' | translate }} }
-      </button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════
-       MAIN LAYOUT — 3 columns
-  ══════════════════════════════════════════ -->
+  <!-- MAIN LAYOUT -->
   <div class="pos-layout">
 
-    <!-- ── COLUMN 1: TABLES ─────────────────────────────────── -->
-    <div class="pos-tables-col">
+    <!-- COLUMN 1: TABLES -->
+    <app-pos-tables-column
+      [loading]="loading()"
+      [tables]="tables()"
+      [selectedTableKey]="selectedTableKey()"
+      [tableCardClassFn]="tableCardClass.bind(this)"
+      [tableStatusLabelFn]="tableStatusLabel.bind(this)"
+      [tableStatusDotFn]="tableStatusDot.bind(this)"
+      [tableKeyFn]="tableKey.bind(this)"
+      (tableSelect)="selectTable($event)">
+    </app-pos-tables-column>
 
-      <div class="pos-tables-head">
-        <span class="pos-tables-head__label">{{ 'pos.tables.title' | translate }}</span>
-      </div>
+    <!-- COLUMN 2: MENU -->
+    <app-pos-menu-column
+      [loading]="loading()"
+      [categories]="categories()"
+      [activeCatId]="activeCatId()"
+      [searchQuery]="searchQuery()"
+      [filteredItems]="filteredItems()"
+      [qtyPreset]="qtyPreset()"
+      [qtyPresets]="qtyPresets"
+      [accentForFn]="accentFor.bind(this)"
+      [fmtFn]="fmt.bind(this)"
+      (categoryChange)="setCategory($event)"
+      (searchChange)="setSearch($event)"
+      (qtyPresetChange)="setQtyPreset($event)"
+      (itemTap)="tapItem($event)">
+    </app-pos-menu-column>
 
-      <!-- No table / Walk-in -->
-      <button class="pos-no-table"
-              [class.pos-no-table--selected]="selectedTableKey() === 'no-table'"
-              (click)="selectTable('no-table')"
-              type="button">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <line x1="19" y1="8" x2="19" y2="14"/>
-          <line x1="22" y1="11" x2="16" y2="11"/>
-        </svg>
-        {{ 'pos.tables.walk_in' | translate }}
-      </button>
+    <!-- COLUMN 3: ORDER PANEL -->
+    <app-pos-order-column
+      [view]="view()"
+      [selectedTableKey]="selectedTableKey()"
+      [selectedTable]="selectedTable()"
+      [isShiftOpen]="isShiftOpen"
 
-      <!-- Table cards grid -->
-      <div class="pos-tables-grid">
-        @if (loading()) {
-          @for (i of [1,2,3,4,5,6]; track i) {
-            <div class="tbl-card tbl-card--skeleton"></div>
-          }
-        } @else {
-          @for (t of tables(); track t.id) {
-            <button [class]="tableCardClass(t)"
-                    (click)="selectTable(tableKey(t))"
-                    type="button">
-              <div class="tbl-card__dot" [style.background]="tableStatusDot(t)"></div>
-              <div class="tbl-card__name">{{ t.displayName }}</div>
-              <div class="tbl-card__status">{{ tableStatusLabel(t) | translate }}</div>
-              @if (t.orderReference) {
-                <div class="tbl-card__ref">{{ t.orderReference }}</div>
-              }
-            </button>
-          }
-        }
-      </div>
+      [tableActiveOrder]="tableActiveOrder()"
+      [tableActiveOrderLoading]="tableActiveOrderLoading()"
+      [addingToExistingOrder]="addingToExistingOrder()"
+      [addingToOrderLoading]="addingToOrderLoading()"
+      [addingToOrderError]="addingToOrderError()"
+      [addingToOrderId]="addingToOrderId()"
 
-      <!-- Legend -->
-      <div class="pos-tables-legend">
-        <span class="legend-item">
-          <span class="legend-dot" style="background:#504c44"></span>{{ 'pos.tables.legend_free' | translate }}
-        </span>
-        <span class="legend-item">
-          <span class="legend-dot" style="background:#e8a838"></span>{{ 'pos.tables.legend_busy' | translate }}
-        </span>
-        <span class="legend-item">
-          <span class="legend-dot" style="background:#64c882"></span>{{ 'pos.tables.legend_ready' | translate }}
-        </span>
-      </div>
+      [cartItems]="cartItems()"
+      [cartIsEmpty]="cartIsEmpty()"
+      [cartCount]="cartCount()"
+      [cartSubtotal]="cartSubtotal()"
 
-    </div>
+      [orderNotes]="orderNotes()"
+      [paymentType]="paymentType()"
+      [submitting]="submitting()"
+      [submitError]="submitError()"
 
-    <!-- ── COLUMN 2: MENU ──────────────────────────────────── -->
-    <div class="pos-menu-col">
+      [pendingOrderRef]="pendingOrderRef()"
+      [pendingTotal]="pendingTotal()"
+      [tenderedInput]="tenderedInput()"
+      [tipInput]="tipInput()"
+      [changeAmount]="changeAmount()"
+      [isTenderedSufficient]="isTenderedSufficient()"
+      [paymentError]="paymentError()"
+      [paymentLoading]="paymentLoading()"
 
-      <!-- Category sidebar -->
-      <div class="pos-cat-sidebar">
-        <button class="pos-cat-item"
-                [class.pos-cat-item--active]="activeCatId() === null"
-                (click)="setCategory(null)"
-                type="button">
-          <span class="pos-cat-icon">⊞</span>
-          <span class="pos-cat-label">{{ 'pos.menu.all' | translate }}</span>
-        </button>
-        @for (cat of categories(); track cat.id) {
-          <button class="pos-cat-item"
-                  [class.pos-cat-item--active]="activeCatId() === cat.id"
-                  (click)="setCategory(cat.id)"
-                  type="button">
-            <span class="pos-cat-dot" [style.background]="accentFor(cat.id)"></span>
-            <span class="pos-cat-label">{{ cat.name }}</span>
-            <span class="pos-cat-count">{{ cat.items.length }}</span>
-          </button>
-        }
-      </div>
+      [lastOrderRef]="lastOrderRef()"
 
-      <!-- Items area -->
-      <div class="pos-items-area">
+      [orderStatusLabelFn]="orderStatusLabel.bind(this)"
+      [orderStatusClassFn]="orderStatusClass.bind(this)"
+      [cartLineHasNoteFn]="cartLineHasNote.bind(this)"
+      [getCartLineNoteFn]="getCartLineNote.bind(this)"
+      [fmtFn]="fmt.bind(this)"
 
-        <!-- Search -->
-        <div class="pos-search">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input type="text" [placeholder]="'pos.menu.search_placeholder' | translate"
-                 [value]="searchQuery()"
-                 (input)="setSearch($any($event.target).value)">
-        </div>
+      (enterAddItems)="enterAddItemsMode()"
+      (cancelAddItems)="cancelAddItems()"
+      (confirmAddItems)="confirmAddItems()"
+      (payTableOrder)="payTableOrder()"
+      (updateQty)="updateQty($event.cartId, $event.qty)"
+      (removeItem)="removeItem($event)"
+      (openNote)="openNoteModal($event)"
+      (orderNotesChange)="setOrderNotes($event)"
+      (paymentTypeChange)="setPaymentType($event)"
+      (placeOrder)="placeOrder()"
+      (tenderedInputChange)="tenderedInput.set($event)"
+      (tipInputChange)="tipInput.set($event)"
+      (recordPayment)="recordPayment()"
+      (skipPayment)="skipPayment()"
+      (printReceipt)="printReceipt()"
+      (newOrder)="newOrder()">
+    </app-pos-order-column>
 
-        <!-- Item grid -->
-        <div class="pos-item-grid">
-          @if (loading()) {
-            @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
-              <div class="pos-item-card pos-item-card--skeleton"></div>
-            }
-          } @else if (filteredItems().length === 0) {
-            <div class="pos-items-empty"><p>{{ 'pos.menu.no_items' | translate }}</p></div>
-          } @else {
-            @for (item of filteredItems(); track item.id) {
-              <button class="pos-item-card"
-                      (click)="tapItem(item)"
-                      type="button">
-                <div class="pos-item-card__accent" [style.background]="item._accent"></div>
-                <div class="pos-item-card__body">
-                  <div class="pos-item-card__name">{{ item.name }}</div>
-                  <div class="pos-item-card__price" [style.color]="item._accent">
-                    {{ fmt(item.displayPrice ?? item.basePrice ?? 0) }} DT
-                  </div>
-                </div>
-              </button>
-            }
-          }
-        </div>
-
-        <!-- Quantity preset bar -->
-        <div class="pos-qty-bar">
-          <span class="pos-qty-bar__label">{{ 'pos.menu.qty_label' | translate }}</span>
-          <div class="pos-qty-bar__current">{{ qtyPreset() }}</div>
-          @for (p of qtyPresets; track p) {
-            <button class="pos-qty-preset"
-                    [class.pos-qty-preset--active]="qtyPreset() === p"
-                    (click)="setQtyPreset(p)"
-                    type="button">{{ p }}</button>
-          }
-          <button class="pos-qty-preset pos-qty-preset--clear"
-                  (click)="setQtyPreset(1)"
-                  type="button">C</button>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ── COLUMN 3: ORDER PANEL ────────────────────────────── -->
-    <div class="pos-order-col">
-
-      <!-- Order header -->
-      <div class="pos-order-head">
-        <span class="pos-order-head__title">{{ 'pos.order.title' | translate }}</span>
-        @if (selectedTableKey() && selectedTableKey() !== 'no-table') {
-          <span class="pos-order-head__table">
-            {{ selectedTable()?.displayName ?? ('T-' + selectedTableKey()) }}
-          </span>
-        } @else {
-          <span class="pos-order-head__walkin">{{ 'pos.order.walk_in' | translate }}</span>
-        }
-      </div>
-
-      <!-- ── PAYMENT SCREEN ── -->
-      @if (view() === 'payment') {
-        <div class="pos-payment-screen">
-
-          <div class="pos-pay-screen__ref">{{ pendingOrderRef() }}</div>
-
-          <!-- Total -->
-          <div class="pos-pay-screen__total-row">
-            <span class="pos-pay-screen__total-label">{{ 'pos.payment.total_due' | translate }}</span>
-            <span class="pos-pay-screen__total-val">{{ fmt(pendingTotal()) }} DT</span>
-          </div>
-
-          <!-- Method selector -->
-          <div class="pos-pay-screen__methods">
-            <button class="pos-pay-method-btn"
-                    [class.pos-pay-method-btn--active]="paymentType() === 'cash'"
-                    (click)="setPaymentType('cash')" type="button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="6" width="20" height="12" rx="2"/>
-                <circle cx="12" cy="12" r="2"/>
-                <path d="M6 12h.01M18 12h.01"/>
-              </svg>
-              {{ 'pos.payment.method_cash' | translate }}
-            </button>
-            <button class="pos-pay-method-btn"
-                    [class.pos-pay-method-btn--active]="paymentType() === 'card'"
-                    (click)="setPaymentType('card')" type="button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="1" y="4" width="22" height="16" rx="2"/>
-                <line x1="1" y1="10" x2="23" y2="10"/>
-              </svg>
-              {{ 'pos.payment.method_card' | translate }}
-            </button>
-            <button class="pos-pay-method-btn"
-                    [class.pos-pay-method-btn--active]="paymentType() === 'mixed'"
-                    (click)="setPaymentType('mixed')" type="button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2v20M2 12h20"/>
-              </svg>
-              {{ 'pos.payment.method_mixed' | translate }}
-            </button>
-          </div>
-
-          <!-- Cash inputs (only for cash/mixed) -->
-          @if (paymentType() === 'cash' || paymentType() === 'mixed') {
-            <div class="pos-pay-screen__inputs">
-
-              <div class="pos-pay-field">
-                <label class="pos-pay-field__label">{{ 'pos.payment.amount_tendered' | translate }}</label>
-                <div class="pos-pay-field__input-row">
-                  <input type="number"
-                         step="0.001"
-                         min="0"
-                         class="pos-pay-field__input"
-                         [value]="tenderedInput()"
-                         (input)="tenderedInput.set($any($event.target).value)"
-                         placeholder="{{ fmt(pendingTotal()) }}"
-                         autocomplete="off">
-                  <span class="pos-pay-field__unit">DT</span>
-                </div>
-              </div>
-
-              <div class="pos-pay-field">
-                <label class="pos-pay-field__label">{{ 'pos.payment.tip' | translate }}</label>
-                <div class="pos-pay-field__input-row">
-                  <input type="number"
-                         step="0.001"
-                         min="0"
-                         class="pos-pay-field__input"
-                         [value]="tipInput()"
-                         (input)="tipInput.set($any($event.target).value)"
-                         placeholder="0.000"
-                         autocomplete="off">
-                  <span class="pos-pay-field__unit">DT</span>
-                </div>
-              </div>
-
-              <!-- Change display -->
-              @if (tenderedInput() && isTenderedSufficient()) {
-                <div class="pos-pay-change">
-                  <span class="pos-pay-change__label">{{ 'pos.payment.change' | translate }}</span>
-                  <span class="pos-pay-change__val">{{ fmt(changeAmount()) }} DT</span>
-                </div>
-              }
-              @if (tenderedInput() && !isTenderedSufficient()) {
-                <div class="pos-pay-insufficient">
-                  {{ 'pos.payment.insufficient' | translate: { amount: fmt(pendingTotal() + (parseFloat(tipInput()) || 0) - (parseFloat(tenderedInput()) || 0)) } }}
-                </div>
-              }
-
-            </div>
-          }
-
-          <!-- Card: just a confirm message -->
-          @if (paymentType() === 'card') {
-            <div class="pos-pay-card-hint">
-              {{ 'pos.payment.card_hint' | translate }}
-            </div>
-          }
-
-          <!-- Error -->
-          @if (paymentError()) {
-            <p class="pos-order-error">{{ paymentError() }}</p>
-          }
-
-          <!-- Actions -->
-          <div class="pos-pay-screen__actions">
-            <button class="pos-pay-confirm-btn"
-                    [disabled]="paymentLoading() || (paymentType() === 'cash' && !isTenderedSufficient())"
-                    (click)="recordPayment()"
-                    type="button">
-              @if (paymentLoading()) {
-                <span class="pos-place-spinner"></span> {{ 'pos.payment.processing' | translate }}
-              } @else {
-                {{ 'pos.payment.confirm' | translate }}
-              }
-            </button>
-            <button class="pos-pay-skip-btn" (click)="skipPayment()" type="button">
-              {{ 'pos.payment.pay_later' | translate }}
-            </button>
-          </div>
-
-        </div>
-
-      <!-- ── ORDER SENT ── -->
-      } @else if (view() === 'orderSent') {
-        <div class="pos-order-sent">
-          <div class="pos-order-sent__check">✓</div>
-          <div class="pos-order-sent__title">{{ 'pos.order_sent.title' | translate }}</div>
-          <div class="pos-order-sent__ref">{{ lastOrderRef() }}</div>
-          <button class="pos-btn-print" (click)="printReceipt()" type="button">
-            {{ 'pos.order_sent.print' | translate }}
-          </button>
-          <button class="pos-btn-neworder" (click)="newOrder()" type="button">
-            {{ 'pos.order_sent.new_order' | translate }}
-          </button>
-        </div>
-
-      <!-- ── MAIN POS VIEW ── -->
-      } @else {
-
-        <!-- ── TABLE HAS ACTIVE ORDER: show it ── -->
-        @if (tableActiveOrderLoading()) {
-          <div class="pos-order-empty">
-            <span class="pos-tbl-order__spinner"></span>
-            <p>{{ 'pos.order.loading' | translate }}</p>
-          </div>
-
-        } @else if (tableActiveOrder() && !addingToExistingOrder()) {
-          <!-- ── READ-ONLY VIEW of the existing table order ── -->
-          <div class="pos-tbl-order">
-
-            <div class="pos-tbl-order__header">
-              <div class="pos-tbl-order__ref">{{ tableActiveOrder()!.reference }}</div>
-              <span class="pos-tbl-order__status pos-tbl-order__status--{{ orderStatusClass(tableActiveOrder()!.status) }}">
-                {{ orderStatusLabel(tableActiveOrder()!.status) }}
-              </span>
-            </div>
-
-            <div class="pos-tbl-order__lines">
-              @for (line of tableActiveOrder()!.lines; track line.id) {
-                <div class="pos-tbl-order__line">
-                  <span class="pos-tbl-order__qty">{{ line.quantity }}×</span>
-                  <div class="pos-tbl-order__info">
-                    <span class="pos-tbl-order__name">{{ line.itemName }}</span>
-                    @if (line.variantName) {
-                      <span class="pos-tbl-order__sub">{{ line.variantName }}</span>
-                    }
-                    @for (m of line.modifierNames; track m) {
-                      <span class="pos-tbl-order__mod">+ {{ m }}</span>
-                    }
-                    @if (line.notes) {
-                      <span class="pos-tbl-order__note">↳ {{ line.notes }}</span>
-                    }
-                  </div>
-                  <span class="pos-tbl-order__price">{{ fmt(line.lineTotal) }}</span>
-                </div>
-              }
-            </div>
-
-            <div class="pos-tbl-order__totals">
-              <div class="pos-tbl-order__sub-row">
-                <span>{{ 'pos.order.subtotal_label' | translate }}</span>
-                <span>{{ fmt(tableActiveOrder()!.subtotal) }} DT</span>
-              </div>
-              @if (tableActiveOrder()!.discountAmount) {
-                <div class="pos-tbl-order__discount-row">
-                  <span>{{ 'pos.order.discount_label' | translate }}</span>
-                  <span>-{{ fmt(tableActiveOrder()!.discountAmount!) }} DT</span>
-                </div>
-              }
-              <div class="pos-tbl-order__total-row">
-                <span>{{ 'pos.order.total_due' | translate }}</span>
-                <span class="pos-tbl-order__total-val">{{ fmt(tableActiveOrder()!.amountDue ?? tableActiveOrder()!.total) }} DT</span>
-              </div>
-            </div>
-
-            <div class="pos-tbl-order__actions">
-              <button class="pos-tbl-order__add-btn" (click)="enterAddItemsMode()" type="button">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                {{ 'pos.order.add_items' | translate }}
-              </button>
-              <button class="pos-tbl-order__pay-btn"
-                      [disabled]="!isShiftOpen"
-                      (click)="payTableOrder()" type="button">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
-                {{ 'pos.order.collect' | translate }}
-              </button>
-            </div>
-
-          </div>
-
-        } @else if (tableActiveOrder() && addingToExistingOrder()) {
-          <!-- ── ADD ITEMS MODE: compact order summary + cart ── -->
-
-          <!-- Compact header showing which order we're appending to -->
-          <div class="pos-append-header">
-            <div class="pos-append-header__info">
-              <span class="pos-append-header__label">{{ 'pos.order.append_label' | translate }}</span>
-              <span class="pos-append-header__ref">{{ tableActiveOrder()!.reference }}</span>
-            </div>
-            <button class="pos-append-header__cancel" (click)="cancelAddItems()" type="button">
-              {{ 'pos.order.append_cancel' | translate }}
-            </button>
-          </div>
-
-          <!-- Existing items (collapsed, read-only) -->
-          <div class="pos-append-existing">
-            @for (line of tableActiveOrder()!.lines; track line.id) {
-              <div class="pos-append-line">
-                <span class="pos-append-line__qty">{{ line.quantity }}×</span>
-                <span class="pos-append-line__name">{{ line.itemName }}</span>
-                <span class="pos-append-line__price">{{ fmt(line.lineTotal) }}</span>
-              </div>
-            }
-            <div class="pos-append-existing__divider">
-              <span>{{ 'pos.order.append_divider' | translate }}</span>
-            </div>
-          </div>
-
-          <!-- New items staged in cart -->
-          @if (cartIsEmpty()) {
-            <div class="pos-order-empty pos-order-empty--sm">
-              <p>{{ 'pos.order.append_tap' | translate }}</p>
-            </div>
-          } @else {
-            <div class="pos-order-lines">
-              @for (line of cartItems(); track line.cartId) {
-                <div class="pos-order-line">
-                  <div class="pos-order-line__qty">
-                    <button class="pos-qty-btn" (click)="updateQty(line.cartId, line.quantity - 1)" type="button">−</button>
-                    <span class="pos-qty-val">{{ line.quantity }}</span>
-                    <button class="pos-qty-btn" (click)="updateQty(line.cartId, line.quantity + 1)" type="button">+</button>
-                  </div>
-                  <div class="pos-order-line__info">
-                    <div class="pos-order-line__name">{{ line.itemName }}</div>
-                    @if (line.variant) { <div class="pos-order-line__sub">{{ line.variant.name }}</div> }
-                    @for (m of line.modifiers; track m.id) { <div class="pos-order-line__mod">+ {{ m.name }}</div> }
-                  </div>
-                  <div class="pos-order-line__price">{{ fmt(line.lineTotal) }}</div>
-                  <button class="pos-order-line__remove" (click)="removeItem(line.cartId)" type="button">✕</button>
-                </div>
-              }
-            </div>
-          }
-
-          <!-- Error -->
-          @if (addingToOrderError()) {
-            <p class="pos-order-error">{{ addingToOrderError() }}</p>
-          }
-
-          <!-- Confirm button -->
-          <button class="pos-place-btn pos-place-btn--append"
-                  [disabled]="cartIsEmpty() || addingToOrderLoading()"
-                  (click)="confirmAddItems()" type="button">
-            @if (addingToOrderLoading()) {
-              <span class="pos-place-spinner"></span> {{ 'pos.order.append_adding' | translate }}
-            } @else {
-              {{ 'pos.order.append_confirm' | translate: { count: cartCount() } }}
-            }
-          </button>
-
-        } @else {
-          <!-- Normal cart flow (no active order, or cashier dismissed it) -->
-
-          <!-- Empty state -->
-          @if (cartIsEmpty()) {
-            <div class="pos-order-empty">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                <circle cx="9" cy="21" r="1"/>
-                <circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-              </svg>
-              <p>{{ 'pos.order.tap_product' | translate }}</p>
-            </div>
-          }
-
-          <!-- Cart items -->
-          @if (!cartIsEmpty()) {
-            <div class="pos-order-lines">
-              @for (line of cartItems(); track line.cartId) {
-                <div class="pos-order-line">
-                  <div class="pos-order-line__qty">
-                    <button class="pos-qty-btn"
-                            (click)="updateQty(line.cartId, line.quantity - 1)"
-                            type="button">−</button>
-                    <span class="pos-qty-val">{{ line.quantity }}</span>
-                    <button class="pos-qty-btn"
-                            (click)="updateQty(line.cartId, line.quantity + 1)"
-                            type="button">+</button>
-                  </div>
-                  <div class="pos-order-line__info">
-                    <div class="pos-order-line__name">{{ line.itemName }}</div>
-                    @if (line.variant) {
-                      <div class="pos-order-line__sub">{{ line.variant.name }}</div>
-                    }
-                    @for (m of line.modifiers; track m.id) {
-                      <div class="pos-order-line__mod">+ {{ m.name }}</div>
-                    }
-                    @if (cartLineHasNote(line.cartId)) {
-                      <div class="pos-order-line__note">
-                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                        </svg>
-                        {{ getCartLineNote(line.cartId) }}
-                      </div>
-                    }
-                  </div>
-                  <div class="pos-order-line__price">{{ fmt(line.lineTotal) }}</div>
-                  <div class="pos-order-line__actions">
-                    <button class="pos-order-line__note-btn"
-                            [class.pos-order-line__note-btn--has-note]="cartLineHasNote(line.cartId)"
-                            (click)="openNoteModal(line.cartId)"
-                            type="button" [title]="'pos.note_modal.title' | translate">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                      </svg>
-                    </button>
-                    <button class="pos-order-line__remove"
-                            (click)="removeItem(line.cartId)"
-                            type="button">✕</button>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-
-          <!-- Totals -->
-          <div class="pos-order-totals">
-            <div class="pos-order-totals__sub">
-              <span>{{ 'pos.order.subtotal' | translate }}</span>
-              <span>{{ fmt(cartSubtotal()) }} DT</span>
-            </div>
-            <div class="pos-order-totals__total">
-              <span class="pos-order-totals__total-label">{{ 'pos.order.total' | translate }}</span>
-              <span class="pos-order-totals__total-val">{{ fmt(cartSubtotal()) }} DT</span>
-            </div>
-          </div>
-
-          <!-- Notes -->
-          <div class="pos-order-notes">
-            <input type="text" [placeholder]="'pos.order.notes_placeholder' | translate"
-                   [value]="orderNotes()"
-                   (input)="setOrderNotes($any($event.target).value)">
-          </div>
-
-          <!-- Error -->
-          @if (submitError()) {
-            <p class="pos-order-error">{{ submitError() }}</p>
-          }
-
-          <!-- Append mode banner -->
-          @if (addingToOrderId()) {
-            <div class="pos-append-banner">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              {{ 'pos.order.append_banner' | translate }}
-              <button class="pos-append-banner__cancel" type="button">{{ 'pos.order.append_banner_cancel' | translate }}</button>
-            </div>
-          }
-
-          <!-- Payment type quick select (only for new orders) -->
-          @if (!addingToOrderId()) {
-            <div class="pos-payment-btns">
-              <button class="pos-pay-btn pos-pay-btn--cash"
-                      [class.pos-pay-btn--active]="paymentType() === 'cash'"
-                      (click)="setPaymentType('cash')" type="button">{{ 'pos.payment.cash_btn' | translate }}</button>
-              <button class="pos-pay-btn"
-                      [class.pos-pay-btn--active]="paymentType() === 'card'"
-                      (click)="setPaymentType('card')" type="button">{{ 'pos.payment.card_btn' | translate }}</button>
-              <button class="pos-pay-btn"
-                      [class.pos-pay-btn--active]="paymentType() === 'mixed'"
-                      (click)="setPaymentType('mixed')" type="button">{{ 'pos.payment.mixed_btn' | translate }}</button>
-            </div>
-          }
-
-          <!-- Place order / append button -->
-          <button class="pos-place-btn"
-                  [class.pos-place-btn--append]="!!addingToOrderId()"
-                  [disabled]="cartIsEmpty() || submitting() || !isShiftOpen"
-                  (click)="placeOrder()"
-                  type="button">
-            @if (submitting()) {
-              <span class="pos-place-spinner"></span>
-              @if (addingToOrderId()) { {{ 'pos.order.adding' | translate }} } @else { {{ 'pos.order.sending' | translate }} }
-            } @else if (!isShiftOpen) {
-              {{ 'pos.order.no_shift' | translate }}
-            } @else if (addingToOrderId()) {
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              {{ 'pos.order.add_to_order' | translate }}
-            } @else {
-              {{ 'pos.order.validate' | translate }}
-            }
-          </button>
-
-        } <!-- end normal cart flow / add-items mode -->
-
-      }
-    </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     ITEM MODAL (variant/modifier picker)
-══════════════════════════════════════ -->
-@if (activeModal() === 'item' && modalItem(); as item) {
-  <div class="pos-modal-backdrop" (click)="closeModal()">
-    <div class="pos-modal" (click)="$event.stopPropagation()">
-
-      <div class="pos-modal__head">
-        <div>
-          <div class="pos-modal__accent" [style.background]="item._accent"></div>
-          <h3 class="pos-modal__name">{{ item.name }}</h3>
-        </div>
-        <button class="pos-modal__close" (click)="closeModal()" type="button">✕</button>
-      </div>
-
-      @for (g of item.variantGroups; track g.id) {
-        <div class="pos-modal__section">
-          <div class="pos-modal__section-label">
-            {{ g.name }}
-            @if (g.required) { <span class="pos-modal__required">{{ 'pos.item_modal.required' | translate }}</span> }
-          </div>
-          <div class="pos-modal__options">
-            @for (v of g.variants; track v.id) {
-              <button class="pos-modal__option"
-                      [class.pos-modal__option--active]="modalVariant()?.id === v.id"
-                      (click)="selectVariant(v)" type="button">
-                <span>{{ v.name }}</span>
-                <span class="pos-modal__option-price">{{ fmt(v.price) }} DT</span>
-              </button>
-            }
-          </div>
-        </div>
-      }
-
-      @for (g of item.modifierGroups; track g.id) {
-        <div class="pos-modal__section">
-          <div class="pos-modal__section-label">
-            {{ g.name }}
-            @if (g.required) { <span class="pos-modal__required">{{ 'pos.item_modal.required' | translate }}</span> }
-          </div>
-          <div class="pos-modal__options">
-            @for (m of g.modifiers; track m.id) {
-              <button class="pos-modal__option"
-                      [class.pos-modal__option--active]="isModSelected(m.id)"
-                      (click)="toggleMod(m.id, g)" type="button">
-                <span>{{ m.name }}</span>
-                @if (m.priceDelta > 0) {
-                  <span class="pos-modal__option-price">+{{ fmt(m.priceDelta) }}</span>
-                }
-              </button>
-            }
-          </div>
-        </div>
-      }
-
-      <div class="pos-modal__foot">
-        <div class="pos-modal__unit-price">{{ fmt(modalUnitPrice()) }} DT × {{ qtyPreset() }}</div>
-        <button class="pos-modal__add" (click)="addModalItemToCart()" type="button">
-          {{ 'pos.item_modal.add' | translate: { price: fmt(modalUnitPrice() * qtyPreset()) } }}
-        </button>
-      </div>
-
-    </div>
-  </div>
+<!-- MODALS -->
+@if (activeModal() === 'item' && modalItem()) {
+  <app-pos-item-modal
+    [item]="modalItem()!"
+    [modalVariant]="modalVariant()"
+    [modalMods]="modalMods()"
+    [modalUnitPrice]="modalUnitPrice()"
+    [qtyPreset]="qtyPreset()"
+    [fmtFn]="fmt.bind(this)"
+    [isModSelectedFn]="isModSelected.bind(this)"
+    (selectVariant)="selectVariant($event)"
+    (toggleMod)="toggleMod($event.modId, $event.group)"
+    (close)="closeModal()"
+    (addToCart)="addModalItemToCart()">
+  </app-pos-item-modal>
 }
 
-<!-- ══════════════════════════════════════
-     ITEM NOTE MODAL
-══════════════════════════════════════ -->
 @if (activeModal() === 'itemNote') {
-  <div class="pos-modal-backdrop" (click)="closeNoteModal()">
-    <div class="pos-modal pos-modal--note" (click)="$event.stopPropagation()">
-
-      <div class="pos-modal__head">
-        <div>
-          <h3 class="pos-modal__name">{{ 'pos.note_modal.title' | translate }}</h3>
-          <p class="pos-modal__subtitle">{{ 'pos.note_modal.subtitle' | translate }}</p>
-        </div>
-        <button class="pos-modal__close" (click)="closeNoteModal()" type="button">✕</button>
-      </div>
-
-      <div class="pos-modal__note-body">
-        <textarea class="pos-modal__note-input"
-                  rows="3"
-                  [placeholder]="'pos.note_modal.placeholder' | translate"
-                  [value]="noteInput()"
-                  (input)="noteInput.set($any($event.target).value)"
-                  maxlength="300">
-        </textarea>
-        <div class="pos-modal__note-chars">{{ noteInput().length }}/300</div>
-      </div>
-
-      <div class="pos-modal__foot">
-        <button class="pos-modal__cancel" (click)="closeNoteModal()" type="button">{{ 'pos.note_modal.cancel' | translate }}</button>
-        <button class="pos-modal__add" (click)="saveNote()" type="button">
-          {{ 'pos.note_modal.save' | translate }}
-        </button>
-      </div>
-
-    </div>
-  </div>
+  <app-pos-item-note-modal
+    [noteInput]="noteInput()"
+    (noteInputChange)="noteInput.set($event)"
+    (save)="saveNote()"
+    (close)="closeNoteModal()">
+  </app-pos-item-note-modal>
 }
 
-<!-- ══════════════════════════════════════
-     OPEN SHIFT MODAL
-══════════════════════════════════════ -->
 @if (activeModal() === 'openShift') {
-  <div class="pos-modal-backdrop pos-modal-backdrop--blocking">
-    <div class="pos-shift-modal" (click)="$event.stopPropagation()">
-
-      <div class="pos-shift-modal__icon">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-        </svg>
-      </div>
-
-      <h2 class="pos-shift-modal__title">{{ 'pos.shift_open.title' | translate }}</h2>
-      <p class="pos-shift-modal__desc">{{ 'pos.shift_open.desc' | translate }}</p>
-
-      <div class="pos-shift-modal__field">
-        <label class="pos-shift-modal__label">{{ 'pos.shift_open.float_label' | translate }}</label>
-        <div class="pos-pay-field__input-row">
-          <input type="number"
-                 step="0.001"
-                 min="0"
-                 class="pos-pay-field__input"
-                 [value]="openFloatInput()"
-                 (input)="openFloatInput.set($any($event.target).value)"
-                 placeholder="50.000"
-                 autocomplete="off">
-          <span class="pos-pay-field__unit">DT</span>
-        </div>
-      </div>
-
-      @if (shiftError()) {
-        <p class="pos-order-error">{{ shiftError() }}</p>
-      }
-
-      <button class="pos-place-btn pos-place-btn--full"
-              [disabled]="shiftLoading()"
-              (click)="openShift()"
-              type="button">
-        @if (shiftLoading()) {
-          <span class="pos-place-spinner"></span> {{ 'pos.shift_open.opening' | translate }}
-        } @else {
-          {{ 'pos.shift_open.open' | translate }}
-        }
-      </button>
-
-    </div>
-  </div>
+  <app-pos-open-shift-modal
+    [openFloatInput]="openFloatInput()"
+    [shiftError]="shiftError()"
+    [shiftLoading]="shiftLoading()"
+    (openFloatInputChange)="openFloatInput.set($event)"
+    (confirm)="openShift()">
+  </app-pos-open-shift-modal>
 }
 
-<!-- ══════════════════════════════════════
-     CLOSE SHIFT MODAL
-══════════════════════════════════════ -->
 @if (activeModal() === 'closeShift') {
-  <div class="pos-modal-backdrop" (click)="activeModal.set('none')">
-    <div class="pos-shift-modal" (click)="$event.stopPropagation()">
-
-      <div class="pos-shift-modal__icon pos-shift-modal__icon--amber">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M18 6 6 18M6 6l12 12"/>
-        </svg>
-      </div>
-
-      <h2 class="pos-shift-modal__title">{{ 'pos.shift_close.title' | translate }}</h2>
-
-      @if (currentShift()) {
-        <div class="pos-shift-summary">
-          <div class="pos-shift-summary__row">
-            <span>{{ 'pos.shift_close.orders' | translate }}</span>
-            <span>{{ currentShift()!.totalOrders ?? 0 }}</span>
-          </div>
-          <div class="pos-shift-summary__row">
-            <span>{{ 'pos.shift_close.gross_revenue' | translate }}</span>
-            <span>{{ fmt(currentShift()!.totalRevenue ?? 0) }} DT</span>
-          </div>
-          <div class="pos-shift-summary__row">
-            <span>{{ 'pos.shift_close.opening_float' | translate }}</span>
-            <span>{{ fmt(currentShift()?.openingFloat ?? 0) }} DT</span>
-          </div>
-          <div class="pos-shift-summary__row pos-shift-summary__row--total">
-            <span>{{ 'pos.shift_close.expected_drawer' | translate }}</span>
-            <span>{{ drawerBalance }} DT</span>
-          </div>
-        </div>
-      }
-
-      <div class="pos-shift-modal__field">
-        <label class="pos-shift-modal__label">{{ 'pos.shift_close.counted_label' | translate }}</label>
-        <div class="pos-pay-field__input-row">
-          <input type="number"
-                 step="0.001"
-                 min="0"
-                 class="pos-pay-field__input"
-                 [value]="closeCountInput()"
-                 (input)="closeCountInput.set($any($event.target).value)"
-                 placeholder="{{ drawerBalance }}"
-                 autocomplete="off">
-          <span class="pos-pay-field__unit">DT</span>
-        </div>
-      </div>
-
-      <div class="pos-shift-modal__field">
-        <label class="pos-shift-modal__label">{{ 'pos.shift_close.notes_label' | translate }}</label>
-        <input type="text"
-               class="pos-pay-field__input"
-               [value]="closeNotesInput()"
-               (input)="closeNotesInput.set($any($event.target).value)"
-               [placeholder]="'pos.shift_close.notes_placeholder' | translate">
-      </div>
-
-      @if (shiftError()) {
-        <p class="pos-order-error">{{ shiftError() }}</p>
-      }
-
-      <div class="pos-shift-modal__actions">
-        <button class="pos-pay-skip-btn" (click)="activeModal.set('none')" type="button">
-          {{ 'pos.shift_close.cancel' | translate }}
-        </button>
-        <button class="pos-place-btn pos-place-btn--danger"
-                [disabled]="shiftLoading()"
-                (click)="closeShift()"
-                type="button">
-          @if (shiftLoading()) {
-            <span class="pos-place-spinner"></span> {{ 'pos.shift_close.closing' | translate }}
-          } @else {
-            {{ 'pos.shift_close.close' | translate }}
-          }
-        </button>
-      </div>
-
-    </div>
-  </div>
+  <app-pos-close-shift-modal
+    [currentShift]="currentShift()"
+    [drawerBalance]="drawerBalance"
+    [closeCountInput]="closeCountInput()"
+    [closeNotesInput]="closeNotesInput()"
+    [shiftError]="shiftError()"
+    [shiftLoading]="shiftLoading()"
+    [fmtFn]="fmt.bind(this)"
+    (closeCountInputChange)="closeCountInput.set($event)"
+    (closeNotesInputChange)="closeNotesInput.set($event)"
+    (confirm)="closeShift()"
+    (dismiss)="activeModal.set('none')">
+  </app-pos-close-shift-modal>
 }
 
-<!-- ══════════════════════════════════════
-     CASH IN MODAL
-══════════════════════════════════════ -->
 @if (activeModal() === 'cashIn') {
-  <div class="pos-modal-backdrop" (click)="activeModal.set('none')">
-    <div class="pos-modal pos-modal--sm" (click)="$event.stopPropagation()">
-      <div class="pos-modal__head">
-        <div class="pos-modal__icon pos-modal__icon--in">↓</div>
-        <h3 class="pos-modal__name">{{ 'pos.cash_in.title' | translate }}</h3>
-        <button class="pos-modal__close" (click)="activeModal.set('none')" type="button">✕</button>
-      </div>
-      <div class="pos-modal__sm-body">
-        <div class="pos-field">
-          <label class="pos-field__label">{{ 'pos.cash_in.amount_label' | translate }}</label>
-          <input class="pos-field__input" type="number" step="0.001" min="0"
-                 [value]="cashMovementAmount()"
-                 (input)="cashMovementAmount.set($any($event.target).value)"
-                 placeholder="0.00" autocomplete="off">
-        </div>
-        <div class="pos-field">
-          <label class="pos-field__label">{{ 'pos.cash_in.reason_label' | translate }} <span class="pos-field__req">*</span></label>
-          <textarea class="pos-field__textarea" rows="3"
-                    [value]="cashMovementReason()"
-                    (input)="cashMovementReason.set($any($event.target).value)"
-                    [placeholder]="'pos.cash_in.reason_placeholder' | translate"></textarea>
-        </div>
-        @if (cashMovementError()) { <p class="pos-modal__error">{{ cashMovementError() }}</p> }
-      </div>
-      <div class="pos-modal__sm-actions">
-        <button class="pos-modal__ghost-btn" (click)="activeModal.set('none')" type="button">{{ 'pos.cash_in.cancel' | translate }}</button>
-        <button class="pos-modal__confirm-btn pos-modal__confirm-btn--blue"
-                [disabled]="cashMovementLoading()"
-                (click)="confirmCashIn()" type="button">
-          {{ cashMovementLoading() ? '...' : ('pos.cash_in.confirm' | translate) }}
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-pos-cash-movement-modal
+    mode="in"
+    [amount]="cashMovementAmount()"
+    [reason]="cashMovementReason()"
+    [error]="cashMovementError()"
+    [loading]="cashMovementLoading()"
+    (amountChange)="cashMovementAmount.set($event)"
+    (reasonChange)="cashMovementReason.set($event)"
+    (confirm)="confirmCashIn()"
+    (dismiss)="activeModal.set('none')">
+  </app-pos-cash-movement-modal>
 }
 
-<!-- ══════════════════════════════════════
-     CASH OUT MODAL
-══════════════════════════════════════ -->
 @if (activeModal() === 'cashOut') {
-  <div class="pos-modal-backdrop" (click)="activeModal.set('none')">
-    <div class="pos-modal pos-modal--sm" (click)="$event.stopPropagation()">
-      <div class="pos-modal__head">
-        <div class="pos-modal__icon pos-modal__icon--out">↑</div>
-        <h3 class="pos-modal__name">{{ 'pos.cash_out.title' | translate }}</h3>
-        <button class="pos-modal__close" (click)="activeModal.set('none')" type="button">✕</button>
-      </div>
-      <div class="pos-modal__sm-body">
-        <div class="pos-field">
-          <label class="pos-field__label">{{ 'pos.cash_out.amount_label' | translate }}</label>
-          <input class="pos-field__input" type="number" step="0.001" min="0"
-                 [value]="cashMovementAmount()"
-                 (input)="cashMovementAmount.set($any($event.target).value)"
-                 placeholder="0.00" autocomplete="off">
-        </div>
-        <div class="pos-field">
-          <label class="pos-field__label">{{ 'pos.cash_out.reason_label' | translate }} <span class="pos-field__req">*</span></label>
-          <textarea class="pos-field__textarea" rows="3"
-                    [value]="cashMovementReason()"
-                    (input)="cashMovementReason.set($any($event.target).value)"
-                    [placeholder]="'pos.cash_out.reason_placeholder' | translate"></textarea>
-        </div>
-        @if (cashMovementError()) { <p class="pos-modal__error">{{ cashMovementError() }}</p> }
-      </div>
-      <div class="pos-modal__sm-actions">
-        <button class="pos-modal__ghost-btn" (click)="activeModal.set('none')" type="button">{{ 'pos.cash_out.cancel' | translate }}</button>
-        <button class="pos-modal__confirm-btn pos-modal__confirm-btn--orange"
-                [disabled]="cashMovementLoading()"
-                (click)="confirmCashOut()" type="button">
-          {{ cashMovementLoading() ? '...' : ('pos.cash_out.confirm' | translate) }}
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-pos-cash-movement-modal
+    mode="out"
+    [amount]="cashMovementAmount()"
+    [reason]="cashMovementReason()"
+    [error]="cashMovementError()"
+    [loading]="cashMovementLoading()"
+    (amountChange)="cashMovementAmount.set($event)"
+    (reasonChange)="cashMovementReason.set($event)"
+    (confirm)="confirmCashOut()"
+    (dismiss)="activeModal.set('none')">
+  </app-pos-cash-movement-modal>
 }
 
-<!-- ══════════════════════════════════════
-     DISCOUNT MODAL
-══════════════════════════════════════ -->
 @if (activeModal() === 'discount') {
-  <div class="pos-modal-backdrop" (click)="activeModal.set('none')">
-    <div class="pos-modal pos-modal--sm" (click)="$event.stopPropagation()">
-      <div class="pos-modal__head">
-        <h3 class="pos-modal__name">{{ 'pos.discount.title' | translate }}</h3>
-        <button class="pos-modal__close" (click)="activeModal.set('none')" type="button">✕</button>
-      </div>
-      <div class="pos-modal__sm-body">
-        <div class="pos-disc-tabs">
-          <button class="pos-disc-tab" [class.pos-disc-tab--active]="discountMode() === 'fixed'"
-                  (click)="discountMode.set('fixed')" type="button">{{ 'pos.discount.fixed' | translate }}</button>
-          <button class="pos-disc-tab" [class.pos-disc-tab--active]="discountMode() === 'percent'"
-                  (click)="discountMode.set('percent')" type="button">{{ 'pos.discount.percent' | translate }}</button>
-        </div>
-        <input class="pos-field__input pos-field__input--lg"
-               type="number" step="0.001" min="0"
-               [value]="discountInput()"
-               (input)="discountInput.set($any($event.target).value)"
-               [placeholder]="'pos.discount.placeholder' | translate" autocomplete="off">
-      </div>
-      <div class="pos-modal__sm-actions">
-        <button class="pos-modal__confirm-btn pos-modal__confirm-btn--orange pos-modal__confirm-btn--full"
-                (click)="applyDiscount()" type="button">
-          {{ 'pos.discount.apply' | translate }}
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-pos-discount-modal
+    [discountMode]="discountMode()"
+    [discountInput]="discountInput()"
+    (discountModeChange)="discountMode.set($event)"
+    (discountInputChange)="discountInput.set($event)"
+    (apply)="applyDiscount()"
+    (dismiss)="activeModal.set('none')">
+  </app-pos-discount-modal>
 }
 
-<!-- ══════════════════════════════════════
-     PROMO CODE MODAL
-══════════════════════════════════════ -->
 @if (activeModal() === 'promo') {
-  <div class="pos-modal-backdrop" (click)="activeModal.set('none')">
-    <div class="pos-modal pos-modal--sm" (click)="$event.stopPropagation()">
-      <div class="pos-modal__head">
-        <h3 class="pos-modal__name">{{ 'pos.promo.title' | translate }}</h3>
-        <button class="pos-modal__close" (click)="activeModal.set('none')" type="button">✕</button>
-      </div>
-      <div class="pos-modal__sm-body">
-        <input class="pos-field__input pos-field__input--promo"
-               type="text"
-               [value]="promoInput()"
-               (input)="promoInput.set($any($event.target).value)"
-               [placeholder]="'pos.promo.placeholder' | translate">
-      </div>
-      <div class="pos-modal__sm-actions">
-        <button class="pos-modal__confirm-btn pos-modal__confirm-btn--pink pos-modal__confirm-btn--full"
-                (click)="applyPromo()" type="button">
-          {{ 'pos.promo.confirm' | translate }}
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-pos-promo-modal
+    [promoInput]="promoInput()"
+    (promoInputChange)="promoInput.set($event)"
+    (apply)="applyPromo()"
+    (dismiss)="activeModal.set('none')">
+  </app-pos-promo-modal>
 }
 
-<!-- ══════════════════════════════════════
-     REFUND MODAL — order list
-══════════════════════════════════════ -->
-@if (activeModal() === 'refund') {
-  <div class="pos-modal-backdrop" (click)="activeModal.set('none')">
-    <div class="pos-modal pos-modal--list" (click)="$event.stopPropagation()">
-      <div class="pos-modal__head">
-        <h3 class="pos-modal__name">{{ 'pos.refund.title' | translate }}</h3>
-        <button class="pos-modal__close" (click)="activeModal.set('none')" type="button">✕</button>
-      </div>
-      <div class="pos-modal__list-body">
-        @if (refundLoading()) {
-          <div class="pos-modal__loading">{{ 'pos.refund.loading' | translate }}</div>
-        } @else if (refundOrders().length === 0) {
-          <div class="pos-modal__loading">{{ 'pos.refund.no_orders' | translate }}</div>
-        } @else {
-          @for (order of refundOrders(); track order.id) {
-            <button class="pos-refund-row" (click)="selectRefundOrder(order)" type="button">
-              <div class="pos-refund-row__left">
-                <span class="pos-refund-row__ref">#{{ order.reference.slice(-7).toUpperCase() }}</span>
-                <span class="pos-refund-row__meta">{{ order.createdAt | date:'dd/MM HH:mm' }} — {{ order.tableNumber ?? ('pos.refund.counter' | translate) }}</span>
-              </div>
-              <span class="pos-refund-row__amount">{{ fmt(order.amountDue ?? order.total) }} TND</span>
-            </button>
-          }
-        }
-      </div>
-    </div>
-  </div>
+@if (activeModal() === 'refund' || activeModal() === 'refundDetail') {
+  <app-pos-refund-modal
+    [mode]="activeModal() === 'refund' ? 'list' : 'detail'"
+    [refundOrders]="refundOrders()"
+    [refundLoading]="refundLoading()"
+    [selectedRefundOrder]="selectedRefundOrder()"
+    [refundAmount]="refundAmount()"
+    [refundReason]="refundReason()"
+    [refundError]="refundError()"
+    [refundSubmitting]="refundSubmitting()"
+    [fmtFn]="fmt.bind(this)"
+    (refundAmountChange)="refundAmount.set($event)"
+    (refundReasonChange)="refundReason.set($event)"
+    (selectOrder)="selectRefundOrder($event)"
+    (backToList)="activeModal.set('refund')"
+    (confirm)="confirmRefund()"
+    (dismiss)="activeModal.set('none')">
+  </app-pos-refund-modal>
 }
 
-<!-- ══════════════════════════════════════
-     REFUND DETAIL MODAL
-══════════════════════════════════════ -->
-@if (activeModal() === 'refundDetail' && selectedRefundOrder()) {
-  <div class="pos-modal-backdrop" (click)="activeModal.set('refund')">
-    <div class="pos-modal pos-modal--sm" (click)="$event.stopPropagation()">
-      <div class="pos-modal__head">
-        <h3 class="pos-modal__name">{{ 'pos.refund.detail_title' | translate: { ref: selectedRefundOrder()!.reference.slice(-7).toUpperCase() } }}</h3>
-        <button class="pos-modal__close" (click)="activeModal.set('refund')" type="button">✕</button>
-      </div>
-      <div class="pos-modal__sm-body">
-        <div class="pos-field">
-          <label class="pos-field__label">{{ 'pos.refund.amount_label' | translate }}</label>
-          <input class="pos-field__input" type="number" step="0.001" min="0"
-                 [value]="refundAmount()"
-                 (input)="refundAmount.set($any($event.target).value)">
-        </div>
-        <div class="pos-field">
-          <label class="pos-field__label">{{ 'pos.refund.reason_label' | translate }} <span class="pos-field__req">*</span></label>
-          <textarea class="pos-field__textarea" rows="3"
-                    [value]="refundReason()"
-                    (input)="refundReason.set($any($event.target).value)"
-                    [placeholder]="'pos.refund.reason_placeholder' | translate"></textarea>
-        </div>
-        @if (refundError()) { <p class="pos-modal__error">{{ refundError() }}</p> }
-      </div>
-      <div class="pos-modal__sm-actions">
-        <button class="pos-modal__ghost-btn" (click)="activeModal.set('refund')" type="button">{{ 'pos.refund.back' | translate }}</button>
-        <button class="pos-modal__confirm-btn pos-modal__confirm-btn--orange"
-                [disabled]="refundSubmitting()"
-                (click)="confirmRefund()" type="button">
-          {{ refundSubmitting() ? '...' : ('pos.refund.confirm' | translate) }}
-        </button>
-      </div>
-    </div>
-  </div>
-}
-
-<!-- ══════════════════════════════════════
-     Z-REPORT MODAL
-══════════════════════════════════════ -->
 @if (activeModal() === 'zReport') {
-  <div class="pos-modal-backdrop" (click)="activeModal.set('none')">
-    <div class="pos-modal pos-modal--report" (click)="$event.stopPropagation()">
-      <div class="pos-modal__head">
-        <h3 class="pos-modal__name">{{ 'pos.z_report.title' | translate }}</h3>
-        <button class="pos-modal__ghost-btn" (click)="printZReport()" type="button">{{ 'pos.z_report.print' | translate }}</button>
-      </div>
-      @if (zReportLoading()) {
-        <div class="pos-modal__loading">{{ 'pos.z_report.generating' | translate }}</div>
-      } @else if (zReport()) {
-        @if (zReport(); as r) {
-          <div class="pos-modal__report-body">
-
-            <div class="pos-zr-header">
-              <div class="pos-zr-header__icon">📄</div>
-              <div class="pos-zr-header__info">
-                <div class="pos-zr-header__tenant">{{ r.report.tenantName }}</div>
-                <div class="pos-zr-header__type">{{ 'pos.z_report.title' | translate }}</div>
-                <div class="pos-zr-header__meta">{{ r.report.openedAt | date:'MMM d, y HH:mm' }} .. {{ r.report.closedAt ? ('pos.z_report.status_closed' | translate) : ('pos.z_report.status_open' | translate) }}</div>
-                <div class="pos-zr-header__meta">{{ 'pos.z_report.session_id' | translate }} {{ r.shiftId.slice(0,8).toUpperCase() }}&nbsp;&nbsp;{{ 'pos.z_report.opened' | translate }} {{ r.report.openedAt | date:'MMM d HH:mm' }}</div>
-                <div class="pos-zr-header__meta">{{ 'pos.z_report.printed' | translate }} {{ now | date:'MMM d, y HH:mm' }}</div>
-              </div>
-            </div>
-
-            <div class="pos-zr-section">{{ 'pos.z_report.financial_summary' | translate }}</div>
-            <div class="pos-zr-rows">
-              <div class="pos-zr-row"><span>{{ 'pos.z_report.opening_float' | translate }}</span><span>TND {{ fmt(r.report.openingFloat) }}</span></div>
-              <div class="pos-zr-row"><span>{{ 'pos.z_report.total_cash' | translate }}</span><span>TND {{ fmt(r.report.totalCashRevenue) }}</span></div>
-              <div class="pos-zr-row"><span>{{ 'pos.z_report.total_card' | translate }}</span><span>TND {{ fmt(r.report.totalCardRevenue) }}</span></div>
-              <div class="pos-zr-row"><span>{{ 'pos.z_report.total_mixed' | translate }}</span><span>TND 0.000</span></div>
-              <div class="pos-zr-row"><span>{{ 'pos.z_report.manual_cash_in' | translate }}</span><span>TND 0.000</span></div>
-              <div class="pos-zr-row"><span>{{ 'pos.z_report.manual_cash_out' | translate }}</span><span>TND 0.000</span></div>
-              <div class="pos-zr-row pos-zr-row--bold"><span>{{ 'pos.z_report.expected_balance' | translate }}</span><span>TND {{ fmt(r.report.expectedCash) }}</span></div>
-              <div class="pos-zr-row pos-zr-row--bold"><span>{{ 'pos.z_report.actual_balance' | translate }}</span><span>TND {{ fmt(r.report.closingActual) }}</span></div>
-              <div class="pos-zr-row pos-zr-row--diff">
-                <span>{{ 'pos.z_report.difference' | translate }}</span>
-                <span class="pos-zr-diff pos-zr-diff--{{ zrDiffClass(r.report.cashDiscrepancy) }}">
-                  TND {{ fmt(r.report.cashDiscrepancy) }}
-                  <span class="pos-zr-diff__badge">{{ zrDiffLabel(r.report.cashDiscrepancy) }}</span>
-                </span>
-              </div>
-            </div>
-
-            <div class="pos-zr-section">{{ 'pos.z_report.order_stats' | translate }}</div>
-            <div class="pos-zr-rows">
-              <div class="pos-zr-row"><span>{{ 'pos.z_report.total_orders' | translate }}</span><span>{{ r.report.totalOrders }}</span></div>
-              <div class="pos-zr-row pos-zr-row--bold"><span>{{ 'pos.z_report.total_revenue' | translate }}</span><span>TND {{ fmt(r.report.grossRevenue) }}</span></div>
-            </div>
-
-            <div class="pos-zr-methods">
-              <div class="pos-zr-method pos-zr-method--cash">
-                <div class="pos-zr-method__label">{{ 'pos.z_report.method_cash' | translate }}</div>
-                <div class="pos-zr-method__val">TND {{ fmt(r.report.totalCashRevenue) }}</div>
-              </div>
-              <div class="pos-zr-method pos-zr-method--card">
-                <div class="pos-zr-method__label">{{ 'pos.z_report.method_card' | translate }}</div>
-                <div class="pos-zr-method__val">TND {{ fmt(r.report.totalCardRevenue) }}</div>
-              </div>
-              <div class="pos-zr-method pos-zr-method--mixed">
-                <div class="pos-zr-method__label">{{ 'pos.z_report.method_mixed' | translate }}</div>
-                <div class="pos-zr-method__val">TND 0.000</div>
-              </div>
-            </div>
-
-          </div>
-        }
-      } @else {
-        <div class="pos-modal__loading">{{ 'pos.z_report.error' | translate }}</div>
-      }
-    </div>
-  </div>
+  <app-pos-z-report-modal
+    [zReport]="zReport()"
+    [zReportLoading]="zReportLoading()"
+    [now]="now"
+    [fmtFn]="fmt.bind(this)"
+    [zrDiffClassFn]="zrDiffClass.bind(this)"
+    [zrDiffLabelFn]="zrDiffLabel.bind(this)"
+    (print)="printZReport()"
+    (dismiss)="activeModal.set('none')">
+  </app-pos-z-report-modal>
 }
 
 <!-- Print receipt (hidden on screen) -->
 @if (view() === 'orderSent') {
-  <div class="pos-receipt">
-    <div class="pos-receipt__head">
-      <div class="pos-receipt__restaurant">{{ tenantName() }}</div>
-      @if (receiptTable()) {
-        <div class="pos-receipt__table">{{ 'pos.receipt.table' | translate }} {{ receiptTable() }}</div>
-      }
-      <div class="pos-receipt__ref">{{ 'pos.receipt.ref' | translate }} {{ lastOrderRef() }}</div>
-      <div class="pos-receipt__date">{{ now | date:'dd/MM/yyyy HH:mm' }}</div>
-    </div>
-    <div class="pos-receipt__divider">--------------------------------</div>
-    @for (line of receiptLines(); track line.cartId) {
-      <div class="pos-receipt__line">
-        <span>{{ line.quantity }}× {{ line.itemName }}@if (line.variant) { ({{ line.variant.name }}) }</span>
-        <span>{{ fmt(line.lineTotal) }} DT</span>
-      </div>
-      @if (line.note) {
-        <div class="pos-receipt__line pos-receipt__line--mod">
-          <span>&nbsp;&nbsp;↳ {{ line.note }}</span><span></span>
-        </div>
-      }
-      @for (mod of line.modifiers; track mod.id) {
-        <div class="pos-receipt__line pos-receipt__line--mod">
-          <span>&nbsp;&nbsp;+ {{ mod.name }}</span><span></span>
-        </div>
-      }
-    }
-    <div class="pos-receipt__divider">--------------------------------</div>
-    <div class="pos-receipt__total">
-      <strong>{{ 'pos.receipt.total' | translate }}</strong>
-      <strong>{{ fmt(receiptSubtotal()) }} DT</strong>
-    </div>
-    <div class="pos-receipt__footer">{{ 'pos.receipt.thank_you' | translate }}</div>
-  </div>
+  <app-pos-receipt
+    [tenantName]="tenantName()"
+    [receiptTable]="receiptTable()"
+    [lastOrderRef]="lastOrderRef()"
+    [now]="now"
+    [receiptLines]="receiptLines()"
+    [receiptSubtotal]="receiptSubtotal()"
+    [fmtFn]="fmt.bind(this)">
+  </app-pos-receipt>
 }
