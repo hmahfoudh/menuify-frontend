@@ -1,10 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
-import { TableStatusResponse, PosOrderPayload, StaffResponse } from '../models/pos.models';
-import { PosAuthService } from './pos-auth.service';
+import { TableStatusResponse, PosOrderPayload, StaffResponse, AddOrderLinesRequest } from '../models/pos.models';
 
 // Reuse existing public menu models for the menu data
 import {
@@ -13,6 +12,7 @@ import {
 import { OrderResponse } from '../../dashboard/orders/models/order.models';
 import { LocalStorageService } from '../../../core/services/local-storage.service';
 import { ApiResponse } from '../../../core/models/api.models';
+import { PosOrder } from '../models/pos-order.models';
 
 // Reuse existing order response shape
 
@@ -21,7 +21,6 @@ export class PosService {
 
   private localStorage = inject(LocalStorageService);
   private http = inject(HttpClient);
-  private posAuth = inject(PosAuthService);
   private base = environment.apiUrl;
 
 
@@ -78,6 +77,17 @@ export class PosService {
     return this.http
       .post<ApiResponse<OrderResponse>>(
         `${this.base}/api/orders`,
+        payload,
+      )
+      .pipe(map(r => r.data));
+  }
+
+  //
+
+  addLines(orderId: any, payload: AddOrderLinesRequest){
+    return this.http
+      .post<ApiResponse<PosOrder>>(
+        `${this.base}/api/pos/orders/${orderId}/lines`,
         payload,
       )
       .pipe(map(r => r.data));

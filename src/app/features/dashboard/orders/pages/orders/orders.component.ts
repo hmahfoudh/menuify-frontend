@@ -1,13 +1,15 @@
 import {
   Component, OnInit, OnDestroy, signal, computed, inject
 } from '@angular/core';
-import { CommonModule }  from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import {
   OrderResponse, OrderStatus,
   STATUS_META, STATUS_FILTERS
 } from '../../models/order.models';
-import { interval, Subscription } from 'rxjs';
-import { switchMap, startWith }   from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { OrderService } from '../../services/order.service';
 
 @Component({
@@ -19,32 +21,30 @@ import { OrderService } from '../../services/order.service';
 })
 export class OrdersComponent implements OnInit, OnDestroy {
 
-  private svc  = inject(OrderService);
-  private poll?: Subscription;
+  private svc        = inject(OrderService);
+  private platformId = inject(PLATFORM_ID);
+  private destroy$   = new Subject<void>();
 
-  // ── State ───────────────────────────────────────────────────────────────────
+  // ── State ─────────────────────────────────────────────────────────────────
   orders        = signal<OrderResponse[]>([]);
   loading       = signal(true);
   totalElements = signal(0);
   currentPage   = signal(0);
   pageSize      = 20;
 
-  selectedStatus = signal<OrderStatus | null>(null);
-  selectedOrder  = signal<OrderResponse | null>(null);
-  updatingId     = signal<string | null>(null);
-  error          = signal<string | null>(null);
-  lastRefreshed  = signal<Date>(new Date());
-
+  selectedStatus    = signal<OrderStatus | null>(null);
+  selectedOrder     = signal<OrderResponse | null>(null);
+  updatingId        = signal<string | null>(null);
+  error             = signal<string | null>(null);
+  lastRefreshed     = signal<Date>(new Date());
   etaMinutes        = signal<number | null>(null);
   restaurantMessage = signal('');
 
-  // ── Constants ────────────────────────────────────────────────────────────────
+  // ── Constants ──────────────────────────────────────────────────────────────
   readonly statusFilters = STATUS_FILTERS;
   readonly statusMeta    = STATUS_META;
 
-  // ── Computed ─────────────────────────────────────────────────────────────────
-
-  // Per-column counts used by the kanban headers
+  // ── Computed ───────────────────────────────────────────────────────────────
   pendingCount   = computed(() => this.orders().filter(o => o.status === 'PENDING').length);
   confirmedCount = computed(() => this.orders().filter(o => o.status === 'CONFIRMED').length);
   preparingCount = computed(() => this.orders().filter(o => o.status === 'PREPARING').length);
@@ -61,59 +61,63 @@ export class OrdersComponent implements OnInit, OnDestroy {
          : 'Delivery';
   });
 
-  ngOnInit() { this.startPolling(); }
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.loadOrders();
 
-  ngOnDestroy() { this.poll?.unsubscribe(); }
+    if (isPlatformBrowser(this.platformId)) {
+      this.svc.connectStream();
 
-  startPolling() {
-    this.poll = interval(30_000)
-      .pipe(startWith(0), switchMap(() => {
-        // Always fetch all active statuses for the kanban board
-        return this.svc.getAll(null, this.currentPage(), this.pageSize);
-      }))
-      .subscribe({
-        next: page => {
-          this.orders.set(page.content);
-          this.totalElements.set(page.totalElements);
-          this.loading.set(false);
-          this.lastRefreshed.set(new Date());
-
-          const sel = this.selectedOrder();
-          if (sel) {
-            const updated = page.content.find(o => o.id === sel.id);
-            if (updated) this.selectedOrder.set(updated);
+      this.svc.newOrderEvents$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(event => {
+          if (event.type === 'NEW_ORDER') {
+            this.loadOrders();
           }
-        },
-        error: () => {
-          this.loading.set(false);
-          this.error.set('Failed to load orders');
+        });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.svc.closeStream();
+  }
+
+  // ── Data loading ───────────────────────────────────────────────────────────
+  loadOrders(): void {
+    this.loading.set(true);
+    this.svc.getAll(null, this.currentPage(), this.pageSize).subscribe({
+      next: page => {
+        this.orders.set(page.content);
+        this.totalElements.set(page.totalElements);
+        this.loading.set(false);
+        this.lastRefreshed.set(new Date());
+
+        const sel = this.selectedOrder();
+        if (sel) {
+          const updated = page.content.find(o => o.id === sel.id);
+          if (updated) this.selectedOrder.set(updated);
         }
-      });
+      },
+      error: () => {
+        this.loading.set(false);
+        this.error.set('Failed to load orders');
+      }
+    });
   }
 
-  // ── Filter ──────────────────────────────────────────────────────────────────
-  setFilter(status: OrderStatus | null) {
-    if (this.selectedStatus() === status) return;
-    this.selectedStatus.set(status);
-    this.currentPage.set(0);
-    this.loading.set(true);
-    this.poll?.unsubscribe();
-    this.startPolling();
+  // ── Manual refresh ─────────────────────────────────────────────────────────
+  refresh(): void {
+    this.loadOrders();
   }
 
-  // ── Manual refresh ───────────────────────────────────────────────────────────
-  refresh() {
-    this.loading.set(true);
-    this.poll?.unsubscribe();
-    this.startPolling();
-  }
+  // ── Order detail ───────────────────────────────────────────────────────────
+  openOrder(order: OrderResponse)  { this.selectedOrder.set(order); }
+  closeDetail()                    { this.selectedOrder.set(null);  }
 
-  // ── Order detail ─────────────────────────────────────────────────────────────
-  openOrder(order: OrderResponse) { this.selectedOrder.set(order); }
-  closeDetail() { this.selectedOrder.set(null); }
-
-  // ── Status update ────────────────────────────────────────────────────────────
-  advanceStatus(order: OrderResponse) {
+  // ── Status update ──────────────────────────────────────────────────────────
+  advanceStatus(order: OrderResponse): void {
     const meta = STATUS_META[order.status];
     if (!meta.next) return;
 
@@ -138,7 +142,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     });
   }
 
-  cancelOrder(order: OrderResponse) {
+  cancelOrder(order: OrderResponse): void {
     if (!confirm(`Cancel order ${order.reference}?`)) return;
     this.updatingId.set(order.id);
     this.svc.updateStatus(order.id, 'CANCELLED', null, null).subscribe({
@@ -157,19 +161,17 @@ export class OrdersComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Pagination ───────────────────────────────────────────────────────────────
-  goToPage(page: number) {
+  // ── Pagination ─────────────────────────────────────────────────────────────
+  goToPage(page: number): void {
     if (page < 0 || page >= this.totalPages()) return;
     this.currentPage.set(page);
-    this.loading.set(true);
-    this.poll?.unsubscribe();
-    this.startPolling();
+    this.loadOrders();
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
+  // ── Helpers ────────────────────────────────────────────────────────────────
   getStatusMeta(status: OrderStatus) { return STATUS_META[status]; }
 
-  setEtaMinutes(v: string): void { this.etaMinutes.set(v ? +v : null); }
+  setEtaMinutes(v: string): void       { this.etaMinutes.set(v ? +v : null); }
   setRestaurantMessage(v: string): void { this.restaurantMessage.set(v); }
 
   formatTime(iso: string): string {
@@ -188,7 +190,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     return d.toLocaleDateString('fr-TN', { day: 'numeric', month: 'short' });
   }
 
-  openWhatsApp(order: OrderResponse) {
+  openWhatsApp(order: OrderResponse): void {
     if (!order.customerPhone) return;
     const phone = order.customerPhone.replace(/\s+/g, '');
     window.open(`https://wa.me/${phone}`, '_blank', 'noopener');
