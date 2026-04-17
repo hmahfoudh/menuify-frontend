@@ -1,12 +1,13 @@
 import {
-  Component, OnInit, OnDestroy, signal, computed, inject
+  Component, OnInit, OnDestroy, signal, computed, inject,
+  PLATFORM_ID
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { interval, Subscription, forkJoin } from 'rxjs';
-import { switchMap, startWith } from 'rxjs/operators';
+import { interval, Subscription, forkJoin, Subject } from 'rxjs';
+import { switchMap, startWith, takeUntil, first } from 'rxjs/operators';
 
 import {
   TableStatusResponse, TABLE_STATUS_META,
@@ -36,6 +37,7 @@ import { ZReportResponse } from '../../models/report.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LangSwitcherComponent } from '../../../../shared/components/lang-switcher/lang-switcher.component';
+import { OrderService } from '../../../dashboard/orders/services/order.service';
 
 // ── View states ───────────────────────────────────────────────────────────────
 type PosView = 'pos' | 'payment' | 'orderSent';
@@ -51,16 +53,18 @@ type ModalView = 'none' | 'item' | 'openShift' | 'closeShift' | 'itemNote'
 })
 export class PosComponent implements OnInit, OnDestroy {
 
-  private posSvc     = inject(PosService);
-  private authService    = inject(AuthService);
-  private cart       = inject(PosCartService);
-  private router     = inject(Router);
-  private shiftSvc   = inject(ShiftService);
-  private cashSvc    = inject(CashService);
-  private paymentSvc = inject(PaymentService);
-  private refundSvc  = inject(RefundService);
-  private reportSvc  = inject(ReportService);
-  private orderSvc   = inject(PosOrderService);
+  private posSvc      = inject(PosService);
+  private authService = inject(AuthService);
+  private cart        = inject(PosCartService);
+  private router      = inject(Router);
+  private shiftSvc    = inject(ShiftService);
+  private cashSvc     = inject(CashService);
+  private paymentSvc  = inject(PaymentService);
+  private refundSvc   = inject(RefundService);
+  private reportSvc   = inject(ReportService);
+  private posOrderSvc = inject(PosOrderService);
+  private orderSvc    = inject(OrderService);
+  private platformId = inject(PLATFORM_ID); 
 
   parseFloat = parseFloat;
 
@@ -209,8 +213,9 @@ export class PosComponent implements OnInit, OnDestroy {
     { value: 'DELIVERY',  label: 'Livraison' },
   ];
 
-  private tablePoll?: Subscription;
   private shiftPoll?: Subscription;
+
+  private destroy$   = new Subject<void>();
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void {
@@ -230,10 +235,17 @@ export class PosComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Poll table status every 30s
-    this.tablePoll = interval(30_000)
-      .pipe(startWith(0), switchMap(() => this.posSvc.getTableStatus()))
-      .subscribe({ next: t => this.tables.set(t), error: () => {} });
+    if (isPlatformBrowser(this.platformId)) {
+          this.orderSvc.connectStream();
+    
+          this.orderSvc.newOrderEvents$
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(event => {
+              if (event.type === 'NEW_ORDER') {
+                this.posSvc.getTableStatus().pipe(first()).subscribe({ next: t => this.tables.set(t), error: () => {} });
+              }
+            });
+        }
 
     // Poll shift totals every 60s (live X-Report)
     this.shiftPoll = interval(60_000)
@@ -242,7 +254,9 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.tablePoll?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.orderSvc.closeStream();
     this.shiftPoll?.unsubscribe();
   }
 
@@ -339,7 +353,7 @@ export class PosComponent implements OnInit, OnDestroy {
       const table = this.tables().find(t => String(t.number) === key);
       if (table?.orderId) {
         this.tableActiveOrderLoading.set(true);
-        this.orderSvc.getOrder(table.orderId).subscribe({
+        this.posOrderSvc.getOrder(table.orderId).subscribe({
           next: res => {
             this.tableActiveOrderLoading.set(false);
             if (res.success) this.tableActiveOrder.set(res.data);
@@ -419,7 +433,7 @@ export class PosComponent implements OnInit, OnDestroy {
       modifierIds: c.modifiers.map(m => m.id),
     }));
 
-    this.orderSvc.addLines(order.id, lines).subscribe({
+    this.posOrderSvc.addLines(order.id, lines).subscribe({
       next: res => {
         if (res.success) {
           // Refresh the displayed order with the updated data from backend
@@ -828,7 +842,7 @@ export class PosComponent implements OnInit, OnDestroy {
     this.selectedRefundOrder.set(null);
     this.refundError.set(null);
     this.activeModal.set('refund');
-    this.orderSvc.loadActiveOrders().subscribe({
+    this.posOrderSvc.loadActiveOrders().subscribe({
       next: res => {
         if (res.success) this.refundOrders.set(res.data);
         this.refundLoading.set(false);
