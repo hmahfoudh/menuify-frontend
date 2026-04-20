@@ -62,6 +62,16 @@
   &:hover { background: rgba(201,169,110,0.16); }
 }
 
+.tp-btn-dl-all {
+  padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line2);
+  background: transparent; color: var(--fog); font-size: 0.78rem;
+  font-weight: 500; font-family: inherit; cursor: pointer; white-space: nowrap;
+  transition: all var(--r); flex-shrink: 0;
+  display: flex; align-items: center; gap: 6px;
+  &:hover:not(:disabled) { background: var(--ink3); color: var(--cream); border-color: var(--gold-line); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
 // ── Alerts ────────────────────────────────────────────────────────────────────
 .tp-toast {
   margin-bottom: 1rem; padding: 10px 14px; border-radius: 8px;

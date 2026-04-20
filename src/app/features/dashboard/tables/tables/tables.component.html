@@ -29,6 +29,24 @@
       <button class="tp-btn-add" (click)="openCreate()" type="button">
         + Add table
       </button>
+      @if (tables().length > 1) {
+        <button class="tp-btn-dl-all"
+                [disabled]="downloadingAll()"
+                (click)="downloadAllQr()" type="button">
+          @if (downloadingAll()) {
+            <span class="tp-btn-spinner"></span>
+            Generating…
+          } @else {
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            All QR codes
+          }
+        </button>
+      }
     </div>
   </div>
 

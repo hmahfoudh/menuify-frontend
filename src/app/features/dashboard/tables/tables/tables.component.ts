@@ -7,6 +7,7 @@ import { HttpClient }     from '@angular/common/http';
 import { map }            from 'rxjs/operators';
 import { QRCodeModule }   from 'angularx-qrcode';
 import QRCode             from 'qrcode';
+import JSZip              from 'jszip';
 import { AuthService } from '../../../../core/services/auth.service';
 import { environment } from '../../../../../environments/environment';
 
@@ -84,6 +85,7 @@ export class TablesComponent implements OnInit {
 
   // ── QR preview modal ───────────────────────────────────────────────────────
   previewTable = signal<TableResponse | null>(null);
+  downloadingAll = signal(false);
 
   // ── Shape options ──────────────────────────────────────────────────────────
   shapes: { value: TableShape; label: string }[] = [
@@ -279,6 +281,70 @@ export class TablesComponent implements OnInit {
   copyLink(t: TableResponse): void {
     navigator.clipboard.writeText(t.qrTargetUrl).then(() =>
       this.showSuccess('Link copied to clipboard'));
+  }
+
+  // ── Download all QR codes as ZIP ──────────────────────────────────────────
+  async downloadAllQr(): Promise<void> {
+    const list = this.tables();
+    if (list.length === 0) return;
+
+    this.downloadingAll.set(true);
+    this.error.set(null);
+
+    try {
+      const zip = new JSZip();
+      const size = 1024;
+
+      for (const t of list) {
+        const canvas = document.createElement('canvas');
+        canvas.width  = size;
+        canvas.height = size;
+
+        await QRCode.toCanvas(canvas, t.qrTargetUrl, {
+          width:                size,
+          margin:               2,
+          errorCorrectionLevel: 'H',
+          color: {
+            dark:  t.qrColorDark  || '#000000',
+            light: t.qrColorLight || '#ffffff',
+          },
+        });
+
+        const logoUrl = t.qrEmbedLogo ? this.tenant()?.logoUrl : null;
+        if (logoUrl) {
+          try {
+            const ctx      = canvas.getContext('2d')!;
+            const logo     = await this.loadImage(logoUrl);
+            const logoSize = Math.round(size * 0.2);
+            const x        = (size - logoSize) / 2;
+            const y        = (size - logoSize) / 2;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(x - 6, y - 6, logoSize + 12, logoSize + 12);
+            ctx.drawImage(logo, x, y, logoSize, logoSize);
+          } catch {
+            // Skip logo on error, QR is still valid
+          }
+        }
+
+        const blob = await new Promise<Blob>((resolve) =>
+          canvas.toBlob(b => resolve(b!), 'image/png')
+        );
+        const name = `${t.displayName.replace(/[^a-zA-Z0-9-_]/g, '_')}-qr.png`;
+        zip.file(name, blob);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      this.triggerDownload(url, 'qr-codes-all.zip');
+      URL.revokeObjectURL(url);
+
+      this.showSuccess(`${list.length} QR codes downloaded`);
+    } catch {
+      this.error.set('Failed to generate QR codes ZIP');
+    } finally {
+      this.downloadingAll.set(false);
+    }
   }
 
   // ── Status helpers ────────────────────────────────────────────────────────
