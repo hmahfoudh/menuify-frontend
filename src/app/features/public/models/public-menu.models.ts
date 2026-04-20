@@ -1,5 +1,7 @@
 // ── Public API responses ───────────────────────────────────────────────────────
 
+import { Feature } from "../../dashboard/settings/models/settings.models";
+
 export interface PublicTenantResponse {
   name:           string;
   subdomain:      string;
@@ -20,6 +22,7 @@ export interface PublicTenantResponse {
   wifiName: string | null;
   wifiPassword: string | null;
   currencySymbol: string;
+  features: Feature[];
 }
 export interface PublicMenuResponse {
   tenant:         PublicTenantResponse;

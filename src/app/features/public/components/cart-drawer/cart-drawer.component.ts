@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { TrackedOrder, TrackingStatus, TRACKING_STATUS_META, TRACKING_STEPS } from '../../models/public-menu.models';
+import { TrackedOrder, TrackingStatus, TRACKING_STATUS_META, TRACKING_STEPS, PublicTenantResponse } from '../../models/public-menu.models';
+import { Feature } from '../../../dashboard/settings/models/settings.models';
 
 @Component({
   selector: 'app-cart-drawer',
@@ -11,6 +12,7 @@ import { TrackedOrder, TrackingStatus, TRACKING_STATUS_META, TRACKING_STEPS } fr
   styleUrl: './cart-drawer.component.scss',
 })
 export class CartDrawerComponent {
+  @Input({ required: true }) tenant: PublicTenantResponse;
   @Input({ required: true }) cartMode!: 'cart' | 'orders';
   @Input({ required: true }) cartItems!: any[];
   @Input({ required: true }) cartEmpty!: boolean;
@@ -45,5 +47,9 @@ export class CartDrawerComponent {
   fmt(n: number | null): string {
     if (n == null) return '';
     return n.toFixed(3);
+  }
+
+  canTakeOrder(): boolean{
+    return this.tenant.features.includes(Feature.ORDER_TAKING);
   }
 }

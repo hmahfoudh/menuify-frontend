@@ -1,7 +1,10 @@
-import { Component, signal, inject, OnInit, input } from '@angular/core';
+import { Component, signal, inject, OnInit, input, Input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router }       from '@angular/router';
+import { ActivatedRoute, Router }       from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { PublicTenantResponse } from '../../models/public-menu.models';
+import { Feature } from '../../../dashboard/settings/models/settings.models';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector:    'app-welcome-popup',
@@ -10,29 +13,51 @@ import { TranslatePipe } from '@ngx-translate/core';
   templateUrl: './welcome-popup.component.html',
   styleUrls:   ['./welcome-popup.component.scss'],
 })
-export class WelcomePopupComponent implements OnInit {
+export class WelcomePopupComponent implements OnInit, OnDestroy {
 
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  visible = signal(true);
+  visible = signal(false);
 
-  restaurantNameInput = input<string>('');
-  restaurantLogoInput = input<string>('');
-  restaurantTagLineInput = input<string>('');
+  @Input() tenant : PublicTenantResponse;
 
   restaurantName = signal('');
   restaurantLogo = signal('');
   restaurantTagLine = signal('');
 
+  private destroy$ = new Subject();
+
   ngOnInit(): void {
-    this.restaurantName.set(this.restaurantNameInput());
-    this.restaurantLogo.set(this.restaurantLogoInput());
-    this.restaurantTagLine.set(this.restaurantTagLineInput());
-    // Show only once per session
+    this.restaurantName.set(this.tenant?.name);
+    this.restaurantLogo.set(this.tenant.logoUrl);
+    this.restaurantTagLine.set(this.tenant.tagline);
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe({
+      next: params => {
+        if(params['qr']){
+          this.visible.set(false);
+        }else{
+          this.checkFeatures();
+        }
+      }
+    })
+    
+    //Show only once per session
     // const shown = sessionStorage.getItem('menuify_welcome_shown');
     // if (!shown) {
     //   this.visible.set(true);
     // }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.complete();
+  }
+
+  checkFeatures(){
+    if(this.tenant.features.includes(Feature.RESERVATION)){
+      this.visible.set(true);
+    }
   }
 
   setTenant(name: string, logo: string): void {
@@ -52,6 +77,6 @@ export class WelcomePopupComponent implements OnInit {
 
   private dismiss(): void {
     this.visible.set(false);
-    // sessionStorage.setItem('menuify_welcome_shown', 'true');
+    sessionStorage.setItem('menuify_welcome_shown', 'true');
   }
 }

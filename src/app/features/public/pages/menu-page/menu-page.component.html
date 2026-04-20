@@ -23,9 +23,7 @@
 
   <!-- Welcome Popup -->
    <app-welcome-popup
-    [restaurantNameInput]="m.tenant.name"
-    [restaurantLogoInput]="m.tenant.logoUrl"
-    [restaurantTagLineInput]="m.tenant.tagline"
+    [tenant]="m.tenant"
   >
   </app-welcome-popup>
 
@@ -117,6 +115,7 @@
   <!-- CART DRAWER -->
   @if (cartOpen()) {
     <app-cart-drawer
+      [tenant]="m.tenant"
       [cartMode]="cartMode()"
       [cartItems]="cartItems()"
       [cartEmpty]="cartEmpty()"

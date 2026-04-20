@@ -78,7 +78,6 @@ export class ReservationFormComponent implements OnInit {
   ngOnInit(): void {
     // Default date to today, time to next hour
     this.tenant = this.localStorage.getJson<PublicTenantResponse>('tenant');
-    console.log(this.tenant)
     this.date.set(this.minDate);
     const now = new Date();
     now.setHours(now.getHours() + 1, 0, 0, 0);

@@ -716,3 +716,62 @@
 }
 
 code { font-family: 'DM Mono', 'Courier New', monospace; font-size: 0.85em; }
+
+// ── Features tab ────────────────────────────────────────────────────────────
+.feature-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--mp-border);
+  transition: opacity .2s;
+
+  &:last-child { border-bottom: none; }
+
+  &--locked {
+    opacity: .45;
+    pointer-events: none;        // prevent toggle click
+    pointer-events: auto;        // …but keep cursor so badge is readable
+    .day-toggle { pointer-events: none; }
+  }
+}
+
+.feature-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--mp-accent) 10%, transparent);
+  color: var(--mp-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feature-label {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--mp-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feature-desc {
+  font-size: .78rem;
+  color: var(--mp-text-muted);
+  line-height: 1.45;
+}

@@ -1,0 +1,54 @@
+<div class="pos-tables-col">
+
+  <div class="pos-tables-head">
+    <span class="pos-tables-head__label">{{ 'pos.tables.title' | translate }}</span>
+  </div>
+
+  <button class="pos-no-table"
+          [class.pos-no-table--selected]="selectedTableKey() === 'no-table'"
+          (click)="tableSelect.emit('no-table')"
+          type="button">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <line x1="19" y1="8" x2="19" y2="14"/>
+      <line x1="22" y1="11" x2="16" y2="11"/>
+    </svg>
+    {{ 'pos.tables.walk_in' | translate }}
+  </button>
+
+  <div class="pos-tables-grid">
+    @if (loading()) {
+      @for (i of skeletons; track i) {
+        <div class="tbl-card tbl-card--skeleton"></div>
+      }
+    } @else {
+      @for (t of tables(); track t.id) {
+        <button [class]="tableCardClassFn()(t)"
+                (click)="tableSelect.emit(tableKeyFn()(t))"
+                type="button">
+          <div class="tbl-card__dot" [style.background]="tableStatusDotFn()(t)"></div>
+          <div class="tbl-card__name">{{ t.displayName }}</div>
+          <div class="tbl-card__status">{{ tableStatusLabelFn()(t) | translate }}</div>
+          @if (t.orderReference) {
+            <div class="tbl-card__ref">{{ t.orderReference }}</div>
+          }
+        </button>
+      }
+    }
+  </div>
+
+  <div class="pos-tables-legend">
+    <span class="legend-item">
+      <span class="legend-dot" style="background:#504c44"></span>{{ 'pos.tables.legend_free' | translate }}
+    </span>
+    <span class="legend-item">
+      <span class="legend-dot" style="background:#e8a838"></span>{{ 'pos.tables.legend_busy' | translate }}
+    </span>
+    <span class="legend-item">
+      <span class="legend-dot" style="background:#64c882"></span>{{ 'pos.tables.legend_ready' | translate }}
+    </span>
+  </div>
+
+</div>

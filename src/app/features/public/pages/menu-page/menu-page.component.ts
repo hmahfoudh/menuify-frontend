@@ -380,7 +380,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       this.cartToast.update(t => t ? { ...t, visible: false } : null);
       setTimeout(() => this.cartToast.set(null), 320);
     }, 2600);
-    console.log({cartToast: this.cartToast()});
   }
 
   openCart(): void {

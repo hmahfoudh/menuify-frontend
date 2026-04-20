@@ -32,8 +32,8 @@
       </button>
       }
     </div>
-    <button class="mp-cart__close" (click)="close.emit()"
-      [attr.aria-label]="'cart.close_aria' | translate" type="button">
+    <button class="mp-cart__close" (click)="close.emit()" [attr.aria-label]="'cart.close_aria' | translate"
+      type="button">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
         stroke-linecap="round">
         <line x1="18" y1="6" x2="6" y2="18" />
@@ -178,6 +178,7 @@
       {{ fmt(cartSubtotal) }} {{ currency }}
     </span>
   </div>
+  @if (canTakeOrder()) {
   <button class="mp-checkout-btn" (click)="openCheckout.emit()" [disabled]="!isOpen"
     [class.mp-checkout-btn--closed]="!isOpen" type="button">
     @if (!isOpen) {
@@ -195,6 +196,8 @@
     </svg>
     }
   </button>
+  }
+
 </div>
 
 } <!-- end cart/orders tabs -->

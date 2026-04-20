@@ -15,6 +15,7 @@ import {
   PosCartItem, PosCartModifier,
   CATEGORY_ACCENT_PALETTE,
   AddOrderLinesRequest,
+  TableStatus,
 } from '../../models/pos.models';
 import {
   PublicCategoryResponse, PublicItemResponse,
@@ -32,12 +33,13 @@ import { OpenShiftRequest, CloseShiftRequest } from '../../models/shift.models';
 import { CashMovementRequest } from '../../models/cash.models';
 import { PaymentMethod } from '../../models/payment.models';
 import { IssueRefundRequest } from '../../models/refund.models';
-import { PosOrder } from '../../models/pos-order.models';
+import { OrderStatus, PosOrder } from '../../models/pos-order.models';
 import { ZReportResponse } from '../../models/report.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LangSwitcherComponent } from '../../../../shared/components/lang-switcher/lang-switcher.component';
 import { OrderService } from '../../../dashboard/orders/services/order.service';
+import { PosTablesColumnComponent } from './components/pos-tables-column/pos-tables-column.component';
 
 // ── View states ───────────────────────────────────────────────────────────────
 type PosView = 'pos' | 'payment' | 'orderSent';
@@ -47,7 +49,7 @@ type ModalView = 'none' | 'item' | 'openShift' | 'closeShift' | 'itemNote'
 @Component({
   selector: 'app-pos',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe, TranslatePipe, LangSwitcherComponent],
+  imports: [CommonModule, FormsModule, DatePipe, TranslatePipe, LangSwitcherComponent, PosTablesColumnComponent],
   templateUrl: './pos.component.html',
   styleUrls: ['./pos.component.scss'],
 })
@@ -241,8 +243,12 @@ export class PosComponent implements OnInit, OnDestroy {
           this.orderSvc.newOrderEvents$
             .pipe(takeUntil(this.destroy$))
             .subscribe(event => {
+              console.log("event", event)
               if (event.type === 'NEW_ORDER') {
-                this.posSvc.getTableStatus().pipe(first()).subscribe({ next: t => this.tables.set(t), error: () => {} });
+                setTimeout(()=> {
+                  this.loadTableStatus();
+                },200)
+                
               }
             });
         }
@@ -251,6 +257,10 @@ export class PosComponent implements OnInit, OnDestroy {
     this.shiftPoll = interval(60_000)
       .pipe(startWith(0), switchMap(() => this.shiftSvc.loadCurrentShift()))
       .subscribe({ error: () => {} });
+  }
+
+  loadTableStatus(){
+    this.posSvc.getTableStatus().pipe(first()).subscribe({ next: t => this.tables.set(t), error: () => {} });
   }
 
   ngOnDestroy(): void {
@@ -704,6 +714,7 @@ export class PosComponent implements OnInit, OnDestroy {
         this.cashSvc.loadDrawer().subscribe();
         this.paymentLoading.set(false);
         this.view.set('orderSent');
+        this.loadTableStatus()
       },
       error: err => {
         this.paymentLoading.set(false);
@@ -963,4 +974,6 @@ export class PosComponent implements OnInit, OnDestroy {
   get drawerBalance(): string {
     return this.fmt(this.drawerState()?.expectedBalance ?? 0);
   }
+
+  getStatusMeta(status: TableStatus) { return TABLE_STATUS_META[status]; }
 }

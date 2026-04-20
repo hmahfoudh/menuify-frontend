@@ -154,13 +154,7 @@ export class RegisterComponent {
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   onSubmit(): void {
-    console.log('Submitting registration with payload:', {
-      ...this.accountForm.value,
-      tenant: this.restaurantForm.value,
-      form: this.restaurantForm
-    });
     if (this.restaurantForm.invalid) {
-      console.log('Restaurant form is invalid:', this.restaurantForm.errors);
       this.restaurantForm.markAllAsTouched();
       return;
     }

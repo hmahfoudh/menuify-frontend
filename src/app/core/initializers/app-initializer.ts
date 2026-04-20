@@ -62,7 +62,6 @@ export function initApp(): () => Promise<void> {
         const menu = res?.data ?? res;
 
         const tenantInfo = menu.tenant;
-        console.log('Fetched tenant info on app init:', tenantInfo);
 
         // Store so the tenantInterceptor and menu page can read it
         storage.setJson('tenant', tenantInfo);
