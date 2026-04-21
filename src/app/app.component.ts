@@ -1,8 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { TranslateDirective, TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Lang } from './features/landing/models/landing.models';
-import { MetaTagsService } from './shared/services/meta-tags.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -14,7 +12,7 @@ import { MetaTagsService } from './shared/services/meta-tags.service';
 export class AppComponent implements OnInit{
   private translate = inject(TranslateService);
 
-  constructor(private metaTagsService: MetaTagsService) {
+  constructor() {
     this.translate.addLangs(['fr', 'ar', 'en']);
     this.translate.setFallbackLang('ar');
     this.translate.use('fr');
