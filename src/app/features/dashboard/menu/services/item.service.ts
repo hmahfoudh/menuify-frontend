@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient }         from '@angular/common/http';
-import { Observable }         from 'rxjs';
-import { map }                from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   ItemResponse, ItemRequest,
   VariantGroupResponse, VariantGroupRequest,
@@ -45,7 +45,7 @@ export class ItemService {
   }
 
   update(id: string, req: ItemRequest,
-         image?: File): Observable<ItemResponse> {
+    image?: File): Observable<ItemResponse> {
     const fd = new FormData();
     fd.append('data', new Blob([JSON.stringify(req)],
       { type: 'application/json' }));
@@ -68,6 +68,11 @@ export class ItemService {
     return this.http
       .patch<void>(`${this.base}/reorder`, requests);
   }
+
+  removeImage(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}/image`);
+  }
+
 
   // ── Variant groups ─────────────────────────────────────────────────────────
 

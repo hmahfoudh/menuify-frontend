@@ -98,7 +98,6 @@ export class PosComponent implements OnInit, OnDestroy {
     if (!key || key === 'no-table') return null;
     return this.tables().find(t => String(t.number) === key) ?? null;
   });
-
   // ── Active order for the selected table ───────────────────────────────────
   // Loaded from backend when a table with an active order is selected.
   // Shown read-only in the order panel so the cashier can see what was ordered.

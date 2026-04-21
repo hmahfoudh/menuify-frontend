@@ -11,13 +11,14 @@ export type OrderStatus =
   | 'NEW'
   | 'PENDING'
   | 'CONFIRMED'
-  | 'IN_PROGRESS'
   | 'PREPARING'
   | 'READY'
   | 'SERVED'
   | 'COMPLETED'
   | 'PAID'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'REFUNDED'
+  | 'PARTIALLY_REFUNDED';
 
 export interface PosOrderLine {
   id:            string;
@@ -78,43 +79,28 @@ export interface PosUpdateStatusRequest {
   reason?: string;
 }
 
-// ── Status display helpers ────────────────────────────────────────────────────
+export interface StatusMeta {
+  label:       string;
+  color:       string;   // CSS variable suffix
+  next:        OrderStatus | null;
+  nextLabel:   string | null;
+}
 
-export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-  NEW:         'New',
-  PENDING:     'Pending',
-  CONFIRMED:   'Confirmed',
-  IN_PROGRESS: 'In progress',
-  PREPARING:   'Preparing',
-  READY:       'Ready',
-  SERVED:      'Served',
-  COMPLETED:   'Completed',
-  PAID:        'Paid',
-  CANCELLED:   'Cancelled',
-};
 
-export const ORDER_STATUS_COLOR: Record<OrderStatus, string> = {
-  NEW:         'blue',
-  PENDING:     'blue',
-  CONFIRMED:   'blue',
-  IN_PROGRESS: 'orange',
-  PREPARING:   'orange',
-  READY:       'green',
-  SERVED:      'teal',
-  COMPLETED:   'gray',
-  PAID:        'gray',
-  CANCELLED:   'red',
-};
 
 /** Legal next statuses from a given status (mirrors backend transition map) */
-export const NEXT_STATUSES: Partial<Record<OrderStatus, OrderStatus[]>> = {
-  NEW:         ['IN_PROGRESS', 'CANCELLED'],
-  PENDING:     ['CONFIRMED',   'CANCELLED'],
-  CONFIRMED:   ['IN_PROGRESS', 'CANCELLED'],
-  IN_PROGRESS: ['READY',       'CANCELLED'],
-  PREPARING:   ['READY',       'CANCELLED'],
-  READY:       ['SERVED',      'CANCELLED'],
-  SERVED:      ['PAID',        'CANCELLED'],
+export const POS_ORDER_STATUS_META: Record<OrderStatus, StatusMeta> = {
+  PENDING:   { label: 'Pending',    color: 'amber',  next: 'CONFIRMED',  nextLabel: 'Confirm'    },
+  NEW:       { label: 'New',        color: 'blue',   next: 'CONFIRMED',  nextLabel: 'Confirm'    },
+  CONFIRMED: { label: 'Confirmed',  color: 'blue',   next: 'PREPARING',  nextLabel: 'Start prep' },
+  PREPARING: { label: 'Preparing',  color: 'purple', next: 'READY',      nextLabel: 'Mark ready' },
+  READY:     { label: 'Ready',      color: 'green',  next: 'COMPLETED',  nextLabel: 'Complete'   },
+  SERVED:    { label: 'Served',     color: 'green',  next: 'COMPLETED',  nextLabel: 'Complete'   },
+  COMPLETED: { label: 'Completed',  color: 'muted',  next: null,         nextLabel: null         },
+  CANCELLED: { label: 'Cancelled',  color: 'red',    next: null,         nextLabel: null         },
+  PAID:      { label: 'Paid',  color: 'green',    next: null,         nextLabel: null         },
+  REFUNDED:  { label: 'Refunded',  color: 'muted',  next: null,         nextLabel: null         },
+  PARTIALLY_REFUNDED: { label: 'Partially Refunded', color: 'muted', next: null, nextLabel: null },
 };
 
 export const isActiveStatus = (s: OrderStatus): boolean =>

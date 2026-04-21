@@ -35,7 +35,7 @@ export interface TableStatusMeta {
 
 export const TABLE_STATUS_META: Record<TableStatus, TableStatusMeta> = {
   FREE:     { label: 'FREE',     color: 'free',     dot: '#504c44' },
-  PENDING:  { label: 'PENDING',  color: 'pending',  dot: '#e8a838' },
+  PENDING:  { label: 'OCCUPIED',  color: 'pending',  dot: '#e8a838' },
   PREPARING:{ label: 'PERPARING',color: 'preparing',dot: '#e8a838' },
   READY:    { label: 'READY',    color: 'ready',    dot: '#64c882' },
 };

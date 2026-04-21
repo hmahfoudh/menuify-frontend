@@ -8,7 +8,6 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
 import { FEATURE_ICONS, FEATURE_KEYS, Lang, PLANS, PublicTenant } from '../models/landing.models';
 import { RouterLink } from "@angular/router";
-import { MetaTagsService } from '../../../shared/services/meta-tags.service';
 
 
 
@@ -23,7 +22,6 @@ export class LandingComponent implements OnInit {
 
   private http = inject(HttpClient);
   private translate = inject(TranslateService);
-  private metaTagsService = inject(MetaTagsService);
 
   // ── Language ─────────────────────────────────────────────────────────────────
   currentLang = signal<Lang>('fr');

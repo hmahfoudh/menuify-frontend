@@ -1,8 +1,8 @@
 import {
   Component, OnInit, signal, computed, inject
 } from '@angular/core';
-import { CommonModule }   from '@angular/common';
-import { FormsModule }    from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import {
   CategoryResponse, CategoryRequest,
   ItemResponse, ItemRequest,
@@ -17,79 +17,81 @@ import { TranslatePipe } from '@ngx-translate/core';
 type ActivePanel = 'none' | 'category' | 'item' | 'variantGroup' | 'modifierGroup';
 
 @Component({
-  selector:    'app-menu-manager',
-  standalone:  true,
-  imports:     [CommonModule, FormsModule, TranslatePipe],
+  selector: 'app-menu-manager',
+  standalone: true,
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './menu-manager.component.html',
-  styleUrls:   ['./menu-manager.component.scss']
+  styleUrls: ['./menu-manager.component.scss']
 })
 export class MenuManagerComponent implements OnInit {
 
-  private catSvc  = inject(CategoryService);
+  private catSvc = inject(CategoryService);
   private itemSvc = inject(ItemService);
 
   // ── Data state ───────────────────────────────────────────────────────────
-  categories     = signal<CategoryResponse[]>([]);
-  items          = signal<ItemResponse[]>([]);
-  selectedCatId  = signal<string | null>(null);
-  loadingCats    = signal(true);
-  loadingItems   = signal(false);
-  error          = signal<string | null>(null);
-  success        = signal<string | null>(null);
-  saving         = signal(false);
-  deletingId     = signal<string | null>(null);
+  categories = signal<CategoryResponse[]>([]);
+  items = signal<ItemResponse[]>([]);
+  selectedCatId = signal<string | null>(null);
+  loadingCats = signal(true);
+  loadingItems = signal(false);
+  error = signal<string | null>(null);
+  success = signal<string | null>(null);
+  saving = signal(false);
+  deletingId = signal<string | null>(null);
+  removingImage = signal(false);
+
 
   // ── Panel state ──────────────────────────────────────────────────────────
-  activePanel    = signal<ActivePanel>('none');
-  panelMode      = signal<PanelMode>('create');
+  activePanel = signal<ActivePanel>('none');
+  panelMode = signal<PanelMode>('create');
 
   // ── Category form ────────────────────────────────────────────────────────
-  editingCat     = signal<CategoryResponse | null>(null);
-  catName        = signal('');
-  catIcon        = signal('');
-  catVisible     = signal(true);
-  showIconPicker   = signal(false);
-  customIconInput  = signal('');
+  editingCat = signal<CategoryResponse | null>(null);
+  catName = signal('');
+  catIcon = signal('');
+  catVisible = signal(true);
+  showIconPicker = signal(false);
+  customIconInput = signal('');
 
   // ── Item form ────────────────────────────────────────────────────────────
-  editingItem    = signal<ItemResponse | null>(null);
-  itemName       = signal('');
-  itemDesc       = signal('');
-  itemPrice      = signal<number | null>(null);
-  itemFeatured   = signal(false);
-  itemAvailable  = signal(true);
-  itemVeg        = signal(false);
-  itemVegan      = signal(false);
-  itemGluten     = signal(false);
-  itemSpicy      = signal(false);
-  itemTags       = signal('');
-  itemImageFile  = signal<File | null>(null);
+  editingItem = signal<ItemResponse | null>(null);
+  itemName = signal('');
+  itemDesc = signal('');
+  itemPrice = signal<number | null>(null);
+  itemFeatured = signal(false);
+  itemAvailable = signal(true);
+  itemVeg = signal(false);
+  itemVegan = signal(false);
+  itemGluten = signal(false);
+  itemSpicy = signal(false);
+  itemTags = signal('');
+  itemImageFile = signal<File | null>(null);
   itemImagePreview = signal<string | null>(null);
 
   // ── Variant / Modifier group form ─────────────────────────────────────────
-  editingVGroup  = signal<VariantGroupResponse | null>(null);
-  vgName         = signal('');
-  vgRequired     = signal(true);
-  vgUiType       = signal<'pills' | 'dropdown' | 'cards'>('pills');
+  editingVGroup = signal<VariantGroupResponse | null>(null);
+  vgName = signal('');
+  vgRequired = signal(true);
+  vgUiType = signal<'pills' | 'dropdown' | 'cards'>('pills');
 
-  editingMGroup  = signal<ModifierGroupResponse | null>(null);
-  mgName         = signal('');
-  mgDesc         = signal('');
-  mgRequired     = signal(false);
-  mgMin          = signal(0);
-  mgMax          = signal(3);
-  mgUiType       = signal<'checkbox' | 'radio' | 'stepper'>('checkbox');
+  editingMGroup = signal<ModifierGroupResponse | null>(null);
+  mgName = signal('');
+  mgDesc = signal('');
+  mgRequired = signal(false);
+  mgMin = signal(0);
+  mgMax = signal(3);
+  mgUiType = signal<'checkbox' | 'radio' | 'stepper'>('checkbox');
 
   // ── Inline variant/modifier editing ──────────────────────────────────────
-  newVariantName  = signal('');
+  newVariantName = signal('');
   newVariantPrice = signal(0);
   newVariantDefault = signal(false);
-  newModName      = signal('');
-  newModPrice     = signal(0);
-  newModDefault   = signal(false);
+  newModName = signal('');
+  newModPrice = signal(0);
+  newModDefault = signal(false);
 
   // ── Drag-to-reorder ───────────────────────────────────────────────────────
-  dragIndex      = signal<number | null>(null);
+  dragIndex = signal<number | null>(null);
 
   // ── Constants ─────────────────────────────────────────────────────────────
   readonly commonIcons = COMMON_ICONS;
@@ -131,7 +133,7 @@ export class MenuManagerComponent implements OnInit {
   loadItems(catId: string) {
     this.loadingItems.set(true);
     this.itemSvc.getByCategory(catId).subscribe({
-      next:  items => { this.items.set(items); this.loadingItems.set(false); },
+      next: items => { this.items.set(items); this.loadingItems.set(false); },
       error: () => { this.loadingItems.set(false); }
     });
   }
@@ -161,8 +163,8 @@ export class MenuManagerComponent implements OnInit {
     this.saving.set(true);
 
     const req: CategoryRequest = {
-      name:    this.catName().trim(),
-      icon:    this.catIcon() || undefined,
+      name: this.catName().trim(),
+      icon: this.catIcon() || undefined,
       visible: this.catVisible(),
     };
 
@@ -337,23 +339,48 @@ export class MenuManagerComponent implements OnInit {
     );
   }
 
+  removeItemImage() {
+    const item = this.editingItem();
+    if (!item?.imageUrl) return;
+    if (!confirm('Remove this image?')) return;
+
+    this.removingImage.set(true);
+    this.itemSvc.removeImage(item.id).subscribe({
+      next: () => {
+        // Clear preview and sync state
+        this.itemImageFile.set(null);
+        this.itemImagePreview.set(null);
+        const updated = { ...item, imageUrl: null };
+        this.editingItem.set(updated as any);
+        this.items.update(list =>
+          list.map(i => i.id === item.id ? { ...i, imageUrl: null } as any : i));
+        this.removingImage.set(false);
+        this.showSuccess('Image removed');
+      },
+      error: () => {
+        this.removingImage.set(false);
+        this.error.set('Failed to remove image');
+      }
+    });
+  }
+
   saveItem() {
     const catId = this.selectedCatId();
     if (!this.itemName().trim() || !catId) return;
     this.saving.set(true);
 
     const req: ItemRequest = {
-      categoryId:  catId,
-      name:        this.itemName().trim(),
+      categoryId: catId,
+      name: this.itemName().trim(),
       description: this.itemDesc() || undefined,
-      basePrice:   this.itemPrice() ?? undefined,
-      featured:    this.itemFeatured(),
-      available:   this.itemAvailable(),
-      vegetarian:  this.itemVeg(),
-      vegan:       this.itemVegan(),
-      glutenFree:  this.itemGluten(),
-      spicy:       this.itemSpicy(),
-      tags:        this.itemTags() || undefined,
+      basePrice: this.itemPrice() ?? undefined,
+      featured: this.itemFeatured(),
+      available: this.itemAvailable(),
+      vegetarian: this.itemVeg(),
+      vegan: this.itemVegan(),
+      glutenFree: this.itemGluten(),
+      spicy: this.itemSpicy(),
+      tags: this.itemTags() || undefined,
     };
 
     const image = this.itemImageFile() ?? undefined;
@@ -450,9 +477,9 @@ export class MenuManagerComponent implements OnInit {
     this.error.set(null);
 
     const req: VariantGroupRequest = {
-      name:     this.vgName().trim(),
+      name: this.vgName().trim(),
       required: this.vgRequired(),
-      uiType:   this.vgUiType(),
+      uiType: this.vgUiType(),
     };
 
     const isCreating = this.panelMode() === 'create';
@@ -528,13 +555,13 @@ export class MenuManagerComponent implements OnInit {
   }
 
   addVariant() {
-    const itemId  = this.editingItem()?.id;
+    const itemId = this.editingItem()?.id;
     const groupId = this.editingVGroup()?.id;
     if (!itemId || !groupId || !this.newVariantName().trim()) return;
 
     const req: VariantRequest = {
-      name:      this.newVariantName().trim(),
-      price:     this.newVariantPrice(),
+      name: this.newVariantName().trim(),
+      price: this.newVariantPrice(),
       available: true,
       isDefault: this.newVariantDefault(),
     };
@@ -595,12 +622,12 @@ export class MenuManagerComponent implements OnInit {
     this.error.set(null);
 
     const req: ModifierGroupRequest = {
-      name:        this.mgName().trim(),
+      name: this.mgName().trim(),
       description: this.mgDesc() || undefined,
-      required:    this.mgRequired(),
-      minSelect:   this.mgMin(),
-      maxSelect:   this.mgMax(),
-      uiType:      this.mgUiType(),
+      required: this.mgRequired(),
+      minSelect: this.mgMin(),
+      maxSelect: this.mgMax(),
+      uiType: this.mgUiType(),
     };
 
     const isCreating = this.panelMode() === 'create';
@@ -672,15 +699,15 @@ export class MenuManagerComponent implements OnInit {
   }
 
   addModifier() {
-    const itemId  = this.editingItem()?.id;
+    const itemId = this.editingItem()?.id;
     const groupId = this.editingMGroup()?.id;
     if (!itemId || !groupId || !this.newModName().trim()) return;
 
     const req: ModifierRequest = {
-      name:       this.newModName().trim(),
+      name: this.newModName().trim(),
       priceDelta: this.newModPrice(),
-      available:  true,
-      isDefault:  this.newModDefault(),
+      available: true,
+      isDefault: this.newModDefault(),
     };
 
     this.itemSvc.addModifier(itemId, groupId, req).subscribe({
@@ -772,33 +799,33 @@ export class MenuManagerComponent implements OnInit {
     return p.toFixed(3) + ' DT';
   }
 
-  setCatName(v: string)           { this.catName.set(v); }
-  setCatIcon(v: string)           { this.catIcon.set(v); }
-  setCustomIconInput(v: string)   { this.customIconInput.set(v); }
-  toggleCatVisible()         { this.catVisible.update(v => !v); }
-  setItemName(v: string)     { this.itemName.set(v); }
-  setItemDesc(v: string)     { this.itemDesc.set(v); }
-  setItemPrice(v: string)    { this.itemPrice.set(v ? +v : null); }
-  toggleFeatured()           { this.itemFeatured.update(v => !v); }
-  toggleAvailable()          { this.itemAvailable.update(v => !v); }
-  toggleVeg()                { this.itemVeg.update(v => !v); }
-  toggleVegan()              { this.itemVegan.update(v => !v); }
-  toggleGluten()             { this.itemGluten.update(v => !v); }
-  toggleSpicy()              { this.itemSpicy.update(v => !v); }
-  setItemTags(v: string)     { this.itemTags.set(v); }
-  setVgName(v: string)       { this.vgName.set(v); }
-  toggleVgRequired()         { this.vgRequired.update(v => !v); }
-  setVgUiType(v: string)     { this.vgUiType.set(v as any); }
-  setMgName(v: string)       { this.mgName.set(v); }
-  setMgDesc(v: string)       { this.mgDesc.set(v); }
-  toggleMgRequired()         { this.mgRequired.update(v => !v); }
-  setMgMin(v: string)        { this.mgMin.set(+v); }
-  setMgMax(v: string)        { this.mgMax.set(+v); }
-  setMgUiType(v: string)     { this.mgUiType.set(v as any); }
-  setNewVarName(v: string)   { this.newVariantName.set(v); }
-  setNewVarPrice(v: string)  { this.newVariantPrice.set(+v); }
-  toggleNewVarDefault()      { this.newVariantDefault.update(v => !v); }
-  setNewModName(v: string)   { this.newModName.set(v); }
-  setNewModPrice(v: string)  { this.newModPrice.set(+v); }
-  toggleNewModDefault()      { this.newModDefault.update(v => !v); }
+  setCatName(v: string) { this.catName.set(v); }
+  setCatIcon(v: string) { this.catIcon.set(v); }
+  setCustomIconInput(v: string) { this.customIconInput.set(v); }
+  toggleCatVisible() { this.catVisible.update(v => !v); }
+  setItemName(v: string) { this.itemName.set(v); }
+  setItemDesc(v: string) { this.itemDesc.set(v); }
+  setItemPrice(v: string) { this.itemPrice.set(v ? +v : null); }
+  toggleFeatured() { this.itemFeatured.update(v => !v); }
+  toggleAvailable() { this.itemAvailable.update(v => !v); }
+  toggleVeg() { this.itemVeg.update(v => !v); }
+  toggleVegan() { this.itemVegan.update(v => !v); }
+  toggleGluten() { this.itemGluten.update(v => !v); }
+  toggleSpicy() { this.itemSpicy.update(v => !v); }
+  setItemTags(v: string) { this.itemTags.set(v); }
+  setVgName(v: string) { this.vgName.set(v); }
+  toggleVgRequired() { this.vgRequired.update(v => !v); }
+  setVgUiType(v: string) { this.vgUiType.set(v as any); }
+  setMgName(v: string) { this.mgName.set(v); }
+  setMgDesc(v: string) { this.mgDesc.set(v); }
+  toggleMgRequired() { this.mgRequired.update(v => !v); }
+  setMgMin(v: string) { this.mgMin.set(+v); }
+  setMgMax(v: string) { this.mgMax.set(+v); }
+  setMgUiType(v: string) { this.mgUiType.set(v as any); }
+  setNewVarName(v: string) { this.newVariantName.set(v); }
+  setNewVarPrice(v: string) { this.newVariantPrice.set(+v); }
+  toggleNewVarDefault() { this.newVariantDefault.update(v => !v); }
+  setNewModName(v: string) { this.newModName.set(v); }
+  setNewModPrice(v: string) { this.newModPrice.set(+v); }
+  toggleNewModDefault() { this.newModDefault.update(v => !v); }
 }
