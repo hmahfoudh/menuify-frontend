@@ -22,10 +22,7 @@
 @if (!loading() && menu(); as m) {
 
   <!-- Welcome Popup -->
-   <app-welcome-popup
-    [tenant]="m.tenant"
-  >
-  </app-welcome-popup>
+  <app-welcome-popup [tenant]="m.tenant"></app-welcome-popup>
 
   <!-- CART TOAST -->
   @if (cartToast(); as toast) {
@@ -37,10 +34,7 @@
   }
 
   <!-- HEADER -->
-  <app-menu-header
-    [tenant]="m.tenant"
-    >
-  </app-menu-header>
+  <app-menu-header [tenant]="m.tenant"></app-menu-header>
 
   <!-- CATEGORY TABS -->
   <app-category-tabs
@@ -98,6 +92,7 @@
       [currency]="currency()"
       [selectedVariant]="selectedVariant()"
       [selectedMods]="selectedMods()"
+      [selectedPairings]="selectedPairings()"
       [modalQty]="modalQty()"
       [specialNote]="specialNote()"
       [canAddToCart]="canAddToCart()"
@@ -105,6 +100,7 @@
       (close)="closeModal()"
       (selectVariant)="selectVariant($event)"
       (toggleMod)="toggleMod($event)"
+      (togglePairing)="togglePairing($event)"
       (decQty)="decModalQty()"
       (incQty)="incModalQty()"
       (setSpecialNote)="setSpecialNote($event)"

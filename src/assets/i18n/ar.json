@@ -658,6 +658,57 @@
       "save_group": "حفظ المجموعة"
     }
   },
+  "pairing": {
+    "item_panel": {
+      "title": "التوصيات",
+      "manage_btn": "إدارة",
+      "hint": "اقترح أصنافاً تتناسب مع هذا الطبق — تُعرض للعملاء في صفحة تفاصيل الصنف."
+    },
+    "panel": {
+      "title_list": "مجموعات الإقتران",
+      "title_create": "مجموعة إقتران جديدة",
+      "back_to_item": "العودة إلى الصنف",
+      "back_to_groups": "العودة إلى المجموعات",
+      "cancel": "إلغاء",
+      "add_group": "إضافة مجموعة",
+      "empty_sub": "لا توجد مجموعات إقتران بعد. أضف مجموعة لاقتراح أصناف مع هذا الطبق.",
+      "required": "إلزامي",
+      "optional": "اختياري",
+      "items_count": "أصناف",
+      "no_pairings": "لم يُضف أي صنف بعد.",
+      "free": "مجاناً",
+      "off": "غير متاح"
+    },
+    "group_form": {
+      "name_label": "اسم المجموعة",
+      "name_placeholder": "مثال: يتناسب مع",
+      "name_ar_label": "الاسم (عربي)",
+      "name_ar_placeholder": "مثال: أضف إليه",
+      "name_fr_label": "الاسم (فرنسي)",
+      "name_fr_placeholder": "مثال: Accompagnez avec",
+      "optional": "اختياري",
+      "min_label": "الحد الأدنى للاختيار",
+      "min_hint": "0 = مجموعة اختيارية",
+      "max_label": "الحد الأقصى للاختيار",
+      "max_hint": "‎-1 = غير محدود",
+      "save_first_hint": "احفظ المجموعة أولاً، ثم أضف الأصناف إليها.",
+      "pairings_section": "الأصناف المقترنة",
+      "free": "مجاناً",
+      "add_pairing_btn": "إضافة صنف",
+      "confirm_add": "إضافة",
+      "cancel": "إلغاء",
+      "create_btn": "إنشاء المجموعة",
+      "save_btn": "حفظ المجموعة"
+    },
+    "search_panel": {
+      "title": "البحث عن صنف",
+      "back": "العودة إلى المجموعة",
+      "placeholder": "ابحث باسم الصنف…",
+      "hint": "اكتب للبحث في قائمتك.",
+      "no_results": "لا توجد نتائج لـ \"{{ q }}\".",
+      "unavailable": "غير متاح"
+    }
+  },
   "zr": {
     "header": {
       "title": "تقارير Z",

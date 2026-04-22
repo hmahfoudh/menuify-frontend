@@ -11,90 +11,169 @@
     </button>
 
     @if (item.imageUrl) {
-    <div class="mp-modal__img">
-      <img [src]="item.imageUrl" [alt]="item.name">
-    </div>
+      <div class="mp-modal__img">
+        <img [src]="item.imageUrl" [alt]="item.name">
+      </div>
     }
 
     <div class="mp-modal__body">
 
       <h2 class="mp-modal__name">{{ item.name }}</h2>
       @if (item.description) {
-      <p class="mp-modal__desc">{{ item.description }}</p>
+        <p class="mp-modal__desc">{{ item.description }}</p>
       }
       <div class="mp-modal__diet">
         @if (item.vegetarian) { <span class="mp-diet-tag">🌿 {{ 'menu.diet.vegetarian' | translate }}</span> }
-        @if (item.vegan) { <span class="mp-diet-tag">🌱 {{ 'menu.diet.vegan' | translate }}</span> }
-        @if (item.glutenFree) { <span class="mp-diet-tag">🌾 {{ 'menu.diet.gluten_free' | translate }}</span>}
-        @if (item.spicy) { <span class="mp-diet-tag">🌶️ {{ 'menu.diet.spicy' | translate }}</span> }
+        @if (item.vegan)      { <span class="mp-diet-tag">🌱 {{ 'menu.diet.vegan' | translate }}</span> }
+        @if (item.glutenFree) { <span class="mp-diet-tag">🌾 {{ 'menu.diet.gluten_free' | translate }}</span> }
+        @if (item.spicy)      { <span class="mp-diet-tag">🌶️ {{ 'menu.diet.spicy' | translate }}</span> }
       </div>
 
-      <!-- Variant groups -->
+      <!-- ── Variant groups ─────────────────────────────────────────────── -->
       @for (group of item.variantGroups; track group.id) {
-      <div class="mp-option-group">
-        <div class="mp-option-group__head">
-          <span class="mp-option-group__name">{{ group.name }}</span>
-          @if (group.required) {
-          <span class="mp-required-badge">{{ 'item_modal.required' | translate }}</span>
-          }
-        </div>
-        <div class="mp-variants" [class]="'mp-variants--' + group.uiType">
-          @for (v of group.variants; track v.id) {
-          <button class="mp-variant" [class.mp-variant--active]="selectedVariant?.id === v.id"
-            (click)="selectVariant.emit(v)" type="button">
-            @if (v.imageUrl) {
-            <img [src]="v.imageUrl" [alt]="v.name" class="mp-variant__img">
-            }
-            <span class="mp-variant__name">{{ v.name }}</span>
-            <span class="mp-variant__price">
-              {{ fmt(v.price) }} {{ currency }}
-            </span>
-          </button>
-          }
-        </div>
-      </div>
-      }
-
-      <!-- Modifier groups -->
-      @for (group of item.modifierGroups; track group.id) {
-      <div class="mp-option-group">
-        <div class="mp-option-group__head">
-          <span class="mp-option-group__name">{{ group.name }}</span>
-          <div class="mp-option-group__meta">
+        <div class="mp-option-group">
+          <div class="mp-option-group__head">
+            <span class="mp-option-group__name">{{ group.name }}</span>
             @if (group.required) {
-            <span class="mp-required-badge">{{ 'item_modal.required' | translate }}</span>
+              <span class="mp-required-badge">{{ 'item_modal.required' | translate }}</span>
             }
-            @if (group.maxSelect > 1) {
-            <span class="mp-select-hint">{{ 'item_modal.up_to' | translate: { max: group.maxSelect } }}</span>
+          </div>
+          <div class="mp-variants" [class]="'mp-variants--' + group.uiType">
+            @for (v of group.variants; track v.id) {
+              <button class="mp-variant" [class.mp-variant--active]="selectedVariant?.id === v.id"
+                (click)="selectVariant.emit(v)" type="button">
+                @if (v.imageUrl) {
+                  <img [src]="v.imageUrl" [alt]="v.name" class="mp-variant__img">
+                }
+                <span class="mp-variant__name">{{ v.name }}</span>
+                <span class="mp-variant__price">{{ fmt(v.price) }} {{ currency }}</span>
+              </button>
             }
           </div>
         </div>
-        <div class="mp-modifiers">
-          @for (mod of group.modifiers; track mod.id) {
-          <button class="mp-mod" [class.mp-mod--active]="isModSelected(mod.id)" (click)="toggleMod.emit({ modId: mod.id, group: group })"
-            type="button">
-            <div class="mp-mod__check" [class.mp-mod__check--on]="isModSelected(mod.id)"
-              [class.mp-mod__check--radio]="group.uiType === 'radio'">
-              @if (isModSelected(mod.id)) {
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"
-                stroke-linecap="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              }
-            </div>
-            <span class="mp-mod__name">{{ mod.name }}</span>
-            @if (mod.priceDelta > 0) {
-            <span class="mp-mod__price">
-              +{{ fmt(mod.priceDelta) }} {{ currency }}
-            </span>
-            }
-          </button>
-          }
-        </div>
-      </div>
       }
 
-      <!-- Special note -->
+      <!-- ── Modifier groups ────────────────────────────────────────────── -->
+      @for (group of item.modifierGroups; track group.id) {
+        <div class="mp-option-group">
+          <div class="mp-option-group__head">
+            <span class="mp-option-group__name">{{ group.name }}</span>
+            <div class="mp-option-group__meta">
+              @if (group.required) {
+                <span class="mp-required-badge">{{ 'item_modal.required' | translate }}</span>
+              }
+              @if (group.maxSelect > 1) {
+                <span class="mp-select-hint">{{ 'item_modal.up_to' | translate: { max: group.maxSelect } }}</span>
+              }
+            </div>
+          </div>
+          <div class="mp-modifiers">
+            @for (mod of group.modifiers; track mod.id) {
+              <button class="mp-mod" [class.mp-mod--active]="isModSelected(mod.id)"
+                (click)="toggleMod.emit({ modId: mod.id, group: group })" type="button">
+                <div class="mp-mod__check"
+                  [class.mp-mod__check--on]="isModSelected(mod.id)"
+                  [class.mp-mod__check--radio]="group.uiType === 'radio'">
+                  @if (isModSelected(mod.id)) {
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="3.5" stroke-linecap="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  }
+                </div>
+                <span class="mp-mod__name">{{ mod.name }}</span>
+                @if (mod.priceDelta > 0) {
+                  <span class="mp-mod__price">+{{ fmt(mod.priceDelta) }} {{ currency }}</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ── Pairing groups ─────────────────────────────────────────────── -->
+      @for (group of item.pairingGroups; track group.id) {
+        <div class="mp-option-group">
+          <div class="mp-option-group__head">
+            <span class="mp-option-group__name">{{ group.name }}</span>
+            <div class="mp-option-group__meta">
+              @if (group.required) {
+                <span class="mp-required-badge">{{ 'item_modal.required' | translate }}</span>
+              } @else {
+                <span class="mp-select-hint">{{ 'item_modal.optional' | translate }}</span>
+              }
+              @if (group.maxSelect > 1) {
+                <span class="mp-select-hint">
+                  {{ 'item_modal.up_to' | translate: { max: group.maxSelect } }}
+                </span>
+              }
+              @if (group.maxSelect === -1 && group.pairings.length > 0) {
+                <span class="mp-select-hint">{{ 'item_modal.pairing_pick_any' | translate }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Pairing items list -->
+          <div class="mp-pairings">
+            @for (pairing of group.pairings; track pairing.id) {
+              <button
+                class="mp-pairing"
+                [class.mp-pairing--active]="isPairingSelected(pairing.id)"
+                [class.mp-pairing--disabled]="isPairingDisabled(pairing, group)"
+                [disabled]="isPairingDisabled(pairing, group)"
+                (click)="togglePairing.emit({ pairing: pairing, group: group })"
+                type="button">
+
+                <!-- Item thumbnail -->
+                <div class="mp-pairing__img">
+                  @if (pairing.pairedItemImageUrl) {
+                    <img [src]="pairing.pairedItemImageUrl" [alt]="pairing.pairedItemName" loading="lazy">
+                  } @else {
+                    <span class="mp-pairing__img-placeholder">🍽️</span>
+                  }
+                </div>
+
+                <!-- Name -->
+                <span class="mp-pairing__name">{{ pairing.pairedItemName }}</span>
+
+                <!-- Price delta -->
+                @if (pairing.priceDelta > 0) {
+                  <span class="mp-pairing__price">+{{ fmt(pairing.priceDelta) }} {{ currency }}</span>
+                } @else {
+                  <span class="mp-pairing__free">{{ 'item_modal.pairing_free' | translate }}</span>
+                }
+
+                <!-- Selection indicator: radio dot or checkbox tick -->
+                <div class="mp-pairing__check"
+                  [class.mp-pairing__check--on]="isPairingSelected(pairing.id)"
+                  [class.mp-pairing__check--radio]="isRadioGroup(group)">
+                  @if (isPairingSelected(pairing.id)) {
+                    @if (isRadioGroup(group)) {
+                      <span class="mp-pairing__check-dot"></span>
+                    } @else {
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="3.5" stroke-linecap="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    }
+                  }
+                </div>
+
+              </button>
+            }
+          </div>
+
+          <!-- Selection count feedback when group has a cap -->
+          @if (group.maxSelect > 1) {
+            <p class="mp-pairing-count">
+              {{ groupSelectedCount(group) }} / {{ group.maxSelect }}
+              {{ 'item_modal.pairing_selected' | translate }}
+            </p>
+          }
+        </div>
+      }
+
+      <!-- ── Special note ───────────────────────────────────────────────── -->
       <div class="mp-note">
         <label class="mp-note__label" for="specNote">
           {{ 'item_modal.special_instructions' | translate }}
@@ -105,7 +184,7 @@
           [placeholder]="'item_modal.note_placeholder' | translate" rows="2"></textarea>
       </div>
 
-      <!-- Footer: qty + add -->
+      <!-- ── Footer: qty + add ──────────────────────────────────────────── -->
       <div class="mp-modal__footer">
         <div class="mp-stepper">
           <button type="button" class="mp-stepper__btn" (click)="decQty.emit()">−</button>
@@ -115,9 +194,7 @@
 
         <button class="mp-add-btn" [disabled]="!canAddToCart" (click)="addToCart.emit()" type="button">
           {{ 'item_modal.add_to_order' | translate }}
-          <span class="mp-add-btn__price">
-            {{ fmt(modalTotal) }} {{ currency }}
-          </span>
+          <span class="mp-add-btn__price">{{ fmt(modalTotal) }} {{ currency }}</span>
         </button>
       </div>
 

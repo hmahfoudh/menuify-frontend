@@ -658,6 +658,57 @@
       "save_group": "Enregistrer le groupe"
     }
   },
+  "pairing": {
+    "item_panel": {
+      "title": "Recommandations",
+      "manage_btn": "Gérer",
+      "hint": "Suggérez des articles qui accompagnent bien ce plat — affichés aux clients dans la vue détail."
+    },
+    "panel": {
+      "title_list": "Groupes d'accompagnement",
+      "title_create": "Nouveau groupe",
+      "back_to_item": "Retour à l'article",
+      "back_to_groups": "Retour aux groupes",
+      "cancel": "Annuler",
+      "add_group": "Ajouter un groupe",
+      "empty_sub": "Aucun groupe d'accompagnement. Ajoutez-en un pour recommander des articles avec ce plat.",
+      "required": "Obligatoire",
+      "optional": "Facultatif",
+      "items_count": "articles",
+      "no_pairings": "Aucun article ajouté.",
+      "free": "Gratuit",
+      "off": "INDISPO"
+    },
+    "group_form": {
+      "name_label": "Nom du groupe",
+      "name_placeholder": "ex. À accompagner avec",
+      "name_ar_label": "Nom (Arabe)",
+      "name_ar_placeholder": "ex. أضف إليه",
+      "name_fr_label": "Nom (Français)",
+      "name_fr_placeholder": "ex. Accompagnez avec",
+      "optional": "optionnel",
+      "min_label": "Sélections min.",
+      "min_hint": "0 = groupe facultatif",
+      "max_label": "Sélections max.",
+      "max_hint": "-1 = illimité",
+      "save_first_hint": "Enregistrez le groupe d'abord, puis ajoutez des articles.",
+      "pairings_section": "Articles associés",
+      "free": "Gratuit",
+      "add_pairing_btn": "Ajouter un article",
+      "confirm_add": "Ajouter",
+      "cancel": "Annuler",
+      "create_btn": "Créer le groupe",
+      "save_btn": "Enregistrer"
+    },
+    "search_panel": {
+      "title": "Rechercher un article",
+      "back": "Retour au groupe",
+      "placeholder": "Rechercher par nom d'article…",
+      "hint": "Tapez pour rechercher dans votre catalogue.",
+      "no_results": "Aucun article trouvé pour « {{ q }} ».",
+      "unavailable": "Indisponible"
+    }
+  },
   "zr": {
     "header": {
       "title": "Rapports Z",

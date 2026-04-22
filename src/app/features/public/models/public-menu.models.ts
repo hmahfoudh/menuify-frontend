@@ -59,6 +59,7 @@ export interface PublicItemResponse {
   position:       number;
   variantGroups:  PublicVariantGroupResponse[];
   modifierGroups: PublicModifierGroupResponse[];
+  pairingGroups:  PublicPairingGroupResponse[];   // ← added
   likeCount:      number;
 }
 
@@ -97,6 +98,34 @@ export interface PublicModifierResponse {
   name:       string;
   priceDelta: number;
   isDefault:  boolean;
+}
+
+// ── Pairing types ─────────────────────────────────────────────────────────────
+
+export interface PublicPairingGroupResponse {
+  id:          string;
+  name:        string;
+  nameAr:      string | null;
+  nameFr:      string | null;
+  minSelect:   number;
+  maxSelect:   number;  // -1 = unlimited
+  required:    boolean;
+  position:    number;
+  pairings:    PublicPairingResponse[];
+}
+
+export interface PublicPairingResponse {
+  id:                   string;
+  groupId:              string;
+  pairedItemId:         string;
+  pairedItemName:       string;
+  pairedItemNameAr:     string | null;
+  pairedItemNameFr:     string | null;
+  pairedItemImageUrl:   string | null;
+  priceDelta:           number;
+  available:            boolean;
+  effectivelyAvailable: boolean;
+  position:             number;
 }
 
 export interface ThemeResponse {
@@ -180,18 +209,18 @@ export interface TrackedOrder {
   notes:            string | null;
   createdAt:        string;
   confirmedAt:      string | null;
-  estimatedMinutes: number | null;     // set by restaurant staff
-  restaurantMessage:string | null;     // message shown on tracking screen
-  minutesRemaining: number | null;     // computed by backend: ETA - elapsed
+  estimatedMinutes: number | null;
+  restaurantMessage:string | null;
+  minutesRemaining: number | null;
   lines:            TrackedOrderLine[];
 }
 
 export interface TrackingStatusMeta {
   label:    string;
   desc:     string;
-  step:     number;   // 0-4 for progress bar
+  step:     number;
   color:    string;
-  terminal: boolean;  // true = no more updates expected
+  terminal: boolean;
 }
 
 export const TRACKING_STATUS_META: Record<TrackingStatus, TrackingStatusMeta> = {

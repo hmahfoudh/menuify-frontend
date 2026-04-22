@@ -1,5 +1,7 @@
 // ── Category ──────────────────────────────────────────────────────────────────
 
+import { ItemPairingGroupResponse } from "./pairing.models";
+
 export interface CategoryResponse {
   id:        string;
   name:      string;
@@ -51,6 +53,7 @@ export interface ItemResponse {
   hasVariants: boolean;
   variantGroups:  VariantGroupResponse[];
   modifierGroups: ModifierGroupResponse[];
+  pairingGroups:  ItemPairingGroupResponse[];
   createdAt:      string;
 }
 

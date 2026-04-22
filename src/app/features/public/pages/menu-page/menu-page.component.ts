@@ -14,6 +14,8 @@ import {
   PublicItemResponse,
   PublicVariantResponse,
   PublicModifierGroupResponse,
+  PublicPairingGroupResponse,
+  PublicPairingResponse,
   CreateOrderRequest,
   TrackedOrder,
   TrackingStatus,
@@ -61,48 +63,51 @@ export interface SocialLink {
     SuccessScreenComponent, TrackingPanelComponent, BottomBarComponent,
     MenuFooterComponent, ClosedBannerComponent, CartToastComponent,
     WelcomePopupComponent
-],
+  ],
   templateUrl: './menu-page.component.html',
   styleUrls: ['./menu-page.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class MenuPageComponent implements OnInit, OnDestroy {
 
-  private menuSvc = inject(PublicMenuService);
-  private cart = inject(CartService);
-  private themeSvc = inject(ThemeInjectorService);
-  private session = inject(SessionService);
-  private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private menuSvc     = inject(PublicMenuService);
+  private cart        = inject(CartService);
+  private themeSvc    = inject(ThemeInjectorService);
+  private session     = inject(SessionService);
+  private isBrowser   = isPlatformBrowser(inject(PLATFORM_ID));
   private itemLikeSvc = inject(ItemLikeService);
-  private localStorage = inject(LocalStorageService);
+  private localStorage= inject(LocalStorageService);
 
-  // ── Menu data ────────────────────────────────────────────────────────────
-  menu = signal<PublicMenuResponse | null>(null);
-  loading = signal(true);
-  error = signal<string | null>(null);
-  activeCategory = signal<string>('');
+  // ── Menu data ─────────────────────────────────────────────────────────────
+  menu            = signal<PublicMenuResponse | null>(null);
+  loading         = signal(true);
+  error           = signal<string | null>(null);
+  activeCategory  = signal<string>('');
 
   // ── Cart (proxied from CartService) ──────────────────────────────────────
-  cartItems = this.cart.items;
-  cartCount = this.cart.count;
+  cartItems    = this.cart.items;
+  cartCount    = this.cart.count;
   cartSubtotal = this.cart.subtotal;
-  cartOpen = this.cart.isOpen;
-  cartEmpty = this.cart.isEmpty;
+  cartOpen     = this.cart.isOpen;
+  cartEmpty    = this.cart.isEmpty;
+  cartMode     = signal<'cart' | 'orders'>('cart');
 
-  cartMode = signal<'cart' | 'orders'>('cart');
-
-  // ── ItemLikes ──────────────────────────────────────────────────────────────
-  likedItems = signal<Set<string>>(new Set());
-  itemLikeCounts = signal<Map<string, number>>(new Map());
+  // ── ItemLikes ─────────────────────────────────────────────────────────────
+  likedItems        = signal<Set<string>>(new Set());
+  itemLikeCounts    = signal<Map<string, number>>(new Map());
   private likeInFlight = signal<Set<string>>(new Set());
 
   // ── Item modal ────────────────────────────────────────────────────────────
-  modalItem = signal<PublicItemResponse | null>(null);
+  modalItem       = signal<PublicItemResponse | null>(null);
   modalCategoryId = signal<string>('');
   selectedVariant = signal<PublicVariantResponse | null>(null);
-  selectedMods = signal<Set<string>>(new Set());
-  modalQty = signal(1);
-  specialNote = signal('');
+  selectedMods    = signal<Set<string>>(new Set());
+  modalQty        = signal(1);
+  specialNote     = signal('');
+
+  // ── Pairing selections ────────────────────────────────────────────────────
+  // Map of pairingId → count (0 or 1 for checkbox; 1 for radio, 0 for others)
+  selectedPairings = signal<Map<string, number>>(new Map());
 
   modalPrice = computed(() => {
     const item = this.modalItem();
@@ -118,34 +123,34 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   // ── Order flow ────────────────────────────────────────────────────────────
   orderStep = signal<OrderStep>('idle');
 
-  // ── Opening hours ──────────────────────────────────────────────────────────
-  isOpen = signal(true);
-  nextOpenTime = signal<string | null>(null);
+  // ── Opening hours ─────────────────────────────────────────────────────────
+  isOpen        = signal(true);
+  nextOpenTime  = signal<string | null>(null);
   private hoursCheckInterval?: ReturnType<typeof setInterval>;
 
-  submitting = signal(false);
-  orderError = signal<string | null>(null);
+  submitting  = signal(false);
+  orderError  = signal<string | null>(null);
 
-  customerName = signal('');
+  customerName  = signal('');
   customerPhone = signal('');
-  orderType = signal<OrderType>('DINE_IN');
-  tableNumber = signal('');
-  orderNotes = signal('');
+  orderType     = signal<OrderType>('DINE_IN');
+  tableNumber   = signal('');
+  orderNotes    = signal('');
 
   // ── Order tracking ────────────────────────────────────────────────────────
-  trackingView = signal(false);
-  trackingRef = signal('');
-  trackingError = signal<string | null>(null);
+  trackingView    = signal(false);
+  trackingRef     = signal('');
+  trackingError   = signal<string | null>(null);
   trackingLoading = signal(false);
-  activeOrders = signal<TrackedOrder[]>([]);
-  expandedRef = signal<string | null>(null);
+  activeOrders    = signal<TrackedOrder[]>([]);
+  expandedRef     = signal<string | null>(null);
 
   private trackPoll?: Subscription;
 
-  readonly trackingSteps = TRACKING_STEPS;
-  readonly trackingMetaMap = TRACKING_STATUS_META;
+  readonly trackingSteps    = TRACKING_STEPS;
+  readonly trackingMetaMap  = TRACKING_STATUS_META;
 
-  // ── WiFi password copy state ───────────────────────────────────────────────
+  // ── WiFi password copy state ──────────────────────────────────────────────
   wifiCopied = signal(false);
 
   // ── Cart toast ────────────────────────────────────────────────────────────
@@ -153,9 +158,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   private toastTimer?: ReturnType<typeof setTimeout>;
 
   // ── Computed ──────────────────────────────────────────────────────────────
-  categories = computed(() => this.menu()?.categories ?? []);
-  currency = computed(() => this.menu()?.tenant.currencySymbol ?? 'DT');
-  whatsapp = computed(() => this.menu()?.tenant.whatsappNumber ?? '');
+  categories  = computed(() => this.menu()?.categories ?? []);
+  currency    = computed(() => this.menu()?.tenant.currencySymbol ?? 'DT');
+  whatsapp    = computed(() => this.menu()?.tenant.whatsappNumber ?? '');
 
   latestOrderRef = computed(() => {
     const orders = this.activeOrders();
@@ -167,16 +172,30 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   canAddToCart = computed(() => {
     const item = this.modalItem();
     if (!item) return false;
+
+    // Variant groups: all required groups must have a selection
     for (const g of item.variantGroups) {
       if (g.required && !this.selectedVariant()) return false;
     }
+
+    // Modifier groups: respect minSelect
     for (const g of item.modifierGroups) {
       if (g.required && g.minSelect > 0) {
-        const count = g.modifiers
-          .filter(m => this.selectedMods().has(m.id)).length;
+        const count = g.modifiers.filter(m => this.selectedMods().has(m.id)).length;
         if (count < g.minSelect) return false;
       }
     }
+
+    // Pairing groups: respect minSelect for required groups
+    for (const g of item.pairingGroups ?? []) {
+      if (g.required && g.minSelect > 0) {
+        const count = g.pairings.reduce(
+          (sum, p) => sum + (this.selectedPairings().get(p.id) ?? 0), 0
+        );
+        if (count < g.minSelect) return false;
+      }
+    }
+
     return true;
   });
 
@@ -186,11 +205,11 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (!t) return [];
     const links: SocialLink[] = [];
     if (t.instagramUrl) links.push({ platform: 'instagram', url: t.instagramUrl, handle: this.extractHandle(t.instagramUrl) });
-    if (t.facebookUrl) links.push({ platform: 'facebook', url: t.facebookUrl, handle: this.extractHandle(t.facebookUrl) });
-    if (t.tiktokUrl) links.push({ platform: 'tiktok', url: t.tiktokUrl, handle: this.extractHandle(t.tiktokUrl) });
-    if (t.twitterUrl) links.push({ platform: 'twitter', url: t.twitterUrl, handle: this.extractHandle(t.twitterUrl) });
-    if (t.youtubeUrl) links.push({ platform: 'youtube', url: t.youtubeUrl, handle: this.extractHandle(t.youtubeUrl) });
-    if (t.linkedInUrl) links.push({ platform: 'linkedin', url: t.linkedInUrl, handle: this.extractHandle(t.linkedInUrl) });
+    if (t.facebookUrl)  links.push({ platform: 'facebook',  url: t.facebookUrl,  handle: this.extractHandle(t.facebookUrl) });
+    if (t.tiktokUrl)    links.push({ platform: 'tiktok',    url: t.tiktokUrl,    handle: this.extractHandle(t.tiktokUrl) });
+    if (t.twitterUrl)   links.push({ platform: 'twitter',   url: t.twitterUrl,   handle: this.extractHandle(t.twitterUrl) });
+    if (t.youtubeUrl)   links.push({ platform: 'youtube',   url: t.youtubeUrl,   handle: this.extractHandle(t.youtubeUrl) });
+    if (t.linkedInUrl)  links.push({ platform: 'linkedin',  url: t.linkedInUrl,  handle: this.extractHandle(t.linkedInUrl) });
     return links;
   });
 
@@ -232,9 +251,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (!t) return false;
     return !!(
       t.instagramUrl || t.facebookUrl || t.tiktokUrl ||
-      t.twitterUrl || t.youtubeUrl || t.linkedInUrl ||
-      t.wifiName || t.whatsappNumber ||
-      t.address || t.city || t.country || t.googleMapsUrl
+      t.twitterUrl   || t.youtubeUrl  || t.linkedInUrl ||
+      t.wifiName     || t.whatsappNumber ||
+      t.address      || t.city        || t.country || t.googleMapsUrl
     );
   });
 
@@ -313,15 +332,20 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.modalQty.set(1);
     this.specialNote.set('');
 
+    // Default variant selection
     const allVariants = item.variantGroups.flatMap(g => g.variants);
     const def = allVariants.find(v => v.isDefault) ?? allVariants[0] ?? null;
     this.selectedVariant.set(item.variantGroups.length ? def : null);
 
+    // Default modifier selections
     const defaults = new Set<string>();
     item.modifierGroups.forEach(g =>
       g.modifiers.filter(m => m.isDefault).forEach(m => defaults.add(m.id))
     );
     this.selectedMods.set(defaults);
+
+    // Reset pairing selections (no pairings pre-selected by default)
+    this.selectedPairings.set(new Map());
 
     this.menuSvc.trackItemView(item.id, catId, this.session.getSessionId());
   }
@@ -339,8 +363,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       group.modifiers.forEach(m => mods.delete(m.id));
       mods.add(modId);
     } else {
-      const groupSelected = group.modifiers
-        .filter(m => mods.has(m.id)).length;
+      const groupSelected = group.modifiers.filter(m => mods.has(m.id)).length;
       if (mods.has(modId)) {
         mods.delete(modId);
       } else if (groupSelected < group.maxSelect) {
@@ -350,6 +373,44 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.selectedMods.set(mods);
   }
 
+  /**
+   * Toggle a pairing selection, respecting maxSelect per group.
+   *
+   * maxSelect === 1  → radio: deselect all others in the group first
+   * maxSelect === -1 → unlimited: free toggle
+   * maxSelect > 1    → checkbox with cap: block when at limit
+   */
+  togglePairing(event: { pairing: PublicPairingResponse; group: PublicPairingGroupResponse }): void {
+    const { pairing, group } = event;
+    const map = new Map(this.selectedPairings());
+    const currentlySelected = (map.get(pairing.id) ?? 0) > 0;
+
+    if (currentlySelected) {
+      // Deselect
+      map.delete(pairing.id);
+    } else {
+      if (group.maxSelect === 1) {
+        // Radio: clear all others in this group first
+        group.pairings.forEach(p => map.delete(p.id));
+        map.set(pairing.id, 1);
+      } else if (group.maxSelect === -1) {
+        // Unlimited: just add
+        map.set(pairing.id, 1);
+      } else {
+        // Capped: only add if under the limit
+        const groupCount = group.pairings.reduce(
+          (sum, p) => sum + (map.get(p.id) ?? 0), 0
+        );
+        if (groupCount < group.maxSelect) {
+          map.set(pairing.id, 1);
+        }
+        // If at limit, do nothing (button is disabled in template anyway)
+      }
+    }
+
+    this.selectedPairings.set(map);
+  }
+
   isModSelected(id: string): boolean {
     return this.selectedMods().has(id);
   }
@@ -357,10 +418,15 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   decModalQty(): void { if (this.modalQty() > 1) this.modalQty.update(q => q - 1); }
   incModalQty(): void { this.modalQty.update(q => q + 1); }
 
+  /**
+   * Add the main item to the cart, then add each selected pairing
+   * as a separate cart line (quantity 1, no variant, no modifiers).
+   */
   addToCart(): void {
     const item = this.modalItem();
     if (!item || !this.canAddToCart()) return;
 
+    // 1. Add the main item
     const mods = item.modifierGroups
       .flatMap(g => g.modifiers)
       .filter(m => this.selectedMods().has(m.id));
@@ -369,6 +435,46 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       item, this.selectedVariant(), mods,
       this.modalQty(), this.specialNote()
     );
+
+    // 2. Add each selected pairing as a separate cart line
+    //    We need to find the full PublicItemResponse for the paired item.
+    //    Since pairings only carry display data (name, image, priceDelta),
+    //    we construct a minimal cart entry using the pairing's delta as the
+    //    unit price override. CartService.addItem accepts a full item, so we
+    //    build a lightweight proxy from what the pairing carries.
+    const allPairings = (item.pairingGroups ?? []).flatMap(g => g.pairings);
+    const selectedPairings = allPairings.filter(
+      p => (this.selectedPairings().get(p.id) ?? 0) > 0
+    );
+
+    selectedPairings.forEach(p => {
+      // Build a minimal PublicItemResponse that represents the paired item
+      // so CartService can handle it uniformly. basePrice = priceDelta.
+      const pairingAsItem: PublicItemResponse = {
+        id:             p.pairedItemId,
+        name:           p.pairedItemName,
+        nameAr:         p.pairedItemNameAr,
+        nameFr:         p.pairedItemNameFr,
+        description:    null,
+        basePrice:      p.priceDelta,
+        displayPrice:   p.priceDelta,
+        imageUrl:       p.pairedItemImageUrl,
+        featured:       false,
+        hasVariants:    false,
+        vegetarian:     false,
+        vegan:          false,
+        glutenFree:     false,
+        spicy:          false,
+        tags:           null,
+        position:       0,
+        variantGroups:  [],
+        modifierGroups: [],
+        pairingGroups:  [],
+        likeCount:      0,
+      };
+      this.cart.addItem(pairingAsItem, null, [], 1, '');
+    });
+
     this.closeModal();
     this.showCartToast(item.name);
   }
@@ -392,11 +498,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   closeCart(): void { this.cart.close(); }
 
   toggleCart(): void {
-    if (this.cart.isOpen()) {
-      this.cart.close();
-    } else {
-      this.openCart();
-    }
+    if (this.cart.isOpen()) { this.cart.close(); }
+    else { this.openCart(); }
   }
 
   setCartMode(mode: 'cart' | 'orders'): void { this.cartMode.set(mode); }
@@ -416,13 +519,13 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.cart.open();
   }
 
-  setOrderTypeDineIn(): void { this.orderType.set('DINE_IN'); }
+  setOrderTypeDineIn():   void { this.orderType.set('DINE_IN'); }
   setOrderTypeTakeaway(): void { this.orderType.set('TAKEAWAY'); }
-  setTableNumber(v: string): void { this.tableNumber.set(v); }
-  setCustomerName(v: string): void { this.customerName.set(v); }
+  setTableNumber(v: string):   void { this.tableNumber.set(v); }
+  setCustomerName(v: string):  void { this.customerName.set(v); }
   setCustomerPhone(v: string): void { this.customerPhone.set(v); }
-  setOrderNotes(v: string): void { this.orderNotes.set(v); }
-  setSpecialNote(v: string): void { this.specialNote.set(v); }
+  setOrderNotes(v: string):    void { this.orderNotes.set(v); }
+  setSpecialNote(v: string):   void { this.specialNote.set(v); }
 
   submitOrder(): void {
     if (this.cart.isEmpty()) return;
@@ -430,17 +533,17 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.orderError.set(null);
 
     const req: CreateOrderRequest = {
-      customerName: this.customerName() || null,
-      customerPhone: this.customerPhone() || null,
-      orderType: this.orderType(),
-      tableNumber: this.tableNumber() || null,
+      customerName:    this.customerName() || null,
+      customerPhone:   this.customerPhone() || null,
+      orderType:       this.orderType(),
+      tableNumber:     this.tableNumber() || null,
       customerAddress: null,
-      notes: this.orderNotes() || null,
+      notes:           this.orderNotes() || null,
       lines: this.cartItems().map(c => ({
-        itemId: c.item.id,
-        variantId: c.variant?.id ?? null,
-        quantity: c.quantity,
-        modifierIds: c.modifiers.map(m => m.id),
+        itemId:              c.item.id,
+        variantId:           c.variant?.id ?? null,
+        quantity:            c.quantity,
+        modifierIds:         c.modifiers.map(m => m.id),
         specialInstructions: c.specialNote || null,
       }))
     };
@@ -459,9 +562,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  backToMenu(): void {
-    this.orderStep.set('idle');
-  }
+  backToMenu(): void { this.orderStep.set('idle'); }
 
   openTracking(ref?: string): void {
     this.trackingError.set(null);
@@ -555,7 +656,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
           refs.forEach(ref => {
             requests[ref] = this.menuSvc.trackOrder(ref);
           });
-
           requests['menu'] = this.menuSvc.getMenu();
 
           return forkJoin(requests);
@@ -622,11 +722,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       next: (response: ItemLikeToggleResponse) => {
         this.itemLikeCounts().set(itemId, response.newLikeCount);
         const likedSet = new Set(this.likedItems());
-        if (response.isNowLiked) {
-          likedSet.add(itemId);
-        } else {
-          likedSet.delete(itemId);
-        }
+        if (response.isNowLiked) { likedSet.add(itemId); }
+        else { likedSet.delete(itemId); }
         this.likedItems.set(likedSet);
         const cleared = new Set(this.likeInFlight());
         cleared.delete(itemId);
@@ -668,9 +765,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       const hours: Record<string, { open: boolean; from: string; to: string }>
         = JSON.parse(openingHoursJson);
 
-      const now = new Date();
+      const now  = new Date();
       const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-      const todayKey = days[now.getDay()];
+      const todayKey  = days[now.getDay()];
       const todaySlot = hours[todayKey];
 
       if (!todaySlot?.open) {
@@ -681,9 +778,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
       const [fh, fm] = todaySlot.from.split(':').map(Number);
       const [th, tm] = todaySlot.to.split(':').map(Number);
-      const nowMins = now.getHours() * 60 + now.getMinutes();
+      const nowMins  = now.getHours() * 60 + now.getMinutes();
       const fromMins = fh * 60 + fm;
-      const toMins = th * 60 + tm;
+      const toMins   = th * 60 + tm;
 
       if (nowMins >= fromMins && nowMins < toMins) {
         this.isOpen.set(true);
@@ -709,7 +806,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     for (let i = 1; i <= 7; i++) {
       const dayIdx = (now.getDay() + i) % 7;
       const dayKey = days[dayIdx];
-      const slot = hours[dayKey];
+      const slot   = hours[dayKey];
       if (slot?.open) {
         const dayLabel = i === 1 ? 'tomorrow'
           : days[dayIdx].charAt(0).toUpperCase() + days[dayIdx].slice(1);
@@ -730,9 +827,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   private extractHandle(url: string): string | null {
     try {
-      const path = new URL(url).pathname.replace(/\/$/, '');
+      const path  = new URL(url).pathname.replace(/\/$/, '');
       const parts = path.split('/').filter(Boolean);
-      const last = parts[parts.length - 1];
+      const last  = parts[parts.length - 1];
       return last ? `@${last}` : null;
     } catch {
       return null;
@@ -760,9 +857,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.modalItem()) { this.closeModal(); return; }
-    if (this.trackingView()) { this.closeTracking(); return; }
-    if (this.cartOpen()) { this.cart.close(); return; }
+    if (this.modalItem())              { this.closeModal();   return; }
+    if (this.trackingView())           { this.closeTracking(); return; }
+    if (this.cartOpen())               { this.cart.close();   return; }
     if (this.orderStep() === 'checkout') { this.backToCart(); }
   }
 }

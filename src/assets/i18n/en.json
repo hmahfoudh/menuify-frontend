@@ -658,6 +658,57 @@
       "save_group": "Save group"
     }
   },
+  "pairing": {
+    "item_panel": {
+      "title": "Recommendations",
+      "manage_btn": "Manage",
+      "hint": "Suggest items that go well with this dish — shown to customers in the item detail view."
+    },
+    "panel": {
+      "title_list": "Pairing Groups",
+      "title_create": "New Pairing Group",
+      "back_to_item": "Back to item",
+      "back_to_groups": "Back to groups",
+      "cancel": "Cancel",
+      "add_group": "Add Group",
+      "empty_sub": "No pairing groups yet. Add one to recommend items alongside this dish.",
+      "required": "Required",
+      "optional": "Optional",
+      "items_count": "items",
+      "no_pairings": "No items added yet.",
+      "free": "Free",
+      "off": "OFF"
+    },
+    "group_form": {
+      "name_label": "Group Name",
+      "name_placeholder": "e.g. Make it better with",
+      "name_ar_label": "Name (Arabic)",
+      "name_ar_placeholder": "e.g. أضف إليه",
+      "name_fr_label": "Name (French)",
+      "name_fr_placeholder": "e.g. Accompagnez avec",
+      "optional": "optional",
+      "min_label": "Min. selections",
+      "min_hint": "0 = optional group",
+      "max_label": "Max. selections",
+      "max_hint": "-1 = unlimited",
+      "save_first_hint": "Save the group first, then add items to it.",
+      "pairings_section": "Paired Items",
+      "free": "Free",
+      "add_pairing_btn": "Add Item",
+      "confirm_add": "Add",
+      "cancel": "Cancel",
+      "create_btn": "Create Group",
+      "save_btn": "Save Group"
+    },
+    "search_panel": {
+      "title": "Find an Item",
+      "back": "Back to group",
+      "placeholder": "Search by item name…",
+      "hint": "Type to search items from your catalog.",
+      "no_results": "No items found for \"{{ q }}\".",
+      "unavailable": "Unavailable"
+    }
+  },
   "zr": {
     "header": {
       "title": "Z-Reports",
