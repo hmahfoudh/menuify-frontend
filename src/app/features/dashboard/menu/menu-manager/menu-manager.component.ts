@@ -89,6 +89,9 @@ export class MenuManagerComponent implements OnInit {
   newModName = signal('');
   newModPrice = signal(0);
   newModDefault = signal(false);
+  newModImageFile = signal<File | null>(null);
+  newModImagePreview = signal<string | null>(null);
+
 
   // ── Drag-to-reorder ───────────────────────────────────────────────────────
   dragIndex = signal<number | null>(null);
@@ -600,6 +603,8 @@ export class MenuManagerComponent implements OnInit {
     this.newModName.set('');
     this.newModPrice.set(0);
     this.newModDefault.set(false);
+    this.newModImageFile.set(null);
+    this.newModImagePreview.set(null);
     this.activePanel.set('modifierGroup');
   }
 
@@ -699,27 +704,29 @@ export class MenuManagerComponent implements OnInit {
   }
 
   addModifier() {
-    const itemId = this.editingItem()?.id;
-    const groupId = this.editingMGroup()?.id;
-    if (!itemId || !groupId || !this.newModName().trim()) return;
+  const itemId = this.editingItem()?.id;
+  const groupId = this.editingMGroup()?.id;
+  if (!itemId || !groupId || !this.newModName().trim()) return;
 
-    const req: ModifierRequest = {
-      name: this.newModName().trim(),
-      priceDelta: this.newModPrice(),
-      available: true,
-      isDefault: this.newModDefault(),
-    };
+  const req: ModifierRequest = {
+    name: this.newModName().trim(),
+    priceDelta: this.newModPrice(),
+    available: true,
+    isDefault: this.newModDefault(),
+  };
 
-    this.itemSvc.addModifier(itemId, groupId, req).subscribe({
-      next: group => {
-        this.updateItemModifierGroup(itemId, group);
-        this.editingMGroup.set(group);
-        this.newModName.set('');
-        this.newModPrice.set(0);
-        this.newModDefault.set(false);
-      }
-    });
-  }
+  this.itemSvc.addModifier(itemId, groupId, req, this.newModImageFile() ?? undefined).subscribe({
+    next: group => {
+      this.updateItemModifierGroup(itemId, group);
+      this.editingMGroup.set(group);
+      this.newModName.set('');
+      this.newModPrice.set(0);
+      this.newModDefault.set(false);
+      this.newModImageFile.set(null);
+      this.newModImagePreview.set(null);
+    }
+  });
+}
 
   deleteModifier(itemId: string, groupId: string, modId: string) {
     this.itemSvc.deleteModifier(itemId, groupId, modId).subscribe({
@@ -798,6 +805,24 @@ export class MenuManagerComponent implements OnInit {
     if (p == null) return '';
     return p.toFixed(3) + ' DT';
   }
+
+  onModImageChange(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    this.error.set('Image must be under 5MB'); return;
+  }
+  this.newModImageFile.set(file);
+  const reader = new FileReader();
+  reader.onload = e => this.newModImagePreview.set(e.target?.result as string);
+  reader.readAsDataURL(file);
+}
+
+clearModImage() {
+  this.newModImageFile.set(null);
+  this.newModImagePreview.set(null);
+}
+
 
   setCatName(v: string) { this.catName.set(v); }
   setCatIcon(v: string) { this.catIcon.set(v); }

@@ -146,6 +146,7 @@ export interface ModifierResponse {
   available:  boolean;
   isDefault:  boolean;
   position:   number;
+  imageUrl:   string | null;
 }
 
 export interface ModifierRequest {

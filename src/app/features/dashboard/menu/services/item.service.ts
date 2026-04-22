@@ -158,19 +158,24 @@ export class ItemService {
   }
 
   addModifier(itemId: string, groupId: string,
-    req: ModifierRequest): Observable<ModifierGroupResponse> {
+    req: ModifierRequest, image?: File): Observable<ModifierGroupResponse> {
+    const fd = new FormData();
+    fd.append('data', new Blob([JSON.stringify(req)], { type: 'application/json' }));
+    if (image) fd.append('image', image);
     return this.http
       .post<ApiResponse<ModifierGroupResponse>>(
-        `${this.base}/${itemId}/modifier-groups/${groupId}/modifiers`, req)
+        `${this.base}/${itemId}/modifier-groups/${groupId}/modifiers`, fd)
       .pipe(map(r => r.data));
   }
 
   updateModifier(itemId: string, groupId: string, modifierId: string,
-    req: ModifierRequest): Observable<ModifierGroupResponse> {
+    req: ModifierRequest, image?: File): Observable<ModifierGroupResponse> {
+    const fd = new FormData();
+    fd.append('data', new Blob([JSON.stringify(req)], { type: 'application/json' }));
+    if (image) fd.append('image', image);
     return this.http
       .put<ApiResponse<ModifierGroupResponse>>(
-        `${this.base}/${itemId}/modifier-groups/${groupId}/modifiers/${modifierId}`,
-        req)
+        `${this.base}/${itemId}/modifier-groups/${groupId}/modifiers/${modifierId}`, fd)
       .pipe(map(r => r.data));
   }
 

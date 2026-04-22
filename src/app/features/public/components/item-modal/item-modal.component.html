@@ -71,24 +71,28 @@
         </div>
         <div class="mp-modifiers">
           @for (mod of group.modifiers; track mod.id) {
-          <button class="mp-mod" [class.mp-mod--active]="isModSelected(mod.id)" (click)="toggleMod.emit({ modId: mod.id, group: group })"
-            type="button">
-            <div class="mp-mod__check" [class.mp-mod__check--on]="isModSelected(mod.id)"
-              [class.mp-mod__check--radio]="group.uiType === 'radio'">
-              @if (isModSelected(mod.id)) {
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"
-                stroke-linecap="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              }
-            </div>
-            <span class="mp-mod__name">{{ mod.name }}</span>
-            @if (mod.priceDelta > 0) {
-            <span class="mp-mod__price">
-              +{{ fmt(mod.priceDelta) }} {{ currency }}
-            </span>
-            }
-          </button>
+          <button class="mp-mod" [class.mp-mod--active]="isModSelected(mod.id)"
+  [class.mp-mod--has-img]="!!mod.imageUrl"
+  (click)="toggleMod.emit({ modId: mod.id, group: group })" type="button">
+  @if (mod.imageUrl) {
+  <img [src]="mod.imageUrl" [alt]="mod.name" class="mp-mod__img">
+  }
+  <div class="mp-mod__check" [class.mp-mod__check--on]="isModSelected(mod.id)"
+    [class.mp-mod__check--radio]="group.uiType === 'radio'">
+    @if (isModSelected(mod.id)) {
+    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"
+      stroke-linecap="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+    }
+  </div>
+  <span class="mp-mod__name">{{ mod.name }}</span>
+  @if (mod.priceDelta > 0) {
+  <span class="mp-mod__price">
+    +{{ fmt(mod.priceDelta) }} {{ currency }}
+  </span>
+  }
+</button>
           }
         </div>
       </div>

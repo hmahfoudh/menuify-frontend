@@ -97,6 +97,7 @@ export interface PublicModifierResponse {
   name:       string;
   priceDelta: number;
   isDefault:  boolean;
+  imageUrl:   string | null;
 }
 
 export interface ThemeResponse {
