@@ -7,11 +7,12 @@ import {
   PublicVariantResponse,
   PublicModifierGroupResponse,
 } from '../../models/public-menu.models';
+import { Nl2brPipe } from '../../../../shared/pipes/nl2br-pipe.pipe';
 
 @Component({
   selector: 'app-item-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, Nl2brPipe],
   templateUrl: './item-modal.component.html',
   styleUrl: './item-modal.component.scss',
 })
