@@ -32,6 +32,6 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
     }
     console.log("outside")
   return next(req.clone({
-    setHeaders: { 'X-Tenant-Subdomain2222': subdomain }
+    setHeaders: { 'X-Tenant-Subdomain': subdomain }
   }));
 };
