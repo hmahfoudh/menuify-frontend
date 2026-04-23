@@ -242,7 +242,6 @@ export class PosComponent implements OnInit, OnDestroy {
           this.orderSvc.newOrderEvents$
             .pipe(takeUntil(this.destroy$))
             .subscribe(event => {
-              console.log("event", event)
               if (event.type === 'NEW_ORDER') {
                 setTimeout(()=> {
                   this.loadTableStatus();

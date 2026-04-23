@@ -23,15 +23,12 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   if (!subdomain) return next(req);
-    console.log('[SSR Tenant] host:', host); 
     if (host) {
-      console.log("inside host");
       return next(req.clone({
         setHeaders: { 'X-Original-Host': host, 'X-Tenant-Subdomain': subdomain }
       }));
     }
-    console.log("outside")
   return next(req.clone({
-    setHeaders: { 'X-Tenant-Subdomain2222': subdomain }
+    setHeaders: { 'X-Tenant-Subdomain': subdomain }
   }));
 };
