@@ -55,7 +55,7 @@ export function initApp(): () => Promise<void> {
 
     // Fetch the public menu — the X-Tenant-Subdomain header tells the backend
     // which tenant to load. No auth required.
-    const headers = new HttpHeaders({ 'X-Tenant-Subdomain': sub });
+    const headers = new HttpHeaders({ 'X-Tenant-Subdomain11111': sub });
 
     http.get<any>(`${environment.apiUrl}/api/menu`, { headers }).subscribe({
       next: (res) => {
