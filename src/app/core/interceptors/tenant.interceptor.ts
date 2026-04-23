@@ -1,20 +1,18 @@
-// src/app/core/interceptors/tenant.interceptor.ts
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject, InjectionToken, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from '../services/auth.service';
 import { LocalStorageService } from '../services/local-storage.service';
 import { SubdomainService } from '../services/subdomain.service';
 
-export const REQUEST = new InjectionToken<any>('REQUEST');
 
 export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
-  const platformId   = inject(PLATFORM_ID);
   const subdomainSvc = inject(SubdomainService);
   const auth         = inject(AuthService);
   const storage      = inject(LocalStorageService);
+  const host = subdomainSvc.getHost();
+  
 
-  // SSR: forward original Host header so the backend can resolve the tenant
+  // Browser: existing logic unchanged ↓
   let subdomain: string | null = null;
 
   if (subdomainSvc.isDashboard()) {
@@ -24,23 +22,16 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
     subdomain = cached?.subdomain ?? subdomainSvc.getSubdomain();
   }
 
-  if (!isPlatformBrowser(platformId)) {
-    const nodeReq = inject(REQUEST, { optional: true });
-    const host = nodeReq?.headers?.['host'];
+  if (!subdomain) return next(req);
     console.log('[SSR Tenant] host:', host); 
     if (host) {
+      console.log("inside host");
       return next(req.clone({
-        setHeaders: { 'X-Original-Host': host, 'X-Tenant-Subdomain': subdomain!  }
+        setHeaders: { 'X-Original-Host': host, 'X-Tenant-Subdomain': subdomain }
       }));
     }
-    return next(req);
-  }
-
-  // Browser: existing logic unchanged ↓
-
-  if (!subdomain) return next(req);
-
+    console.log("outside")
   return next(req.clone({
-    setHeaders: { 'X-Tenant-Subdomain': subdomain }
+    setHeaders: { 'X-Tenant-Subdomain2222': subdomain }
   }));
 };

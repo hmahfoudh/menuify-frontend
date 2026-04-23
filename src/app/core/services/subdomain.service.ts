@@ -43,7 +43,7 @@ export class SubdomainService {
   isDashboard():      boolean { return this.getContext() === 'dashboard'; }
   isTenantSubdomain():boolean { return this.getContext() === 'public-menu'; }
 
-  private getHost(): string {
+  public getHost(): string {
     if (this.isBrowser) return window.location.hostname;
     return this.document.location?.hostname ?? '';
   }

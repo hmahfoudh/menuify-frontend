@@ -19,12 +19,6 @@ export class PublicMenuService {
   private subdomain = inject(SubdomainService);
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
-  private get headers(): HttpHeaders {
-    return new HttpHeaders({
-      'X-Tenant-Subdomain': this.subdomain.getSubdomain()
-    });
-  }
-
   private get api(): string {
     return environment.apiUrl;
   }
@@ -35,7 +29,6 @@ export class PublicMenuService {
     return this.http
       .get<ApiResponse<PublicMenuResponse>>(
         `${this.api}/api/menu`,
-        { headers: this.headers }
       ).pipe(map(r => r.data));
   }
 
@@ -43,7 +36,6 @@ export class PublicMenuService {
     return this.http
       .get<ApiResponse<ThemeResponse>>(
         `${this.api}/api/menu/theme`,
-        { headers: this.headers }
       ).pipe(map(r => r.data));
   }
 
@@ -54,7 +46,6 @@ export class PublicMenuService {
       .post<ApiResponse<SubmittedOrder>>(
         `${this.api}/api/orders`,
         req,
-        { headers: this.headers }
       ).pipe(map(r => r.data));
   }
 
@@ -71,7 +62,6 @@ export class PublicMenuService {
         tableNumber,
         deviceType: this.detectDevice(),
       },
-      { headers: this.headers }
     ).subscribe({ error: () => {} });
   }
 
@@ -81,7 +71,6 @@ export class PublicMenuService {
     this.http.post(
       `${this.api}/api/dashboard/analytics/menu/track/item-view`,
       { itemId, categoryId, sessionId },
-      { headers: this.headers }
     ).subscribe({ error: () => {} });
   }
 
@@ -91,7 +80,6 @@ export class PublicMenuService {
     return this.http
       .get<ApiResponse<TrackedOrder>>(
         `${this.api}/api/orders/track/${encodeURIComponent(reference)}`,
-        { headers: this.headers }
       )
       .pipe(map(r => r.data));
   }
