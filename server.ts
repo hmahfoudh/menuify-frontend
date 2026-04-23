@@ -36,7 +36,7 @@ export function app(): express.Express {
         publicPath: browserDistFolder,
         providers: [
           { provide: APP_BASE_HREF, useValue: baseUrl },
-          { provide: REQUEST, useValue: req },
+          { provide: REQUEST, useValue: req }, //
         ],
       })
       .then((html) => res.send(html))

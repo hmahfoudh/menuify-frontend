@@ -15,18 +15,6 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
   const storage      = inject(LocalStorageService);
 
   // SSR: forward original Host header so the backend can resolve the tenant
-  if (!isPlatformBrowser(platformId)) {
-    const nodeReq = inject(REQUEST, { optional: true });
-    const host = nodeReq?.headers?.['host'];
-    if (host) {
-      return next(req.clone({
-        setHeaders: { 'X-Original-Host': host }
-      }));
-    }
-    return next(req);
-  }
-
-  // Browser: existing logic unchanged ↓
   let subdomain: string | null = null;
 
   if (subdomainSvc.isDashboard()) {
@@ -35,6 +23,20 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
     const cached = storage.getJson<{ subdomain: string }>('tenant');
     subdomain = cached?.subdomain ?? subdomainSvc.getSubdomain();
   }
+
+  if (!isPlatformBrowser(platformId)) {
+    const nodeReq = inject(REQUEST, { optional: true });
+    const host = nodeReq?.headers?.['host'];
+    console.log('[SSR Tenant] host:', host); 
+    if (host) {
+      return next(req.clone({
+        setHeaders: { 'X-Original-Host': host, 'X-Tenant-Subdomain': subdomain!  }
+      }));
+    }
+    return next(req);
+  }
+
+  // Browser: existing logic unchanged ↓
 
   if (!subdomain) return next(req);
 
