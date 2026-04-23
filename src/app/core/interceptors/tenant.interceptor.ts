@@ -1,10 +1,12 @@
 // src/app/core/interceptors/tenant.interceptor.ts
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser }   from '@angular/common';
-import { AuthService }         from '../services/auth.service';
+import { inject, InjectionToken, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { AuthService } from '../services/auth.service';
 import { LocalStorageService } from '../services/local-storage.service';
-import { SubdomainService }    from '../services/subdomain.service';
+import { SubdomainService } from '../services/subdomain.service';
+
+export const REQUEST = new InjectionToken<any>('REQUEST');
 
 export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
   const platformId   = inject(PLATFORM_ID);
@@ -12,22 +14,24 @@ export const tenantInterceptor: HttpInterceptorFn = (req, next) => {
   const auth         = inject(AuthService);
   const storage      = inject(LocalStorageService);
 
-  // Skip on server
-  if (!isPlatformBrowser(platformId)) return next(req);
+  // SSR: forward original Host header so the backend can resolve the tenant
+  if (!isPlatformBrowser(platformId)) {
+    const nodeReq = inject(REQUEST, { optional: true });
+    const host = nodeReq?.headers?.['host'];
+    if (host) {
+      return next(req.clone({
+        setHeaders: { 'X-Original-Host': host }
+      }));
+    }
+    return next(req);
+  }
 
-  // Skip public tracking endpoints — they already carry the subdomain header
-  // set manually in PublicMenuService
-  // if (req.url.includes('/api/menu') || req.url.includes('/api/orders')) {
-  //   return next(req);
-  // }
-
+  // Browser: existing logic unchanged ↓
   let subdomain: string | null = null;
 
   if (subdomainSvc.isDashboard()) {
-    // Dashboard: read subdomain from the logged-in tenant
     subdomain = auth.currentTenant()?.subdomain ?? null;
   } else {
-    // Public menu: read subdomain from the cached public tenant info
     const cached = storage.getJson<{ subdomain: string }>('tenant');
     subdomain = cached?.subdomain ?? subdomainSvc.getSubdomain();
   }
