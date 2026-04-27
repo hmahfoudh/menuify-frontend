@@ -73,7 +73,7 @@
       }
 
       @for (cat of categories(); track cat.id; let i = $index) {
-      <div class="cat-item" [class.cat-item--active]="selectedCatId() === cat.id"
+      <div class="cat-item" [class.cat-item--active]="selectedCatId() === cat.id && !selectedSubcatId()"
         [class.cat-item--hidden]="!cat.visible" draggable="true" (dragstart)="onDragStart(i)"
         (dragover)="onDragOver($event, i)" (dragend)="onDragEnd()" (click)="selectCategory(cat.id)">
 
@@ -85,12 +85,29 @@
 
         <div class="cat-info">
           <span class="cat-name">{{ cat.name }}</span>
-          <span class="cat-count">{{ cat.itemCount }} {{ 'menu_mgr.cat_sidebar.item_count' | translate }}</span>
+          <span class="cat-count">
+            @if (cat.subcategories.length > 0) {
+              {{ cat.subcategories.length }} subcategories
+            } @else {
+              {{ cat.itemCount }} {{ 'menu_mgr.cat_sidebar.item_count' | translate }}
+            }
+          </span>
         </div>
+
+        <!-- Expand/collapse toggle (only when has subcategories) -->
+        @if (cat.subcategories.length > 0) {
+        <button class="cat-expand-btn" [class.cat-expand-btn--open]="isCategoryExpanded(cat.id)"
+          (click)="toggleCategoryExpanded(cat.id, $event)" type="button" title="Expand subcategories">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+        }
 
         <!-- Visibility toggle -->
         <button class="cat-vis-btn" [class.cat-vis-btn--hidden]="!cat.visible"
-          (click)="$event.stopPropagation(); toggleCategoryVisibility(cat)"
+          (click)="toggleCategoryVisibility(cat, undefined, $event)"
           [title]="cat.visible ? ('menu_mgr.cat_sidebar.vis_hide' | translate) : ('menu_mgr.cat_sidebar.vis_show' | translate)"
           type="button">
           @if (cat.visible) {
@@ -110,7 +127,7 @@
         </button>
 
         <!-- Edit button -->
-        <button class="cat-edit-btn" (click)="$event.stopPropagation(); openEditCategory(cat)"
+        <button class="cat-edit-btn" (click)="openEditCategory(cat, $event)"
           [title]="'menu_mgr.cat_sidebar.edit_title' | translate" type="button">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round">
@@ -120,6 +137,73 @@
         </button>
 
       </div>
+
+      <!-- Subcategory rows (collapsible) -->
+      @if (cat.subcategories.length > 0 && isCategoryExpanded(cat.id)) {
+      <div class="subcat-list">
+        @for (sub of cat.subcategories; track sub.id; let si = $index) {
+        <div class="subcat-item"
+          [class.subcat-item--active]="selectedSubcatId() === sub.id"
+          [class.subcat-item--hidden]="!sub.visible"
+          draggable="true" (dragstart)="onSubDragStart(si)"
+          (dragover)="onSubDragOver($event, si, cat.id)"
+          (dragend)="onSubDragEnd(cat.id)"
+          (click)="selectSubcategory(sub)">
+
+          <span class="subcat-drag-handle" aria-hidden="true">⠿</span>
+          <span class="subcat-icon">{{ sub.icon ?? '▸' }}</span>
+          <span class="subcat-name">{{ sub.name }}</span>
+
+          <button class="cat-vis-btn" [class.cat-vis-btn--hidden]="!sub.visible"
+            (click)="toggleCategoryVisibility({id:sub.id,name:sub.name,nameAr:sub.nameAr,nameFr:sub.nameFr,icon:sub.icon,imageUrl:null,position:sub.position,visible:sub.visible,itemCount:0,createdAt:'',subcategories:[]}, cat.id, $event)"
+            type="button">
+            @if (sub.visible) {
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+            </svg>
+            } @else {
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <line x1="1" y1="1" x2="23" y2="23" />
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8" />
+            </svg>
+            }
+          </button>
+
+          <button class="cat-edit-btn" (click)="openEditSubcategory(sub, cat, $event)" type="button">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </button>
+        </div>
+        }
+
+        <!-- Add subcategory row -->
+        <button class="subcat-add-btn" (click)="openCreateSubcategory(cat, $event)" type="button">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Add subcategory
+        </button>
+      </div>
+      }
+
+      <!-- Add subcategory button when no subcategories yet — shown when this cat is selected -->
+      @if (cat.subcategories.length === 0 && selectedCatId() === cat.id) {
+      <button class="subcat-add-btn subcat-add-btn--inline"
+        (click)="openCreateSubcategory(cat, $event)" type="button">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Add subcategory
+      </button>
+      }
+
       }
       }
     </aside>
@@ -132,7 +216,13 @@
       <div class="item-area-head">
         <div>
           <h3 class="item-area-title">
-            @if (cat.icon) { {{ cat.icon }}&nbsp; }{{ cat.name }}
+            @if (selectedSubcategory(); as sub) {
+              <span class="item-area-parent">{{ cat.icon ?? '📂' }} {{ cat.name }}</span>
+              <span class="item-area-sep">›</span>
+              @if (sub.icon) { {{ sub.icon }}&nbsp; }{{ sub.name }}
+            } @else {
+              @if (cat.icon) { {{ cat.icon }}&nbsp; }{{ cat.name }}
+            }
           </h3>
           <p class="item-area-sub">{{ cat.itemCount }} {{ 'menu_mgr.item_area.item_count' | translate }}</p>
         </div>
@@ -282,9 +372,13 @@
     <div class="panel">
       <div class="panel-head">
         <div>
+          @if (parentCatForNew()) {
+          <span class="panel-sub">Subcategory of {{ parentCatForNew()!.name }}</span>
+          }
           <h3 class="panel-title">
-            {{ panelMode() === 'create' ? ('menu_mgr.cat_panel.title_create' | translate) :
-            ('menu_mgr.cat_panel.title_edit' | translate) }}
+            {{ panelMode() === 'create'
+              ? (parentCatForNew() ? 'New Subcategory' : ('menu_mgr.cat_panel.title_create' | translate))
+              : ('menu_mgr.cat_panel.title_edit' | translate) }}
           </h3>
         </div>
         <button class="panel-close" (click)="closePanel()">

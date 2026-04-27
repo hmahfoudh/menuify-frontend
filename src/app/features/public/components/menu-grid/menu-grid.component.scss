@@ -39,3 +39,23 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+.mp-subsection {
+  margin-bottom: 1.75rem;
+}
+
+.mp-subsection__title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--menuify-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+.mp-subsection__icon {
+  font-size: 1rem;
+}

@@ -2,23 +2,49 @@
   @for (cat of categories; track cat.id) {
   <section [id]="'section-' + cat.id" class="mp-section">
 
-    <h2 class="mp-section__title">
-      @if (cat.icon) { {{ cat.icon }}&nbsp; }{{ cat.name }}
-    </h2>
-
-    <div class="mp-grid">
-      @for (item of cat.items; track item.id) {
-        <app-item-card
-          [item]="item"
-          [catId]="cat.id"
-          [currency]="currency"
-          [isLiked]="isItemLiked(item.id)"
-          [likeCount]="getItemLikeCount(item.id)"
-          (cardClick)="openItem.emit({ item: item, catId: cat.id })"
-          (likeClick)="toggleLike.emit($event)">
-        </app-item-card>
+    @if (cat.subcategories && cat.subcategories.length > 0) {
+      <!-- Parent category: render a sub-section per subcategory -->
+      @for (sub of cat.subcategories; track sub.id) {
+      <div [id]="'section-' + sub.id" class="mp-subsection">
+        <h3 class="mp-subsection__title">
+          @if (sub.icon) { <span class="mp-subsection__icon">{{ sub.icon }}</span> }
+          {{ sub.name }}
+        </h3>
+        <div class="mp-grid">
+          @for (item of sub.items; track item.id) {
+            <app-item-card
+              [item]="item"
+              [catId]="sub.id"
+              [currency]="currency"
+              [isLiked]="isItemLiked(item.id)"
+              [likeCount]="getItemLikeCount(item.id)"
+              (cardClick)="openItem.emit({ item: item, catId: sub.id })"
+              (likeClick)="toggleLike.emit($event)">
+            </app-item-card>
+          }
+        </div>
+      </div>
       }
-    </div>
+    } @else {
+      <!-- Leaf category: items directly -->
+      <h2 class="mp-section__title">
+        @if (cat.icon) { {{ cat.icon }}&nbsp; }{{ cat.name }}
+      </h2>
+      <div class="mp-grid">
+        @for (item of cat.items; track item.id) {
+          <app-item-card
+            [item]="item"
+            [catId]="cat.id"
+            [currency]="currency"
+            [isLiked]="isItemLiked(item.id)"
+            [likeCount]="getItemLikeCount(item.id)"
+            (cardClick)="openItem.emit({ item: item, catId: cat.id })"
+            (likeClick)="toggleLike.emit($event)">
+          </app-item-card>
+        }
+      </div>
+    }
+
   </section>
   }
 </main>

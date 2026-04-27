@@ -8,7 +8,7 @@ import {
   ItemResponse, ItemRequest,
   VariantGroupResponse, VariantGroupRequest, VariantRequest,
   ModifierGroupResponse, ModifierGroupRequest, ModifierRequest,
-  ReorderRequest, PanelMode, COMMON_ICONS
+  ReorderRequest, PanelMode, COMMON_ICONS, SubcategoryResponse
 } from '../models/menu.models';
 import { CategoryService } from '../services/category.service';
 import { ItemService } from '../services/item.service';
@@ -32,6 +32,10 @@ export class MenuManagerComponent implements OnInit {
   categories = signal<CategoryResponse[]>([]);
   items = signal<ItemResponse[]>([]);
   selectedCatId = signal<string | null>(null);
+  /** The subcategory currently selected for item display (null = top-level items) */
+  selectedSubcatId = signal<string | null>(null);
+  /** Set of category IDs whose subcategory list is expanded in the sidebar */
+  expandedCatIds = signal<Set<string>>(new Set());
   loadingCats = signal(true);
   loadingItems = signal(false);
   error = signal<string | null>(null);
@@ -47,6 +51,8 @@ export class MenuManagerComponent implements OnInit {
 
   // ── Category form ────────────────────────────────────────────────────────
   editingCat = signal<CategoryResponse | null>(null);
+  /** Set when opening "Add subcategory" — the parent category for the new subcategory */
+  parentCatForNew = signal<CategoryResponse | null>(null);
   catName = signal('');
   catIcon = signal('');
   catVisible = signal(true);
@@ -103,6 +109,20 @@ export class MenuManagerComponent implements OnInit {
   selectedCategory = computed(() =>
     this.categories().find(c => c.id === this.selectedCatId()) ?? null);
 
+  selectedSubcategory = computed(() => {
+    const cat = this.selectedCategory();
+    if (!cat || !this.selectedSubcatId()) return null;
+    return cat.subcategories.find(s => s.id === this.selectedSubcatId()) ?? null;
+  });
+
+  /** The effective category ID to use when creating an item */
+  effectiveCategoryId = computed(() =>
+    this.selectedSubcatId() ?? this.selectedCatId());
+
+  /** True when the selected top-level category has subcategories */
+  selectedCatHasSubcats = computed(() =>
+    (this.selectedCategory()?.subcategories?.length ?? 0) > 0);
+
   visibleCount = computed(() =>
     this.categories().filter(c => c.visible).length);
 
@@ -129,8 +149,35 @@ export class MenuManagerComponent implements OnInit {
 
   selectCategory(id: string) {
     this.selectedCatId.set(id);
+    this.selectedSubcatId.set(null);
     this.closePanel();
-    this.loadItems(id);
+    const cat = this.categories().find(c => c.id === id);
+    // If category has subcategories, auto-select first subcategory
+    if (cat?.subcategories?.length) {
+      this.selectedSubcatId.set(cat.subcategories[0].id);
+      this.loadItems(cat.subcategories[0].id);
+    } else {
+      this.loadItems(id);
+    }
+  }
+
+  selectSubcategory(subcat: SubcategoryResponse) {
+    this.selectedSubcatId.set(subcat.id);
+    this.closePanel();
+    this.loadItems(subcat.id);
+  }
+
+  toggleCategoryExpanded(catId: string, event: Event) {
+    event.stopPropagation();
+    this.expandedCatIds.update(set => {
+      const next = new Set(set);
+      next.has(catId) ? next.delete(catId) : next.add(catId);
+      return next;
+    });
+  }
+
+  isCategoryExpanded(catId: string): boolean {
+    return this.expandedCatIds().has(catId);
   }
 
   loadItems(catId: string) {
@@ -144,6 +191,7 @@ export class MenuManagerComponent implements OnInit {
   openCreateCategory() {
     this.panelMode.set('create');
     this.editingCat.set(null);
+    this.parentCatForNew.set(null);
     this.catName.set('');
     this.catIcon.set('');
     this.catVisible.set(true);
@@ -151,12 +199,52 @@ export class MenuManagerComponent implements OnInit {
     this.activePanel.set('category');
   }
 
-  openEditCategory(cat: CategoryResponse) {
+  openCreateSubcategory(parent: CategoryResponse, event: Event) {
+    event.stopPropagation();
+    this.panelMode.set('create');
+    this.editingCat.set(null);
+    this.parentCatForNew.set(parent);
+    this.catName.set('');
+    this.catIcon.set('');
+    this.catVisible.set(true);
+    this.showIconPicker.set(false);
+    this.activePanel.set('category');
+  }
+
+  openEditCategory(cat: CategoryResponse, event?: Event) {
+    event?.stopPropagation();
     this.panelMode.set('edit');
     this.editingCat.set(cat);
+    this.parentCatForNew.set(null);
     this.catName.set(cat.name);
     this.catIcon.set(cat.icon ?? '');
     this.catVisible.set(cat.visible);
+    this.showIconPicker.set(false);
+    this.activePanel.set('category');
+  }
+
+  openEditSubcategory(subcat: SubcategoryResponse, parent: CategoryResponse, event: Event) {
+    event.stopPropagation();
+    // Build a minimal CategoryResponse-shaped object for the edit panel
+    const subcatAsCat: CategoryResponse = {
+      id: subcat.id,
+      name: subcat.name,
+      nameAr: subcat.nameAr,
+      nameFr: subcat.nameFr,
+      icon: subcat.icon,
+      imageUrl: null,
+      position: subcat.position,
+      visible: subcat.visible,
+      itemCount: 0,
+      createdAt: '',
+      subcategories: [],
+    };
+    this.panelMode.set('edit');
+    this.editingCat.set(subcatAsCat);
+    this.parentCatForNew.set(parent);
+    this.catName.set(subcat.name);
+    this.catIcon.set(subcat.icon ?? '');
+    this.catVisible.set(subcat.visible);
     this.showIconPicker.set(false);
     this.activePanel.set('category');
   }
@@ -165,10 +253,12 @@ export class MenuManagerComponent implements OnInit {
     if (!this.catName().trim()) return;
     this.saving.set(true);
 
+    const isSubcategory = !!this.parentCatForNew();
     const req: CategoryRequest = {
       name: this.catName().trim(),
       icon: this.catIcon() || undefined,
       visible: this.catVisible(),
+      parentId: this.parentCatForNew()?.id,
     };
 
     const action$ = this.panelMode() === 'create'
@@ -177,12 +267,48 @@ export class MenuManagerComponent implements OnInit {
 
     action$.subscribe({
       next: cat => {
-        if (this.panelMode() === 'create') {
-          this.categories.update(list => [...list, cat]);
-          this.selectCategory(cat.id);
+        if (isSubcategory) {
+          const parentId = this.parentCatForNew()!.id;
+          if (this.panelMode() === 'create') {
+            // Append new subcategory into the parent's subcategories list
+            this.categories.update(list => list.map(c => {
+              if (c.id !== parentId) return c;
+              const newSub: SubcategoryResponse = {
+                id: cat.id, name: cat.name, nameAr: cat.nameAr,
+                nameFr: cat.nameFr, icon: cat.icon,
+                position: cat.position, visible: cat.visible,
+              };
+              return { ...c, subcategories: [...c.subcategories, newSub] };
+            }));
+            // Auto-expand and select the new subcategory
+            this.expandedCatIds.update(s => new Set([...s, parentId]));
+            this.selectedCatId.set(parentId);
+            this.selectSubcategory({ id: cat.id, name: cat.name, nameAr: cat.nameAr,
+              nameFr: cat.nameFr, icon: cat.icon, position: cat.position, visible: cat.visible });
+          } else {
+            // Update existing subcategory in parent's list
+            this.categories.update(list => list.map(c => {
+              if (c.id !== parentId) return c;
+              return {
+                ...c,
+                subcategories: c.subcategories.map(s =>
+                  s.id === cat.id
+                    ? { id: cat.id, name: cat.name, nameAr: cat.nameAr,
+                        nameFr: cat.nameFr, icon: cat.icon,
+                        position: cat.position, visible: cat.visible }
+                    : s
+                )
+              };
+            }));
+          }
         } else {
-          this.categories.update(list =>
-            list.map(c => c.id === cat.id ? cat : c));
+          if (this.panelMode() === 'create') {
+            this.categories.update(list => [...list, cat]);
+            this.selectCategory(cat.id);
+          } else {
+            this.categories.update(list =>
+              list.map(c => c.id === cat.id ? { ...cat, subcategories: c.subcategories } : c));
+          }
         }
         this.saving.set(false);
         this.closePanel();
@@ -196,15 +322,34 @@ export class MenuManagerComponent implements OnInit {
   }
 
   deleteCategory(cat: CategoryResponse) {
-    if (!confirm(`Delete "${cat.name}"? All items will be removed.`)) return;
+    const isSubcategory = !!this.parentCatForNew();
+    const confirmMsg = isSubcategory
+      ? `Delete subcategory "${cat.name}"? All items will be removed.`
+      : `Delete "${cat.name}"? All subcategories and items will be removed.`;
+    if (!confirm(confirmMsg)) return;
+
     this.deletingId.set(cat.id);
     this.catSvc.delete(cat.id).subscribe({
       next: () => {
-        this.categories.update(list => list.filter(c => c.id !== cat.id));
-        if (this.selectedCatId() === cat.id) {
-          const remaining = this.categories();
-          if (remaining.length) this.selectCategory(remaining[0].id);
-          else { this.selectedCatId.set(null); this.items.set([]); }
+        if (isSubcategory) {
+          const parentId = this.parentCatForNew()!.id;
+          this.categories.update(list => list.map(c => {
+            if (c.id !== parentId) return c;
+            return { ...c, subcategories: c.subcategories.filter(s => s.id !== cat.id) };
+          }));
+          if (this.selectedSubcatId() === cat.id) {
+            const parent = this.categories().find(c => c.id === parentId);
+            const remaining = parent?.subcategories ?? [];
+            if (remaining.length) this.selectSubcategory(remaining[0]);
+            else { this.selectedSubcatId.set(null); this.items.set([]); }
+          }
+        } else {
+          this.categories.update(list => list.filter(c => c.id !== cat.id));
+          if (this.selectedCatId() === cat.id) {
+            const remaining = this.categories();
+            if (remaining.length) this.selectCategory(remaining[0].id);
+            else { this.selectedCatId.set(null); this.selectedSubcatId.set(null); this.items.set([]); }
+          }
         }
         this.deletingId.set(null);
         this.showSuccess('Category deleted');
@@ -216,11 +361,24 @@ export class MenuManagerComponent implements OnInit {
     });
   }
 
-  toggleCategoryVisibility(cat: CategoryResponse) {
+  toggleCategoryVisibility(cat: CategoryResponse, parentId?: string, event?: Event) {
+    event?.stopPropagation();
     this.catSvc.toggleVisibility(cat.id).subscribe({
       next: updated => {
-        this.categories.update(list =>
-          list.map(c => c.id === updated.id ? updated : c));
+        if (parentId) {
+          this.categories.update(list => list.map(c => {
+            if (c.id !== parentId) return c;
+            return {
+              ...c,
+              subcategories: c.subcategories.map(s =>
+                s.id === updated.id ? { ...s, visible: updated.visible } : s
+              )
+            };
+          }));
+        } else {
+          this.categories.update(list =>
+            list.map(c => c.id === updated.id ? { ...updated, subcategories: c.subcategories } : c));
+        }
       }
     });
   }
@@ -263,10 +421,41 @@ export class MenuManagerComponent implements OnInit {
     this.catSvc.reorder(requests).subscribe();
   }
 
+  onSubDragStart(index: number) { this.dragIndex.set(index); }
+
+  onSubDragOver(event: DragEvent, index: number, catId: string) {
+    event.preventDefault();
+    const from = this.dragIndex();
+    if (from === null || from === index) return;
+
+    this.categories.update(list => list.map(c => {
+      if (c.id !== catId) return c;
+      const subs = [...c.subcategories];
+      const moved = subs.splice(from, 1)[0];
+      subs.splice(index, 0, moved);
+      return { ...c, subcategories: subs };
+    }));
+    this.dragIndex.set(index);
+  }
+
+  onSubDragEnd(catId: string) {
+    this.dragIndex.set(null);
+    const cat = this.categories().find(c => c.id === catId);
+    if (!cat) return;
+    const requests: ReorderRequest[] = cat.subcategories
+      .map((s, i) => ({ id: s.id, position: i, parentId: catId }));
+    this.catSvc.reorder(requests).subscribe();
+  }
+
   // ── Item CRUD ─────────────────────────────────────────────────────────────
   openCreateItem() {
-    const catId = this.selectedCatId();
+    const catId = this.effectiveCategoryId();
     if (!catId) return;
+    // Guard: if top-level category has subcategories, force subcategory selection
+    if (this.selectedCatHasSubcats() && !this.selectedSubcatId()) {
+      this.error.set('Please select a subcategory before adding items.');
+      return;
+    }
     this.panelMode.set('create');
     this.editingItem.set(null);
     this.resetItemForm();
@@ -368,7 +557,7 @@ export class MenuManagerComponent implements OnInit {
   }
 
   saveItem() {
-    const catId = this.selectedCatId();
+    const catId = this.effectiveCategoryId();
     if (!this.itemName().trim() || !catId) return;
     this.saving.set(true);
 
@@ -743,6 +932,7 @@ export class MenuManagerComponent implements OnInit {
     this.activePanel.set('none');
     this.editingItem.set(null);
     this.editingCat.set(null);
+    this.parentCatForNew.set(null);
     this.editingVGroup.set(null);
     this.editingMGroup.set(null);
     this.showIconPicker.set(false);

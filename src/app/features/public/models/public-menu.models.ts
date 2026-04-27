@@ -30,12 +30,23 @@ export interface PublicMenuResponse {
 }
 
 export interface PublicCategoryResponse {
+  id:             string;
+  name:           string;
+  nameAr:         string | null;
+  nameFr:         string | null;
+  icon:           string | null;
+  imageUrl:       string | null;
+  position:       number;
+  items:          PublicItemResponse[];
+  subcategories:  PublicSubcategoryResponse[];
+}
+
+export interface PublicSubcategoryResponse {
   id:       string;
   name:     string;
   nameAr:   string | null;
   nameFr:   string | null;
   icon:     string | null;
-  imageUrl: string | null;
   position: number;
   items:    PublicItemResponse[];
 }

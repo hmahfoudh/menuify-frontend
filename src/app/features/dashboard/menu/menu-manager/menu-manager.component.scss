@@ -1636,3 +1636,124 @@
   border-radius: 4px;
   flex-shrink: 0;
 }
+// ── Subcategory sidebar items ─────────────────────────────────────────────────
+
+.cat-expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: transform 0.15s, color 0.15s;
+
+  &--open {
+    transform: rotate(180deg);
+    color: var(--mp-accent);
+  }
+
+  &:hover { color: var(--mp-accent); }
+}
+
+.subcat-list {
+  border-left: 2px solid var(--surface-200);
+  margin-left: 18px;
+  margin-bottom: 2px;
+}
+
+.subcat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 5px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.12s;
+  user-select: none;
+  min-height: 32px;
+
+  &:hover { background: var(--surface-100); }
+
+  &--active {
+    background: color-mix(in srgb, var(--mp-accent) 10%, transparent);
+
+    .subcat-name { color: var(--mp-accent); font-weight: 600; }
+  }
+
+  &--hidden {
+    opacity: 0.5;
+  }
+}
+
+.subcat-drag-handle {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  cursor: grab;
+  flex-shrink: 0;
+}
+
+.subcat-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+}
+
+.subcat-name {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subcat-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  padding: 5px 8px 5px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover {
+    color: var(--mp-accent);
+    background: var(--surface-100);
+  }
+
+  // The inline version (shown when cat has no subcategories yet) is always
+  // visible when rendered — visibility is controlled by @if in the template
+  &--inline {
+    display: flex;
+    margin-left: 18px;
+    border-left: 2px solid var(--surface-200);
+    border-radius: 0 6px 6px 0;
+  }
+}
+
+// (no hover sibling trick — template @if handles visibility)
+
+// ── Item area breadcrumb ──────────────────────────────────────────────────────
+
+.item-area-parent {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.item-area-sep {
+  margin: 0 4px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}

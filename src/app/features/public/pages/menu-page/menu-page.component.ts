@@ -14,6 +14,7 @@ import {
   PublicItemResponse,
   PublicVariantResponse,
   PublicModifierGroupResponse,
+  PublicSubcategoryResponse,
   CreateOrderRequest,
   TrackedOrder,
   TrackingStatus,
@@ -81,6 +82,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   loading = signal(true);
   error = signal<string | null>(null);
   activeCategory = signal<string>('');
+  activeSubcategory = signal<string>('');
 
   // ── Cart (proxied from CartService) ──────────────────────────────────────
   cartItems = this.cart.items;
@@ -156,6 +158,11 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   categories = computed(() => this.menu()?.categories ?? []);
   currency = computed(() => this.menu()?.tenant.currencySymbol ?? 'DT');
   whatsapp = computed(() => this.menu()?.tenant.whatsappNumber ?? '');
+
+  /** Subcategories of the currently active top-level category, or [] */
+  activeSubcategories = computed(() =>
+    this.categories().find(c => c.id === this.activeCategory())?.subcategories ?? []
+  );
 
   latestOrderRef = computed(() => {
     const orders = this.activeOrders();
@@ -267,6 +274,10 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         this.loading.set(false);
         if (menu.categories.length > 0) {
           this.activeCategory.set(menu.categories[0].id);
+          const firstSubs = menu.categories[0].subcategories;
+          if (firstSubs?.length > 0) {
+            this.activeSubcategory.set(firstSubs[0].id);
+          }
         }
         this.menuSvc.trackMenuView(
           this.session.getSessionId(),
@@ -281,9 +292,12 @@ export class MenuPageComponent implements OnInit, OnDestroy {
           const likeCounts = new Map<string, number>();
           menu.categories.forEach(cat => {
             cat.items.forEach(item => {
-              if (item.likeCount !== undefined) {
-                likeCounts.set(item.id, item.likeCount);
-              }
+              if (item.likeCount !== undefined) likeCounts.set(item.id, item.likeCount);
+            });
+            cat.subcategories?.forEach(sub => {
+              sub.items.forEach(item => {
+                if (item.likeCount !== undefined) likeCounts.set(item.id, item.likeCount);
+              });
             });
           });
           this.itemLikeCounts.set(likeCounts);
@@ -298,9 +312,23 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   selectCategory(id: string): void {
     this.activeCategory.set(id);
+    // Auto-select first subcategory if the category has them
+    const cat = this.categories().find(c => c.id === id);
+    const firstSub = cat?.subcategories?.[0];
+    this.activeSubcategory.set(firstSub?.id ?? '');
     if (this.isBrowser) {
       setTimeout(() => {
         document.getElementById(`section-${id}`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+    }
+  }
+
+  selectSubcategory(subId: string): void {
+    this.activeSubcategory.set(subId);
+    if (this.isBrowser) {
+      setTimeout(() => {
+        document.getElementById(`section-${subId}`)
           ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 50);
     }
@@ -570,10 +598,13 @@ export class MenuPageComponent implements OnInit, OnDestroy {
           if (results['menu']?.categories) {
             const likeCounts = new Map<string, number>();
             results['menu'].categories.forEach((cat: any) => {
-              cat.items.forEach((item: any) => {
-                if (item.likeCount !== undefined) {
-                  likeCounts.set(item.id, item.likeCount);
-                }
+              cat.items?.forEach((item: any) => {
+                if (item.likeCount !== undefined) likeCounts.set(item.id, item.likeCount);
+              });
+              cat.subcategories?.forEach((sub: any) => {
+                sub.items?.forEach((item: any) => {
+                  if (item.likeCount !== undefined) likeCounts.set(item.id, item.likeCount);
+                });
               });
             });
             this.itemLikeCounts.set(likeCounts);

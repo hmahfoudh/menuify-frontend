@@ -46,7 +46,10 @@
   <app-category-tabs
     [categories]="categories()"
     [activeCategory]="activeCategory()"
-    (selectCategory)="selectCategory($event)">
+    [subcategories]="activeSubcategories()"
+    [activeSubcategory]="activeSubcategory()"
+    (selectCategory)="selectCategory($event)"
+    (selectSubcategory)="selectSubcategory($event)">
   </app-category-tabs>
 
   <!-- ITEM GRID -->
