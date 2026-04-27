@@ -8,4 +8,17 @@
     </button>
     }
   </div>
+
+  <!-- Subcategory chips — visible only when active category has subcategories -->
+  @if (subcategories.length > 0) {
+  <div class="mp-chips">
+    @for (sub of subcategories; track sub.id) {
+    <button class="mp-chip" [class.mp-chip--active]="activeSubcategory === sub.id"
+      (click)="selectSubcategory.emit(sub.id)" type="button">
+      @if (sub.icon) { <span>{{ sub.icon }}</span> }
+      {{ sub.name }}
+    </button>
+    }
+  </div>
+  }
 </nav>

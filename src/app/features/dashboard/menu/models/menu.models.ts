@@ -1,29 +1,44 @@
 // ── Category ──────────────────────────────────────────────────────────────────
 
+export interface SubcategoryResponse {
+  id:       string;
+  name:     string;
+  nameAr:   string | null;
+  nameFr:   string | null;
+  icon:     string | null;
+  position: number;
+  visible:  boolean;
+}
+
 export interface CategoryResponse {
-  id:        string;
-  name:      string;
-  nameAr:    string | null;
-  nameFr:    string | null;
-  icon:      string | null;
-  imageUrl:  string | null;
-  position:  number;
-  visible:   boolean;
-  itemCount: number;
-  createdAt: string;
+  id:            string;
+  name:          string;
+  nameAr:        string | null;
+  nameFr:        string | null;
+  icon:          string | null;
+  imageUrl:      string | null;
+  position:      number;
+  visible:       boolean;
+  itemCount:     number;
+  createdAt:     string;
+  subcategories: SubcategoryResponse[];
 }
 
 export interface CategoryRequest {
-  name:    string;
-  nameAr?: string;
-  nameFr?: string;
-  icon?:   string;
-  visible: boolean;
+  name:      string;
+  nameAr?:   string;
+  nameFr?:   string;
+  icon?:     string;
+  visible:   boolean;
+  /** Null/undefined = top-level. Set = subcategory of that parent. */
+  parentId?: string;
 }
 
 export interface ReorderRequest {
-  id:       string;
-  position: number;
+  id:        string;
+  position:  number;
+  /** Null = reorder top-level. Set = reorder subcategories within this parent. */
+  parentId?: string;
 }
 
 // ── Item ──────────────────────────────────────────────────────────────────────
