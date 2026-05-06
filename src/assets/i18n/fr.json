@@ -70,7 +70,7 @@
       ]
     },
     "standard": {
-      "price": "59 DT/mois",
+      "price": "39 DT/mois",
       "features": [
         "Articles et catégories illimités",
         "Couleurs personnalisées",
@@ -142,7 +142,13 @@
     "wifi_copy_aria": "Copier le mot de passe",
     "wifi_copied_aria": "Copié !",
     "wifi_scan": "Scanner pour se connecter",
-    "follow_us": "Nous suivre"
+    "follow_us": "Nous suivre",
+    "tagline": "Un menu digital élégant, des commandes en temps réel et une gestion simplifiée pour votre restaurant.",
+    "about": "À propos de Menuify",
+    "contact": "Contactez-nous",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "rights": "© 2026 Menuify. Tous droits réservés."
   },
   "closed_banner": {
     "title": "Nous sommes fermés en ce moment"

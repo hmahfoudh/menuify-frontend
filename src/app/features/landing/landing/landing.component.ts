@@ -8,6 +8,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
 import { FEATURE_ICONS, FEATURE_KEYS, Lang, PLANS, PublicTenant } from '../models/landing.models';
 import { RouterLink } from "@angular/router";
+import { MetaTagsService } from '../../../shared/services/meta-tags.service';
 
 
 
@@ -22,6 +23,7 @@ export class LandingComponent implements OnInit {
 
   private http = inject(HttpClient);
   private translate = inject(TranslateService);
+  private metaTags = inject(MetaTagsService);
 
   // ── Language ─────────────────────────────────────────────────────────────────
   currentLang = signal<Lang>('fr');
@@ -68,7 +70,6 @@ export class LandingComponent implements OnInit {
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
-    // Load tenants directory
     this.loadTenants();
   }
 
@@ -77,11 +78,12 @@ export class LandingComponent implements OnInit {
 
   // ── Language ──────────────────────────────────────────────────────────────────
   setLang(lang: Lang): void {
-    this.currentLang.set(lang); // This triggers the effect → meta tags update automatically
+    this.currentLang.set(lang);
     this.translate.use(lang);
-    // Update document dir for RTL support
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
+    // Keep og:locale and language meta in sync when user switches language at runtime
+    this.metaTags.updateLocale(lang);
   }
 
   // ── Directory ─────────────────────────────────────────────────────────────────
@@ -121,16 +123,12 @@ export class LandingComponent implements OnInit {
       next: () => { this.cSending.set(false); this.cSent.set(true); },
       error: () => {
         this.cSending.set(false);
-        // Use translate.instant() in TS — translate pipe is for templates
         this.cError.set(this.translate.instant('contact.error'));
       },
     });
   }
 
   // ── Pricing helper ────────────────────────────────────────────────────────────
-  // Returns the features array from the loaded translation for a given plan.
-  // ngx-translate doesn't support iterating over JSON arrays with the pipe,
-  // so we read them imperatively via instant().
   planFeatures(planKey: string): string[] {
     const features = this.translate.instant(`pricing.${planKey}.features`);
     return Array.isArray(features) ? features : [];
