@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Homepage / Landing -->
-  <url>
-    <loc>https://menuify.tn/</loc>
-    <lastmod>2026-05-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-  </url>
+<!--
+  Sitemap index — lists the main domain sitemap + one sitemap per tenant.
+  Submit THIS file to Google Search Console: https://menuify.tn/sitemap.xml
+-->
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- Authentication Pages -->
-  <url>
-    <loc>https://menuify.tn/auth/login</loc>
-    <lastmod>2026-05-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
+  <!-- Main domain -->
+  <sitemap>
+    <loc>https://menuify.tn/sitemap-main.xml</loc>
+  </sitemap>
 
-  <url>
-    <loc>https://menuify.tn/auth/register</loc>
-    <lastmod>2026-05-06</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
+  <!-- Tenant subdomains -->
+  <sitemap>
+    <loc>https://theridge.menuify.tn/sitemap.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://theloft.menuify.tn/sitemap.xml</loc>
+  </sitemap>
+  <sitemap>
+    <loc>https://baristabistro.menuify.tn/sitemap.xml</loc>
+  </sitemap>
 
-
-</urlset>
+</sitemapindex>

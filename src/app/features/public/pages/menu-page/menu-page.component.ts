@@ -42,6 +42,7 @@ import { ClosedBannerComponent } from '../../components/closed-banner/closed-ban
 import { CartToastComponent } from '../../components/cart-toast/cart-toast.component';
 import { WelcomePopupComponent } from "../../components/welcome-popup/welcome-popup.component";
 import { LocalStorageService } from '../../../../core/services/local-storage.service';
+import { MetaTagsService } from '../../../../shared/services/meta-tags.service';
 
 export type OrderStep = 'idle' | 'checkout' | 'success';
 export type OrderType = 'DINE_IN' | 'TAKEAWAY';
@@ -62,7 +63,7 @@ export interface SocialLink {
     SuccessScreenComponent, TrackingPanelComponent, BottomBarComponent,
     MenuFooterComponent, ClosedBannerComponent, CartToastComponent,
     WelcomePopupComponent
-],
+  ],
   templateUrl: './menu-page.component.html',
   styleUrls: ['./menu-page.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -76,6 +77,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private itemLikeSvc = inject(ItemLikeService);
   private localStorage = inject(LocalStorageService);
+  private metaTags = inject(MetaTagsService);
 
   // ── Menu data ────────────────────────────────────────────────────────────
   menu = signal<PublicMenuResponse | null>(null);
@@ -143,7 +145,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   expandedRef = signal<string | null>(null);
 
   private trackPoll?: Subscription;
-  private destroy$   = new Subject<void>();
+  private destroy$ = new Subject<void>();
 
   readonly trackingSteps = TRACKING_STEPS;
   readonly trackingMetaMap = TRACKING_STATUS_META;
@@ -160,7 +162,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   currency = computed(() => this.menu()?.tenant.currencySymbol ?? 'DT');
   whatsapp = computed(() => this.menu()?.tenant.whatsappNumber ?? '');
 
-  /** Subcategories of the currently active top-level category, or [] */
   activeSubcategories = computed(() =>
     this.categories().find(c => c.id === this.activeCategory())?.subcategories ?? []
   );
@@ -273,6 +274,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         this.menu.set(menu);
         this.themeSvc.applyTheme(theme);
         this.loading.set(false);
+
         if (menu.categories.length > 0) {
           this.activeCategory.set(menu.categories[0].id);
           const firstSubs = menu.categories[0].subcategories;
@@ -280,15 +282,18 @@ export class MenuPageComponent implements OnInit, OnDestroy {
             this.activeSubcategory.set(firstSubs[0].id);
           }
         }
+
         this.menuSvc.trackMenuView(
           this.session.getSessionId(),
           this.session.getQrCode(),
           this.session.getTableNumber()
         );
+
         this.checkOpeningHours(menu.tenant.openingHours);
         this.hoursCheckInterval = setInterval(
           () => this.checkOpeningHours(menu.tenant.openingHours), 60_000
         );
+
         if (menu?.categories) {
           const likeCounts = new Map<string, number>();
           menu.categories.forEach(cat => {
@@ -303,6 +308,10 @@ export class MenuPageComponent implements OnInit, OnDestroy {
           });
           this.itemLikeCounts.set(likeCounts);
         }
+
+        // Inject Restaurant JSON-LD + update page meta for this tenant.
+        // Runs on both SSR and browser — on SSR this is what Googlebot reads.
+        this.injectTenantMeta(menu);
       },
       error: () => {
         this.loading.set(false);
@@ -311,9 +320,88 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Inject tenant-specific meta tags and Restaurant schema.
+   *
+   * Called immediately after menu data loads so both SSR and the browser
+   * have the correct title, description, canonical, and JSON-LD in <head>
+   * before the page is painted / crawled.
+   *
+   * Schema.org Restaurant type gives Google enough context to show rich
+   * results (name, cuisine, address) directly in search results.
+   */
+  private injectTenantMeta(menu: PublicMenuResponse): void {
+    const t = menu.tenant;
+
+    // Derive the canonical URL for this tenant's menu page.
+    // Works for both *.menuify.tn subdomains and custom domains.
+    const canonicalBase = this.isBrowser
+      ? `${window.location.protocol}//${window.location.host}`
+      : `https://${t.subdomain}.menuify.tn`;
+    const canonicalUrl = `${canonicalBase}/menu`;
+
+    // Build the Restaurant structured data object.
+    // Only include fields that are actually set on the tenant to keep
+    // the schema clean — empty fields can confuse validators.
+    const restaurantSchema: Record<string, any> = {
+      '@context': 'https://schema.org',
+      '@type': 'Restaurant',
+      'name': t.name,
+      'description': t.tagline ?? `Menu digital de ${t.name}`,
+      'url': canonicalUrl,
+      'hasMenu': {
+        '@type': 'Menu',
+        'url': canonicalUrl,
+      },
+    };
+
+    if (t.logoUrl) {
+      restaurantSchema['image'] = t.logoUrl;
+    }
+
+    if (t.address || t.city || t.country) {
+      restaurantSchema['address'] = {
+        '@type': 'PostalAddress',
+        ...(t.address && { 'streetAddress': t.address }),
+        ...(t.city && { 'addressLocality': t.city }),
+        ...(t.country && { 'addressCountry': t.country }),
+      };
+    }
+
+    if (t.whatsappNumber) {
+      restaurantSchema['telephone'] = t.whatsappNumber;
+    }
+
+    if (t.googleMapsUrl) {
+      restaurantSchema['hasMap'] = t.googleMapsUrl;
+    }
+
+    if (t.instagramUrl) {
+      restaurantSchema['sameAs'] = [t.instagramUrl];
+      if (t.facebookUrl) (restaurantSchema['sameAs'] as string[]).push(t.facebookUrl);
+    }
+
+    // Push everything into <head> via MetaTagsService
+    this.metaTags.setCustomMetaTags({
+      title: `${t.name} - Menu`,
+      description: t.tagline
+        ? `${t.tagline} — Consultez le menu de ${t.name} et commandez en ligne.`
+        : `Consultez le menu de ${t.name} et commandez en ligne.`,
+      canonical: canonicalUrl,
+      ogType: 'website',
+      ogUrl: canonicalUrl,
+      ogTitle: `${t.name} - Menu digital`,
+      ogDescription: t.tagline ?? `Découvrez le menu de ${t.name}`,
+      ...(t.logoUrl && { ogImage: t.logoUrl }),
+      robots: 'index,follow',
+      structuredData: restaurantSchema,
+    });
+  }
+
+  // ── Category / subcategory ────────────────────────────────────────────────
+
   selectCategory(id: string): void {
     this.activeCategory.set(id);
-    // Auto-select first subcategory if the category has them
     const cat = this.categories().find(c => c.id === id);
     const firstSub = cat?.subcategories?.[0];
     this.activeSubcategory.set(firstSub?.id ?? '');
@@ -334,6 +422,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       }, 50);
     }
   }
+
+  // ── Item modal ────────────────────────────────────────────────────────────
 
   openItem(event: { item: PublicItemResponse; catId: string }): void {
     const { item, catId } = event;
@@ -411,6 +501,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     }, 2600);
   }
 
+  // ── Cart ──────────────────────────────────────────────────────────────────
+
   openCart(): void {
     this.cartMode.set(
       this.cart.isEmpty() && this.hasActiveOrders() ? 'orders' : 'cart'
@@ -433,6 +525,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   updateQty(cartId: string, qty: number): void {
     this.cart.updateQuantity(cartId, qty);
   }
+
+  // ── Order flow ────────────────────────────────────────────────────────────
 
   openCheckout(): void {
     this.cart.close();
@@ -491,6 +585,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   backToMenu(): void {
     this.orderStep.set('idle');
   }
+
+  // ── Order tracking ────────────────────────────────────────────────────────
 
   openTracking(ref?: string): void {
     this.trackingError.set(null);
@@ -615,6 +711,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       });
   }
 
+  // ── Tracking helpers ──────────────────────────────────────────────────────
+
   getTrackingMeta(status: TrackingStatus) {
     return this.trackingMetaMap[status];
   }
@@ -626,6 +724,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   isStepActive(stepStatus: TrackingStatus, current: TrackingStatus): boolean {
     return stepStatus === current;
   }
+
+  // ── Like system ───────────────────────────────────────────────────────────
 
   toggleItemLike(event: { domEvent: Event; itemId: string }): void {
     const { domEvent, itemId } = event;
@@ -689,6 +789,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return this.itemLikeCounts().get(itemId) ?? 0;
   }
 
+  // ── Opening hours ─────────────────────────────────────────────────────────
+
   private checkOpeningHours(openingHoursJson: string | null): void {
     if (!openingHoursJson) {
       this.isOpen.set(true);
@@ -751,6 +853,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return 'Currently closed';
   }
 
+  // ── Misc ──────────────────────────────────────────────────────────────────
+
   copyWifiPassword(): void {
     const pw = this.menu()?.tenant.wifiPassword;
     if (!pw || !this.isBrowser) return;
@@ -783,6 +887,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   trackByPlatform(_: number, link: SocialLink): string {
     return link.platform;
   }
+
+  // ── Cleanup ───────────────────────────────────────────────────────────────
 
   ngOnDestroy(): void {
     this.trackPoll?.unsubscribe();
