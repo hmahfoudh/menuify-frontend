@@ -1,7 +1,5 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://menuify.tn/sitemap.xml
-
-# Disallow private routes if needed
 Disallow: /dashboard/
+Disallow: /admin/
+Sitemap: https://menuify.tn/sitemap.xml

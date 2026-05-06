@@ -70,7 +70,7 @@
       ]
     },
     "standard": {
-      "price": "59 DT/month",
+      "price": "39 DT/month",
       "features": [
         "Unlimited items & categories",
         "Custom colours",
@@ -142,7 +142,13 @@
     "wifi_copy_aria": "Copy password",
     "wifi_copied_aria": "Copied!",
     "wifi_scan": "Scan to connect",
-    "follow_us": "Follow us"
+    "follow_us": "Follow us",
+    "tagline": "An elegant digital menu, real-time ordering and simplified management for your restaurant.",
+    "about": "About Menuify",
+    "contact": "Contact us",
+    "privacy": "Privacy policy",
+    "terms": "Terms of service",
+    "rights": "© 2026 Menuify. All rights reserved."
   },
   "closed_banner": {
     "title": "We're closed right now"

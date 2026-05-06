@@ -3,11 +3,11 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        NAVBAR
   ═══════════════════════════════════════════════════════════════════════ -->
-  <nav class="nav" [class.nav--scrolled]="scrolled()">
+  <nav class="nav" [class.nav--scrolled]="scrolled()" aria-label="Navigation principale">
     <div class="nav__inner">
 
-      <a class="nav__brand" routerLink="/">
-        <img src="/assets/brand/logo-light.svg" alt="Menuify" height="36">
+      <a class="nav__brand" routerLink="/" aria-label="Menuify - Accueil">
+        <img src="/assets/brand/logo-light.svg" alt="Menuify" height="36" width="auto">
       </a>
 
       <!-- Desktop links -->
@@ -20,16 +20,17 @@
 
       <div class="nav__actions">
         <!-- Language switcher -->
-        <div class="lang-switch">
-          <button class="lang-btn" [class.lang-btn--active]="currentLang()==='fr'" (click)="setLang('fr')" type="button">FR</button>
-          <button class="lang-btn" [class.lang-btn--active]="currentLang()==='en'" (click)="setLang('en')" type="button">EN</button>
-          <button class="lang-btn" [class.lang-btn--active]="currentLang()==='ar'" (click)="setLang('ar')" type="button">ع</button>
+        <div class="lang-switch" role="group" aria-label="Choisir la langue">
+          <button class="lang-btn" [class.lang-btn--active]="currentLang()==='fr'" (click)="setLang('fr')" type="button" aria-label="Français">FR</button>
+          <button class="lang-btn" [class.lang-btn--active]="currentLang()==='en'" (click)="setLang('en')" type="button" aria-label="English">EN</button>
+          <button class="lang-btn" [class.lang-btn--active]="currentLang()==='ar'" (click)="setLang('ar')" type="button" aria-label="العربية">ع</button>
         </div>
         <a class="btn-ghost-sm" routerLink="/auth/login">{{ 'nav.signin' | translate }}</a>
         <a class="btn-gold-sm"  routerLink="/auth/register">{{ 'nav.signup' | translate }}</a>
       </div>
 
-      <button class="nav__burger" (click)="updateMobileOpenState()" type="button">
+      <button class="nav__burger" (click)="updateMobileOpenState()" type="button"
+              [attr.aria-expanded]="mobileMenuOpen()" aria-label="Menu mobile">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -51,20 +52,28 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        HERO
   ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="hero">
+  <section class="hero" aria-labelledby="hero-title">
     <div class="container">
       <div class="hero__inner">
         <div class="hero__content">
           <div class="hero__tag">{{ 'hero.tag' | translate }}</div>
-          <h1 class="hero__title">
+
+          <!--
+            h1: the single most important on-page SEO element.
+            The text is rendered by ngx-translate at runtime. If SSR is
+            hydrating translations correctly, Google will see this content.
+            Run `curl https://menuify.tn/ | grep -A2 "<h1"` to verify.
+          -->
+          <h1 id="hero-title" class="hero__title">
             {{ 'hero.title1' | translate }}<br>
             <span class="hero__title-accent">{{ 'hero.title2' | translate }}</span>
           </h1>
+
           <p class="hero__sub">{{ 'hero.sub' | translate }}</p>
           <div class="hero__ctas">
             <a class="btn-gold" routerLink="/auth/register">
               {{ 'hero.cta1' | translate }}
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
                 <polyline points="9 18 15 12 9 6"/>
               </svg>
             </a>
@@ -73,7 +82,7 @@
             </button>
           </div>
           <div class="hero__trust">
-            <div class="trust-avatars">
+            <div class="trust-avatars" aria-hidden="true">
               <div class="trust-av trust-av--1">R</div>
               <div class="trust-av trust-av--2">C</div>
               <div class="trust-av trust-av--3">L</div>
@@ -84,8 +93,8 @@
           </div>
         </div>
 
-        <!-- Phone mockup -->
-        <div class="hero__visual">
+        <!-- Phone mockup — decorative, no meaningful content for crawlers -->
+        <div class="hero__visual" aria-hidden="true">
           <div class="phone-mockup">
             <div class="phone-mockup__screen">
               <div class="mockup-header">
@@ -130,19 +139,19 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        STATS
   ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="stats-bar">
+  <section class="stats-bar" aria-label="Chiffres clés">
     <div class="container">
       <div class="stats-bar__grid">
         <div class="stat-item">
           <div class="stat-item__val">{{ allTenants().length }}+</div>
           <div class="stat-item__label">{{ 'stats.restaurants' | translate }}</div>
         </div>
-        <div class="stat-divider"></div>
+        <div class="stat-divider" aria-hidden="true"></div>
         <div class="stat-item">
           <div class="stat-item__val">10K+</div>
           <div class="stat-item__label">{{ 'stats.orders' | translate }}</div>
         </div>
-        <div class="stat-divider"></div>
+        <div class="stat-divider" aria-hidden="true"></div>
         <div class="stat-item">
           <div class="stat-item__val">98%</div>
           <div class="stat-item__label">{{ 'stats.satisfaction' | translate }}</div>
@@ -154,31 +163,34 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        DIRECTORY
   ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="section" id="directory">
+  <section class="section" id="directory" aria-labelledby="directory-title">
     <div class="container">
       <div class="section-head">
-        <h2 class="section-title">{{ 'directory.title' | translate }}</h2>
+        <h2 id="directory-title" class="section-title">{{ 'directory.title' | translate }}</h2>
         <p class="section-sub">{{ 'directory.sub' | translate }}</p>
       </div>
 
       <div class="dir-search-wrap">
         <svg class="dir-search-icon" width="18" height="18" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        <input class="dir-search" type="text"
+        <input class="dir-search" type="search"
+               [attr.aria-label]="'directory.search' | translate"
                [placeholder]="'directory.search' | translate"
                [value]="searchQuery()"
                (input)="setSearch($any($event.target).value)">
       </div>
 
       @if (loadingDir()) {
-        <div class="dir-loading"><div class="spinner"></div></div>
+        <div class="dir-loading" role="status" aria-label="Chargement...">
+          <div class="spinner"></div>
+        </div>
       }
 
       @if (!loadingDir() && filteredTenants().length === 0) {
         <div class="dir-empty">
-          <div class="dir-empty__icon">🍽️</div>
+          <div class="dir-empty__icon" aria-hidden="true">🍽️</div>
           <p>{{ 'directory.empty' | translate }}</p>
         </div>
       }
@@ -186,12 +198,13 @@
       <div class="dir-grid">
         @for (tenant of filteredTenants(); track tenant.id) {
           <div class="resto-card" (click)="openMenu(tenant.subdomain)"
-               role="button" tabindex="0">
+               role="button" tabindex="0"
+               [attr.aria-label]="tenant.name">
             <div class="resto-card__logo">
               @if (tenant.logoUrl) {
-                <img [src]="tenant.logoUrl" [alt]="tenant.name" class="resto-card__logo-img">
+                <img [src]="tenant.logoUrl" [alt]="tenant.name + ' logo'" class="resto-card__logo-img" loading="lazy">
               } @else {
-                <span class="resto-card__logo-fallback">{{ tenantInitial(tenant.name) }}</span>
+                <span class="resto-card__logo-fallback" aria-hidden="true">{{ tenantInitial(tenant.name) }}</span>
               }
             </div>
             <div class="resto-card__info">
@@ -202,7 +215,7 @@
               @if (tenant.city) {
                 <div class="resto-card__city">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                       stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                       stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                     <circle cx="12" cy="10" r="3"/>
                   </svg>
@@ -210,7 +223,7 @@
                 </div>
               }
             </div>
-            <div class="resto-card__arrow">
+            <div class="resto-card__arrow" aria-hidden="true">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round">
                 <polyline points="9 18 15 12 9 6"/>
@@ -233,22 +246,26 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        FEATURES
   ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="section section--gray" id="features">
+  <section class="section section--gray" id="features" aria-labelledby="features-title">
     <div class="container">
       <div class="section-head">
-        <h2 class="section-title">{{ 'features.title' | translate }}</h2>
+        <h2 id="features-title" class="section-title">{{ 'features.title' | translate }}</h2>
         <p class="section-sub">{{ 'features.sub' | translate }}</p>
       </div>
       <div class="features-grid">
         @for (key of featureKeys; track idx; let idx = $index) {
           <div class="feat-card">
-            <div class="feat-card__icon">
+            <div class="feat-card__icon" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
                 <path [attr.d]="featureIcons[key]"/>
               </svg>
             </div>
-            <div class="feat-card__label">{{ 'features.' + key | translate }}</div>
+            <!--
+              Changed from <div> to <h3>: Google uses heading hierarchy to understand
+              page structure and feature importance. h2 = section title, h3 = feature name.
+            -->
+            <h3 class="feat-card__label">{{ 'features.' + key | translate }}</h3>
           </div>
         }
       </div>
@@ -258,16 +275,16 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        HOW IT WORKS
   ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="section" id="about">
+  <section class="section" id="about" aria-labelledby="how-title">
     <div class="container">
       <div class="section-head">
-        <h2 class="section-title">{{ 'how.title' | translate }}</h2>
+        <h2 id="how-title" class="section-title">{{ 'how.title' | translate }}</h2>
       </div>
       <div class="how-grid">
         @for (step of ['step1','step2','step3']; track step; let i = $index) {
-          @if (i > 0) { <div class="how-connector"></div> }
+          @if (i > 0) { <div class="how-connector" aria-hidden="true"></div> }
           <div class="how-step">
-            <div class="how-step__num">0{{ i + 1 }}</div>
+            <div class="how-step__num" aria-hidden="true">0{{ i + 1 }}</div>
             <h3 class="how-step__title">{{ 'how.' + step + '.title' | translate }}</h3>
             <p class="how-step__desc">{{ 'how.' + step + '.desc' | translate }}</p>
           </div>
@@ -279,10 +296,10 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        PRICING
   ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="section section--gray" id="pricing">
+  <section class="section section--gray" id="pricing" aria-labelledby="pricing-title">
     <div class="container">
       <div class="section-head">
-        <h2 class="section-title">{{ 'pricing.title' | translate }}</h2>
+        <h2 id="pricing-title" class="section-title">{{ 'pricing.title' | translate }}</h2>
         <p class="section-sub">{{ 'pricing.sub' | translate }}</p>
       </div>
       <div class="pricing-grid">
@@ -291,13 +308,13 @@
             @if (plan.popular) {
               <div class="price-card__popular-badge">{{ 'pricing.popular' | translate }}</div>
             }
-            <div class="price-card__name">{{ plan.key | titlecase }}</div>
+            <h3 class="price-card__name">{{ plan.key | titlecase }}</h3>
             <div class="price-card__price">{{ 'pricing.' + plan.key + '.price' | translate }}</div>
-            <ul class="price-card__features">
+            <ul class="price-card__features" [attr.aria-label]="'Fonctionnalités du plan ' + plan.key">
               @for (feat of planFeatures(plan.key); track idx; let idx = $index) {
                 <li class="price-card__feat">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                       stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                       stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
                   {{ feat }}
@@ -318,26 +335,26 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        CONTACT
   ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="section" id="contact">
+  <section class="section" id="contact" aria-labelledby="contact-title">
     <div class="container">
       <div class="contact-wrap">
         <div class="contact-info">
-          <h2 class="section-title">{{ 'contact.title' | translate }}</h2>
+          <h2 id="contact-title" class="section-title">{{ 'contact.title' | translate }}</h2>
           <p class="section-sub" style="text-align:left;max-width:none;">
             {{ 'contact.sub' | translate }}
           </p>
           <div class="contact-details">
             <div class="contact-detail">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                 <polyline points="22,6 12,13 2,6"/>
               </svg>
-              contact&#64;menuify.tn
+              <a href="mailto:contact@menuify.tn" class="contact-detail__link">contact&#64;menuify.tn</a>
             </div>
             <div class="contact-detail">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                 <circle cx="12" cy="10" r="3"/>
               </svg>
@@ -348,9 +365,9 @@
 
         <div class="contact-form">
           @if (cSent()) {
-            <div class="form-success">
+            <div class="form-success" role="alert">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                   stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
                 <polyline points="20 6 9 17 4 12"/>
               </svg>
               <p>{{ 'contact.sent' | translate }}</p>
@@ -358,38 +375,41 @@
           } @else {
             <div class="form-grid">
               <div class="form-field">
-                <label class="form-label">{{ 'contact.name' | translate }} *</label>
-                <input class="form-input" type="text"
+                <label class="form-label" for="contact-name">{{ 'contact.name' | translate }} *</label>
+                <input id="contact-name" class="form-input" type="text"
+                       autocomplete="name"
                        [value]="cName()"
                        (input)="cName.set($any($event.target).value)">
               </div>
               <div class="form-field">
-                <label class="form-label">{{ 'contact.email' | translate }} *</label>
-                <input class="form-input" type="email"
+                <label class="form-label" for="contact-email">{{ 'contact.email' | translate }} *</label>
+                <input id="contact-email" class="form-input" type="email"
+                       autocomplete="email"
                        [value]="cEmail()"
                        (input)="cEmail.set($any($event.target).value)">
               </div>
               <div class="form-field form-field--full">
-                <label class="form-label">{{ 'contact.resto' | translate }}</label>
-                <input class="form-input" type="text"
+                <label class="form-label" for="contact-resto">{{ 'contact.resto' | translate }}</label>
+                <input id="contact-resto" class="form-input" type="text"
+                       autocomplete="organization"
                        [value]="cResto()"
                        (input)="cResto.set($any($event.target).value)">
               </div>
               <div class="form-field form-field--full">
-                <label class="form-label">{{ 'contact.message' | translate }} *</label>
-                <textarea class="form-input form-textarea"
+                <label class="form-label" for="contact-message">{{ 'contact.message' | translate }} *</label>
+                <textarea id="contact-message" class="form-input form-textarea"
                           [value]="cMsg()"
                           (input)="cMsg.set($any($event.target).value)"
                           rows="4"></textarea>
               </div>
             </div>
             @if (cError()) {
-              <p class="form-error-msg">{{ cError() }}</p>
+              <p class="form-error-msg" role="alert">{{ cError() }}</p>
             }
             <button class="btn-gold w-full"
                     [disabled]="cSending()"
                     (click)="submitContact()" type="button">
-              @if (cSending()) { <span class="spinner-sm"></span> }
+              @if (cSending()) { <span class="spinner-sm" aria-hidden="true"></span> }
               {{ 'contact.send' | translate }}
             </button>
           }
@@ -406,16 +426,16 @@
       <div class="footer__inner">
         <div class="footer__brand">
           <div class="footer__logo">
-            <img src="/assets/brand/logo-dark.svg" alt="Menuify" height="36">
+            <img src="/assets/brand/logo-dark.svg" alt="Menuify" height="36" width="auto">
           </div>
           <p class="footer__tagline">{{ 'footer.tagline' | translate }}</p>
         </div>
-        <div class="footer__links">
+        <nav class="footer__links" aria-label="Liens du pied de page">
           <button class="footer__link" (click)="scrollTo('about')"   type="button">{{ 'footer.about'   | translate }}</button>
           <button class="footer__link" (click)="scrollTo('contact')" type="button">{{ 'footer.contact' | translate }}</button>
-          <a class="footer__link" href="#">{{ 'footer.privacy' | translate }}</a>
-          <a class="footer__link" href="#">{{ 'footer.terms'   | translate }}</a>
-        </div>
+          <a class="footer__link" href="/privacy">{{ 'footer.privacy' | translate }}</a>
+          <a class="footer__link" href="/terms">{{ 'footer.terms'   | translate }}</a>
+        </nav>
       </div>
       <div class="footer__bottom">
         <span>{{ 'footer.rights' | translate }}</span>

@@ -1,4 +1,5 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { Meta, Title } from '@angular/platform-browser';
 import { Router, NavigationEnd } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -23,6 +24,7 @@ export interface MetaTagConfig {
   ogImageAlt?: string;
   ogType?: 'website' | 'article' | 'product' | 'business.business';
   ogUrl?: string;
+  ogLocale?: string;
 
   // Twitter Card
   twitterCard?: 'summary' | 'summary_large_image' | 'app' | 'player';
@@ -69,6 +71,8 @@ export class MetaTagsService {
   private readonly metaService = inject(Meta);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  // SSR-safe document access via Angular's DOCUMENT token
+  private readonly document = inject(DOCUMENT);
 
   // Configuration
   private readonly baseUrl = signal('https://menuify.tn');
@@ -85,6 +89,13 @@ export class MetaTagsService {
   // Computed
   readonly metaConfig = computed(() => this.currentMetaConfig());
   readonly url = computed(() => this.currentUrl());
+
+  // Locale map for og:locale
+  private readonly localeMap: Record<string, string> = {
+    fr: 'fr_TN',
+    en: 'en_US',
+    ar: 'ar_TN',
+  };
 
   // Route configuration map (DRY, typed, easily extensible)
   private readonly routeConfigs: RouteMetaConfig[] = [
@@ -104,6 +115,8 @@ export class MetaTagsService {
           'code QR',
           'menu café',
           'gestion de restaurant',
+          'menu digital tunisie',
+          'logiciel restaurant tunisie',
         ],
       },
     },
@@ -124,7 +137,7 @@ export class MetaTagsService {
         title: 'Track Your Order - Menuify',
         description: 'Real-time order tracking. Check your order status and estimated arrival time.',
         ogType: 'website',
-        robots: 'noindex,follow', // Don't index tracking pages
+        robots: 'noindex,follow',
       },
     },
     {
@@ -216,7 +229,7 @@ export class MetaTagsService {
     this.router.events
       .pipe(
         filter((event) => event instanceof NavigationEnd),
-        pairwise(), // Only trigger on URL change, not repeat navigations
+        pairwise(),
       )
       .subscribe(([prev, current]) => {
         if ((prev as NavigationEnd).urlAfterRedirects !== (current as NavigationEnd).urlAfterRedirects) {
@@ -231,7 +244,6 @@ export class MetaTagsService {
   /**
    * Initialize meta tag update effect
    * Automatically updates all meta tags when currentUrl changes
-   * Uses signals for reactive, zoneless-compatible updates
    */
   private initializeMetaTagEffect(): void {
     effect(
@@ -255,7 +267,7 @@ export class MetaTagsService {
         if (rc.pattern instanceof RegExp) {
           return rc.pattern.test(url);
         }
-        return url === rc.pattern || url.startsWith(rc.pattern);
+        return url === rc.pattern || url.startsWith(rc.pattern as string);
       })
       .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
@@ -290,31 +302,24 @@ export class MetaTagsService {
       twitterImage: config.twitterImage ?? this.defaultImage(),
       twitterCreator: config.twitterCreator ?? this.defaultTwitterHandle(),
       canonical: config.canonical ?? this.baseUrl(),
-      language: config.language ?? 'en',
+      language: config.language ?? 'fr',
       robots: config.robots ?? 'index,follow',
     };
   }
 
   /**
    * Apply all meta tags to the document
-   * SSR-safe using Angular's Meta and Title services
+   * SSR-safe using Angular's Meta and Title services + DOCUMENT token
    */
   private applyMetaTags(config: MetaTagConfig, url: string): void {
     // Set title
     this.titleService.setTitle(config.title);
 
-    // Clear existing meta tags (except those we shouldn't touch)
-    const preserveTags = ['charset', 'viewport', 'theme-color'];
-    this.metaService
-      .getTags('')
-      .filter((tag) => !preserveTags.includes(tag.getAttribute('name') ?? ''))
-      .forEach((tag) => this.metaService.removeTag(tag.outerHTML));
-
     // Standard meta tags
     this.metaService.updateTag({ name: 'description', content: config.description });
     this.metaService.updateTag({ name: 'viewport', content: 'width=device-width, initial-scale=1.0' });
     this.metaService.updateTag({ name: 'theme-color', content: '#ffffff' });
-    this.metaService.updateTag({ name: 'language', content: config.language ?? 'en' });
+    this.metaService.updateTag({ name: 'language', content: config.language ?? 'fr' });
 
     // Robots and SEO
     this.metaService.updateTag({ name: 'robots', content: config.robots ?? 'index,follow' });
@@ -322,15 +327,21 @@ export class MetaTagsService {
       this.metaService.updateTag({ name: 'keywords', content: config.keywords.join(', ') });
     }
 
-    // Canonical
-    const canonical = config.canonical ?? `${this.baseUrl()}${url}`;
-    this.metaService.updateTag({ rel: 'canonical', href: canonical });
+    // Canonical — must use a <link> tag, not <meta>; Meta.updateTag() won't work here
+    this.setCanonical(config.canonical ?? `${this.baseUrl()}${url}`);
 
     // Open Graph tags
     this.metaService.updateTag({ property: 'og:title', content: config.ogTitle ?? '' });
     this.metaService.updateTag({ property: 'og:description', content: config.ogDescription ?? '' });
     this.metaService.updateTag({ property: 'og:url', content: config.ogUrl ?? '' });
     this.metaService.updateTag({ property: 'og:type', content: config.ogType ?? 'website' });
+
+    // og:locale — tells crawlers which language variant this page is
+    const lang = config.language ?? 'fr';
+    this.metaService.updateTag({
+      property: 'og:locale',
+      content: this.localeMap[lang] ?? 'fr_TN',
+    });
 
     if (config.ogImage) {
       this.metaService.updateTag({ property: 'og:image', content: config.ogImage });
@@ -399,21 +410,48 @@ export class MetaTagsService {
   }
 
   /**
-   * Set JSON-LD structured data
-   * Replaces existing schema if present
+   * Set canonical <link> tag — SSR-safe via DOCUMENT token.
+   * Cannot use Meta.updateTag() for <link> elements.
+   */
+  private setCanonical(href: string): void {
+    let link = this.document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!link) {
+      link = this.document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      this.document.head.appendChild(link);
+    }
+    link.setAttribute('href', href);
+  }
+
+  /**
+   * Set JSON-LD structured data — SSR-safe via DOCUMENT token.
+   * Uses data-dynamic attribute to distinguish from static schemas in index.html,
+   * so it never removes the static Organization/WebApplication schemas.
    */
   private setStructuredData(data: Record<string, any>): void {
-    // Remove existing schema.org script if present
-    const existingScript = document.querySelector('script[type="application/ld+json"]');
+    // Only remove the dynamic script, never the static ones from index.html
+    const existingScript = this.document.querySelector('script[type="application/ld+json"][data-dynamic]');
     if (existingScript) {
       existingScript.remove();
     }
 
-    // Create new script tag
-    const script = document.createElement('script');
+    const script = this.document.createElement('script');
     script.type = 'application/ld+json';
+    script.setAttribute('data-dynamic', 'true');
     script.textContent = JSON.stringify(data);
-    document.head.appendChild(script);
+    this.document.head.appendChild(script);
+  }
+
+  /**
+   * Update og:locale when the user switches language at runtime.
+   * Call this from LandingComponent.setLang().
+   */
+  updateLocale(lang: string): void {
+    this.metaService.updateTag({
+      property: 'og:locale',
+      content: this.localeMap[lang] ?? 'fr_TN',
+    });
+    this.metaService.updateTag({ name: 'language', content: lang });
   }
 
   /**
@@ -440,7 +478,6 @@ export class MetaTagsService {
   /**
    * Set meta tags with translated values from i18n keys
    * Ensures translations are loaded before applying
-   * @param translationKeys Keys to fetch from current language
    */
   setCustomMetaTagsWithTranslations(translationKeys: {
     titleKey: string;
@@ -449,8 +486,6 @@ export class MetaTagsService {
     ogDescriptionKey?: string;
     keywordsKey?: string;
   }): void {
-    // Use instant() to get already-loaded translations
-    // This is better than subscribe() because translations are already available
     const translations = this.translate.instant([
       translationKeys.titleKey,
       translationKeys.descriptionKey,
@@ -491,7 +526,6 @@ export class MetaTagsService {
    */
   registerRoutes(routes: RouteMetaConfig[]): void {
     this.routeConfigs.push(...routes);
-    // Re-resolve current config with new routes
     this.currentUrl.set(this.router.url);
   }
 

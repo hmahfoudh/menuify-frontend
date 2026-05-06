@@ -21,8 +21,8 @@ import {
   TRACKING_STATUS_META,
   TRACKING_STEPS,
 } from '../../models/public-menu.models';
-import { interval, Subscription } from 'rxjs';
-import { switchMap, startWith } from 'rxjs/operators';
+import { interval, Subject, Subscription } from 'rxjs';
+import { switchMap, startWith, takeUntil } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { ItemLikeService } from '../../services/item-like.service';
 import { ItemLikeToggleResponse } from '../../models/item-like.models';
@@ -143,6 +143,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   expandedRef = signal<string | null>(null);
 
   private trackPoll?: Subscription;
+  private destroy$   = new Subject<void>();
 
   readonly trackingSteps = TRACKING_STEPS;
   readonly trackingMetaMap = TRACKING_STATUS_META;
@@ -266,7 +267,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     forkJoin({
       menu: this.menuSvc.getMenu(),
       theme: this.menuSvc.getTheme(),
-    }).subscribe({
+    }).pipe(takeUntil(this.destroy$)).subscribe({
       next: ({ menu, theme }) => {
         this.localStorage.setJson('tenant', menu.tenant);
         this.menu.set(menu);
@@ -473,7 +474,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       }))
     };
 
-    this.menuSvc.submitOrder(req).subscribe({
+    this.menuSvc.submitOrder(req).pipe(takeUntil(this.destroy$)).subscribe({
       next: order => {
         this.submitting.set(false);
         this.cart.clear();
@@ -536,7 +537,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.trackingLoading.set(true);
     this.trackingError.set(null);
 
-    this.menuSvc.trackOrder(ref).subscribe({
+    this.menuSvc.trackOrder(ref).pipe(takeUntil(this.destroy$)).subscribe({
       next: order => {
         this.trackingLoading.set(false);
         this.trackingError.set(null);
@@ -560,7 +561,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   private addTrackedOrder(reference: string): void {
     if (this.activeOrders().some(o => o.reference === reference)) return;
 
-    this.menuSvc.trackOrder(reference).subscribe({
+    this.menuSvc.trackOrder(reference).pipe(takeUntil(this.destroy$)).subscribe({
       next: order => {
         this.activeOrders.update(list => [...list, order]);
         this.restartPoll();
@@ -588,7 +589,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
           return forkJoin(requests);
         })
-      )
+      ).pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (results: Record<string, any>) => {
           this.activeOrders.update(list =>
@@ -649,7 +650,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     inFlight.add(itemId);
     this.likeInFlight.set(inFlight);
 
-    this.itemLikeSvc.toggleLike(itemId).subscribe({
+    this.itemLikeSvc.toggleLike(itemId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: ItemLikeToggleResponse) => {
         this.itemLikeCounts().set(itemId, response.newLikeCount);
         const likedSet = new Set(this.likedItems());
@@ -787,6 +788,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.trackPoll?.unsubscribe();
     clearInterval(this.hoursCheckInterval);
     clearTimeout(this.toastTimer);
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   @HostListener('document:keydown.escape')
