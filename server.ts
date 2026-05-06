@@ -72,27 +72,37 @@ export function app(): express.Express {
   });
 
   // ── sitemap.xml ────────────────────────────────────────────────────────────
-  // Main domain: static sitemap for landing page only.
-  // Tenant subdomains: per-tenant sitemap covering the /menu route.
-  //
-  // For a full sitemap index (all tenants listed on the main domain),
-  // proxy to the Spring Boot endpoint: GET /api/public/sitemap-index
-  // and expose it at https://menuify.tn/sitemap-index.xml
+  // Main domain: sitemap INDEX listing the landing page + all tenant sitemaps.
+  //   Submit https://menuify.tn/sitemap.xml to Search Console — it covers all.
+  //   When adding a new tenant, add one <sitemap> entry here and redeploy.
+  // Tenant subdomains: per-tenant urlset covering the /menu route only.
   server.get('/sitemap.xml', (req, res) => {
     const subdomain = resolveTenantSubdomain(req);
     res.set('Content-Type', 'application/xml');
 
     if (!subdomain) {
-      // Main domain sitemap — landing page only
+      // Sitemap index — one entry per tenant + the main landing page entry
       res.send(
         `<?xml version="1.0" encoding="UTF-8"?>\n` +
-        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-        `  <url>\n` +
-        `    <loc>https://menuify.tn/</loc>\n` +
-        `    <changefreq>weekly</changefreq>\n` +
-        `    <priority>1.0</priority>\n` +
-        `  </url>\n` +
-        `</urlset>`
+        `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+        `\n` +
+        `  <!-- Main domain landing page -->\n` +
+        `  <sitemap>\n` +
+        `    <loc>https://menuify.tn/sitemap-main.xml</loc>\n` +
+        `  </sitemap>\n` +
+        `\n` +
+        `  <!-- Tenant subdomains -->\n` +
+        `  <sitemap>\n` +
+        `    <loc>https://theridge.menuify.tn/sitemap.xml</loc>\n` +
+        `  </sitemap>\n` +
+        `  <sitemap>\n` +
+        `    <loc>https://theloft.menuify.tn/sitemap.xml</loc>\n` +
+        `  </sitemap>\n` +
+        `  <sitemap>\n` +
+        `    <loc>https://baristabistro.menuify.tn/sitemap.xml</loc>\n` +
+        `  </sitemap>\n` +
+        `\n` +
+        `</sitemapindex>`
       );
     } else {
       // Tenant subdomain sitemap — /menu is the only public indexable page
@@ -107,6 +117,23 @@ export function app(): express.Express {
         `</urlset>`
       );
     }
+  });
+
+  // ── sitemap-main.xml ───────────────────────────────────────────────────────
+  // Referenced by the sitemap index above. Contains only the landing page URL.
+  server.get('/sitemap-main.xml', (_req, res) => {
+    res.set('Content-Type', 'application/xml');
+    res.send(
+      `<?xml version="1.0" encoding="UTF-8"?>\n` +
+      `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+      `  <url>\n` +
+      `    <loc>https://menuify.tn/</loc>\n` +
+      `    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>\n` +
+      `    <changefreq>weekly</changefreq>\n` +
+      `    <priority>1.0</priority>\n` +
+      `  </url>\n` +
+      `</urlset>`
+    );
   });
 
   // ── Static files ───────────────────────────────────────────────────────────
