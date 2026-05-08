@@ -48,6 +48,7 @@ export function app(): express.Express {
   // Served per-context: different rules for main domain vs tenant subdomains.
   server.get('/robots.txt', (req, res) => {
     const subdomain = resolveTenantSubdomain(req);
+    console.log(`Robots.txt request for: ${req.headers.host} - Subdomain detected: ${subdomain}`);
     res.set('Content-Type', 'text/plain');
 
     if (!subdomain) {
