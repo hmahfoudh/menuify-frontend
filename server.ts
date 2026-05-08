@@ -65,7 +65,6 @@ export function app(): express.Express {
       res.send(
         `User-agent: *\n` +
         `Allow: /menu\n` +
-        `Disallow: /\n` +
         `Sitemap: https://${subdomain}.menuify.tn/sitemap.xml\n`
       );
     }
