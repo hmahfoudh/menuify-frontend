@@ -155,6 +155,7 @@
           <span class="subcat-name">{{ sub.name }}</span>
 
           <button class="cat-vis-btn" [class.cat-vis-btn--hidden]="!sub.visible"
+          [title]="sub.visible ? ('menu_mgr.cat_sidebar.vis_hide' | translate) : ('menu_mgr.cat_sidebar.vis_show' | translate)"
             (click)="toggleCategoryVisibility({id:sub.id,name:sub.name,nameAr:sub.nameAr,nameFr:sub.nameFr,icon:sub.icon,imageUrl:null,position:sub.position,visible:sub.visible,itemCount:0,createdAt:'',subcategories:[]}, cat.id, $event)"
             type="button">
             @if (sub.visible) {
