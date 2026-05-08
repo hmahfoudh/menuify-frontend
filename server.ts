@@ -64,6 +64,7 @@ export function app(): express.Express {
       // Tenant subdomain — only the public menu is indexable
       res.send(
         `User-agent: *\n` +
+        `Allow: /\n` +
         `Allow: /menu\n` +
         `Sitemap: https://${subdomain}.menuify.tn/sitemap.xml\n`
       );
