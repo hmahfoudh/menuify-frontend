@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080',
-  defaultLang: 'en',
+  apiUrl: 'https://api.menuify.tn',
+  defaultLang: 'fr',
 };
 
 /*

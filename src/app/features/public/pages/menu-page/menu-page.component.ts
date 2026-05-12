@@ -405,20 +405,49 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     const cat = this.categories().find(c => c.id === id);
     const firstSub = cat?.subcategories?.[0];
     this.activeSubcategory.set(firstSub?.id ?? '');
-    if (this.isBrowser) {
-      setTimeout(() => {
-        document.getElementById(`section-${id}`)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 50);
+    if (!firstSub) {
+      if (this.isBrowser) {
+        setTimeout(() => {
+          document.getElementById(`section-${id}`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+      }
+    } else {
+      if (this.isBrowser) {
+        setTimeout(() => {
+          const el = document.getElementById(`section-${id}`);
+
+          if (!el) return;
+
+          const yOffset = -100; // your offset
+          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+          window.scrollTo({
+            top: y,
+            behavior: 'smooth',
+          });
+        }, 50);
+      }
     }
+
   }
 
   selectSubcategory(subId: string): void {
     this.activeSubcategory.set(subId);
+
     if (this.isBrowser) {
       setTimeout(() => {
-        document.getElementById(`section-${subId}`)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const el = document.getElementById(`section-${subId}`);
+
+        if (!el) return;
+
+        const yOffset = -100; // your offset
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+        window.scrollTo({
+          top: y,
+          behavior: 'smooth',
+        });
       }, 50);
     }
   }
