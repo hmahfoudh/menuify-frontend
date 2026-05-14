@@ -7,14 +7,8 @@
 
 <!-- ── Error ──────────────────────────────────────────────────────────────── -->
 @if (!loading() && error()) {
-<div class="mp-error">
-  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-    stroke-linecap="round">
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" y1="8" x2="12" y2="12" />
-    <line x1="12" y1="16" x2="12.01" y2="16" />
-  </svg>
-  <p>{{ error() }}</p>
+<div class="mp-loading">
+  <div class="mp-ring"></div>
 </div>
 }
 

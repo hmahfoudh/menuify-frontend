@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://api.menuify.tn',
+  apiUrl: 'http://localhost:8080',
   defaultLang: 'fr',
 };
 
