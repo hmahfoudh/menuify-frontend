@@ -14,7 +14,6 @@ import {
   PublicItemResponse,
   PublicVariantResponse,
   PublicModifierGroupResponse,
-  PublicSubcategoryResponse,
   CreateOrderRequest,
   TrackedOrder,
   TrackingStatus,
@@ -82,7 +81,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   // ── Menu data ────────────────────────────────────────────────────────────
   menu = signal<PublicMenuResponse | null>(null);
   loading = signal(true);
-  error = signal<string | null>(null);
+  error = signal(false);
   activeCategory = signal<string>('');
   activeSubcategory = signal<string>('');
 
@@ -248,6 +247,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   });
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+  
   ngOnInit(): void {
     this.themeSvc.listenForPreviewUpdates();
     this.loadMenu();
@@ -315,7 +316,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.loading.set(false);
-        this.error.set('Menu not available right now. Please try again.');
+        this.error.set(true);
       }
     });
   }
