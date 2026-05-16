@@ -1,0 +1,101 @@
+<div class="create-wrap">
+  <div class="create-card">
+
+    <div class="create-head">
+      <div>
+        <h1 class="create-title">New Tenant</h1>
+        <p class="create-sub">Create a restaurant account and owner login</p>
+      </div>
+      <a routerLink="/admin/tenants" class="btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </a>
+    </div>
+
+    @if (formError()) {
+      <div class="form-error" role="alert">{{ formError() }}</div>
+    }
+
+    <div class="form-grid">
+
+      <!-- Restaurant -->
+      <div class="form-section">
+        <div class="form-section__label">Restaurant</div>
+        <div class="field">
+          <label class="field-label" for="name">Name *</label>
+          <input id="name" type="text" class="field-input"
+            [value]="fName()" (input)="setName($any($event.target).value)"
+            placeholder="Black Rabbit Café" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="slug">Slug *</label>
+          <input id="slug" type="text" class="field-input"
+            [value]="fSlug()" (input)="setSlug($any($event.target).value)"
+            placeholder="black-rabbit" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="subdomain">Subdomain *</label>
+          <div class="field-suffix-wrap">
+            <input id="subdomain" type="text" class="field-input field-input--suffix"
+              [value]="fSubdomain()" (input)="setSubdomain($any($event.target).value)"
+              placeholder="blackrabbit" />
+            <span class="field-suffix">.menuify.tn</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Owner -->
+      <div class="form-section">
+        <div class="form-section__label">Owner account</div>
+        <div class="field">
+          <label class="field-label" for="ownerName">Full name</label>
+          <input id="ownerName" type="text" class="field-input"
+            [value]="fOwnerName()" (input)="setOwnerName($any($event.target).value)"
+            placeholder="Ahmed Ben Ali" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="ownerEmail">Email *</label>
+          <input id="ownerEmail" type="email" class="field-input"
+            [value]="fOwnerEmail()" (input)="setOwnerEmail($any($event.target).value)"
+            placeholder="owner@restaurant.tn" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="ownerPass">Password *</label>
+          <input id="ownerPass" type="password" class="field-input"
+            [value]="fOwnerPass()" (input)="setOwnerPass($any($event.target).value)"
+            placeholder="Min. 8 characters" />
+        </div>
+      </div>
+
+      <!-- Plan -->
+      <div class="form-section">
+        <div class="form-section__label">Plan & Trial</div>
+        <div class="field">
+          <label class="field-label" for="plan">Plan</label>
+          <select id="plan" class="field-input"
+            [value]="fPlan()" (change)="setPlan($any($event.target).value)">
+            @for (p of plans; track p) {
+              <option [value]="p">{{ planMeta[p].label }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="trialDays">Trial days</label>
+          <input id="trialDays" type="number" class="field-input"
+            [value]="fTrialDays()" (input)="setTrialDays($any($event.target).value)"
+            min="1" max="365" />
+        </div>
+      </div>
+
+    </div>
+
+    <div class="create-foot">
+      <a routerLink="/admin/tenants" class="btn-ghost">Cancel</a>
+      <button class="btn-primary" [disabled]="saving()" (click)="submit()" type="button">
+        @if (saving()) { <span class="spinner-sm"></span> }
+        Create tenant
+      </button>
+    </div>
+
+  </div>
+</div>

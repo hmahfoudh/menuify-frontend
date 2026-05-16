@@ -1,0 +1,141 @@
+<div class="shell" [class.sidebar-open]="sidebarOpen()" [class.sidebar-collapsed]="sidebarCollapsed()">
+
+  <!-- ── MOBILE OVERLAY ───────────────────────────────────────────────────── -->
+  <div class="overlay" (click)="closeSidebar()" aria-hidden="true"></div>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════════════════════════════════════════ -->
+  <aside class="sidebar" role="navigation" aria-label="Admin navigation">
+
+    <!-- Brand -->
+    <div class="sidebar-brand">
+      <a routerLink="/admin" class="brand-link" (click)="closeSidebar()">
+        <img src="/assets/brand/logo-dark.svg" alt="Menuify" height="36">
+      </a>
+      <button class="collapse-btn" (click)="toggleCollapsed()"
+        [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+        type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          @if (sidebarCollapsed()) { <polyline points="9 18 15 12 9 6"/> }
+          @else { <polyline points="15 18 9 12 15 6"/> }
+        </svg>
+      </button>
+    </div>
+
+    <!-- Platform identity block (replaces tenant block) -->
+    <div class="sidebar-platform">
+      <div class="platform-icon" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div class="platform-info">
+        <span class="platform-name">Menuify Admin</span>
+        <span class="platform-badge">Super Admin</span>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <ul role="list">
+        @for (item of navItems; track item.route) {
+          <li>
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="nav-link--active"
+              class="nav-link"
+              [title]="sidebarCollapsed() ? item.label : ''"
+              (click)="closeSidebar()"
+            >
+              <span class="nav-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path [attr.d]="item.icon"/>
+                </svg>
+              </span>
+              <span class="nav-label">{{ item.label }}</span>
+              <span class="nav-active-bar" aria-hidden="true"></span>
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Back to tenant dashboard — only if this super admin owns a tenant -->
+    @if (hasTenant()) {
+      <div class="sidebar-back">
+        <a routerLink="/dashboard" class="back-link" (click)="closeSidebar()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span class="back-label">Back to Dashboard</span>
+        </a>
+      </div>
+      <div class="sidebar-divider"></div>
+    }
+
+    <!-- User profile -->
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ userInitials() }}</div>
+      <div class="user-info">
+        <span class="user-name">{{ user()?.fullName ?? user()?.email }}</span>
+        <span class="user-role">Super Admin</span>
+      </div>
+      <button class="logout-btn" (click)="logout()" title="Sign out" aria-label="Sign out" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       MAIN AREA
+  ═══════════════════════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+      <!-- Mobile hamburger -->
+      <button class="hamburger" (click)="toggleSidebar()" aria-label="Toggle menu" type="button">
+        <span></span><span></span><span></span>
+      </button>
+
+      <!-- Page title -->
+      <h1 class="topbar-title">{{ pageTitle() }}</h1>
+
+      <!-- Right actions -->
+      <div class="topbar-end">
+
+        <!-- Platform chip — always visible, replaces trial chip -->
+        <div class="platform-chip">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          Platform Console
+        </div>
+
+        <app-lang-switcher />
+
+        <!-- User avatar button -->
+        <div class="topbar-avatar">{{ userInitials() }}</div>
+
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main class="page-content" role="main">
+      <router-outlet />
+    </main>
+
+  </div>
+
+</div>

@@ -1,37 +1,41 @@
 import {
   Component, OnInit, signal, computed,
-  inject, HostListener
+  inject, HostListener,
+  PLATFORM_ID,
+  OnDestroy
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
 import { FEATURE_ICONS, FEATURE_KEYS, Lang, PLANS, PublicTenant } from '../models/landing.models';
-import { RouterLink } from "@angular/router";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 import { MetaTagsService } from '../../../shared/services/meta-tags.service';
+import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { FooterComponent } from '../../../shared/components/footer/footer.component';
+import { Subject, takeUntil } from 'rxjs';
 
 
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, RouterLink],
+  imports: [CommonModule, TranslatePipe, RouterLink, NavbarComponent, FooterComponent],
   templateUrl: './landing.component.html',
   styleUrls: ['./landing.component.scss'],
 })
-export class LandingComponent implements OnInit {
+export class LandingComponent implements OnInit, OnDestroy {
 
+  private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
   private translate = inject(TranslateService);
   private metaTags = inject(MetaTagsService);
+  private route = inject(ActivatedRoute);
 
   // ── Language ─────────────────────────────────────────────────────────────────
   currentLang = signal<Lang>('fr');
   isRtl = computed(() => this.currentLang() === 'ar');
 
-  // ── Navbar ───────────────────────────────────────────────────────────────────
-  scrolled = signal(false);
-  mobileMenuOpen = signal(false);
 
   // ── Restaurant directory ──────────────────────────────────────────────────────
   allTenants = signal<PublicTenant[]>([]);
@@ -66,15 +70,27 @@ export class LandingComponent implements OnInit {
   readonly featureKeys = FEATURE_KEYS;
   readonly featureIcons = FEATURE_ICONS;
   readonly plans = PLANS;
-
+ 
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
+  private destroy$ = new Subject<void>();
 
   ngOnInit(): void {
+    this.route.fragment.pipe(takeUntil(this.destroy$)).subscribe(fragment => {
+      if (fragment && isPlatformBrowser(this.platformId)) {
+        // Small delay to let the page render before scrolling
+        setTimeout(() => {
+          document.getElementById(fragment)?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    });
+
     this.loadTenants();
   }
 
-  @HostListener('window:scroll')
-  onScroll(): void { this.scrolled.set(window.scrollY > 40); }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   // ── Language ──────────────────────────────────────────────────────────────────
   setLang(lang: Lang): void {
@@ -102,9 +118,10 @@ export class LandingComponent implements OnInit {
   tenantInitial(name: string): string { return name.charAt(0).toUpperCase(); }
 
   // ── Smooth scroll ─────────────────────────────────────────────────────────────
-  scrollTo(id: string): void {
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-    this.mobileMenuOpen.set(false);
+  scrollTo(section: string): void {
+    if (isPlatformBrowser(this.platformId)) {
+      document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   // ── Contact ───────────────────────────────────────────────────────────────────
@@ -132,9 +149,5 @@ export class LandingComponent implements OnInit {
   planFeatures(planKey: string): string[] {
     const features = this.translate.instant(`pricing.${planKey}.features`);
     return Array.isArray(features) ? features : [];
-  }
-
-  public updateMobileOpenState(): void {
-    this.mobileMenuOpen.update(v => !v);
   }
 }

@@ -1,0 +1,46 @@
+<nav class="nav" [class.nav--scrolled]="scrolled()" aria-label="Navigation principale">
+  <div class="nav__inner">
+
+    <a class="nav__brand" routerLink="/" aria-label="Menuify - Accueil">
+      <img src="/assets/brand/logo-light.svg" alt="Menuify" height="36" width="auto">
+    </a>
+
+    <!-- Desktop links -->
+    <div class="nav__links">
+      <button class="nav__link" (click)="navigateTo('features')" type="button">{{ 'nav.features' | translate }}</button>
+      <button class="nav__link" (click)="navigateTo('pricing')"  type="button">{{ 'nav.pricing'  | translate }}</button>
+      <button class="nav__link" (click)="navigateTo('contact')"  type="button">{{ 'nav.contact'  | translate }}</button>
+      <button class="nav__link" (click)="navigateTo('about')"    type="button">{{ 'nav.about'    | translate }}</button>
+      <a class="nav__link" routerLink="/blog" routerLinkActive="nav__link--active">Blog</a>
+    </div>
+
+    <div class="nav__actions">
+      <div class="lang-switch" role="group" aria-label="Choisir la langue">
+        <button class="lang-btn" [class.lang-btn--active]="currentLang()==='fr'" (click)="setLang('fr')" type="button" aria-label="Français">FR</button>
+        <button class="lang-btn" [class.lang-btn--active]="currentLang()==='en'" (click)="setLang('en')" type="button" aria-label="English">EN</button>
+        <button class="lang-btn" [class.lang-btn--active]="currentLang()==='ar'" (click)="setLang('ar')" type="button" aria-label="العربية">ع</button>
+      </div>
+      <a class="btn-ghost-sm" routerLink="/auth/login">{{ 'nav.signin'  | translate }}</a>
+      <a class="btn-gold-sm"  routerLink="/auth/register">{{ 'nav.signup' | translate }}</a>
+    </div>
+
+    <button class="nav__burger" (click)="updateMobileOpenState()" type="button"
+      [attr.aria-expanded]="mobileMenuOpen()" aria-label="Menu mobile">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  @if (mobileMenuOpen()) {
+    <div class="nav__mobile">
+      <button class="nav__mobile-link" (click)="navigateTo('features')" type="button">{{ 'nav.features' | translate }}</button>
+      <button class="nav__mobile-link" (click)="navigateTo('pricing')"  type="button">{{ 'nav.pricing'  | translate }}</button>
+      <button class="nav__mobile-link" (click)="navigateTo('contact')"  type="button">{{ 'nav.contact'  | translate }}</button>
+      <button class="nav__mobile-link" (click)="navigateTo('about')"    type="button">{{ 'nav.about'    | translate }}</button>
+      <a class="nav__mobile-link" routerLink="/blog" (click)="mobileMenuOpen.set(false)">Blog</a>
+      <div class="nav__mobile-ctas">
+        <a class="btn-ghost-sm" routerLink="/auth/login">{{ 'nav.signin'  | translate }}</a>
+        <a class="btn-gold-sm"  routerLink="/auth/register">{{ 'nav.signup' | translate }}</a>
+      </div>
+    </div>
+  }
+</nav>

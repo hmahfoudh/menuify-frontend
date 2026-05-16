@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard }  from './core/guards/auth.guard';
+import { authGuard } from './core/guards/auth.guard';
 import { ownerGuard } from './core/guards/owner.guard';
 import { superAdminGuard } from './core/guards/super-admin.guard';
 import { tenantRedirectGuard } from './core/guards/tenant-redirect.guards';
@@ -8,15 +8,15 @@ export const routes: Routes = [
 
   // ── Landing page — bare domain (menuify.tn) ──────────────────────────────────
   {
-    path:          '',
+    path: '',
     canActivate: [tenantRedirectGuard],
-    loadComponent: () =>import('./features/landing/landing/landing.component').then(m => m.LandingComponent),
+    loadComponent: () => import('./features/landing/landing/landing.component').then(m => m.LandingComponent),
   },
 
   // ── Public menu — tenant subdomains (blackrabbit.menuify.tn) ─────────────────
   {
-    path:          'menu',
-    loadComponent: () =>import('./features/public/pages/menu-page/menu-page.component').then(m => m.MenuPageComponent),
+    path: 'menu',
+    loadComponent: () => import('./features/public/pages/menu-page/menu-page.component').then(m => m.MenuPageComponent),
   },
   {
     path: 'reserve',
@@ -25,13 +25,13 @@ export const routes: Routes = [
 
   // ── POS — tenant subdomain ───────────────────────────────────────────────────
   {
-    path:     'dashboard/pos',
-    loadChildren: () =>import('./features/pos/pos.routes').then(m => m.POS_ROUTES),
+    path: 'dashboard/pos',
+    loadChildren: () => import('./features/pos/pos.routes').then(m => m.POS_ROUTES),
   },
 
   // ── Auth pages ───────────────────────────────────────────────────────────────
   {
-    path:         'auth',
+    path: 'auth',
     loadChildren: () =>
       import('./features/auth/auth.routes')
         .then(m => m.AUTH_ROUTES),
@@ -39,49 +39,58 @@ export const routes: Routes = [
 
   // ── Admin panel ──────────────────────────────────────────────────────────────
   {
-    path:     'admin',
+    path: 'admin',
     canActivate: [authGuard, superAdminGuard],
-    loadChildren: () =>import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
   },
 
   // ── Dashboard ────────────────────────────────────────────────────────────────
   {
-    path:          'dashboard',
-    canActivate:   [authGuard, ownerGuard],
+    path: 'dashboard',
+    canActivate: [authGuard, ownerGuard],
     loadComponent: () =>
       import('./features/dashboard/dashboard/dashboard-shell/dashboard-shell.component').then(m => m.DashboardShellComponent),
     children: [
       { path: '', redirectTo: 'menu', pathMatch: 'full' },
-      { path: 'menu',          loadChildren:  () => import('./features/dashboard/menu/menu.routes').then(m => m.MENU_ROUTES) },
-      { path: 'orders',        loadComponent: () => import('./features/dashboard/orders/pages/orders/orders.component').then(m => m.OrdersComponent) },
-      { path: 'history',       loadComponent: () => import('./features/dashboard/orders/pages/order-history/order-history.component').then(m => m.OrderHistoryComponent) },
-      { path: 'reservations',  loadComponent: () => import('./features/dashboard/reservations/reservations/reservations.component').then(m => m.ReservationsComponent) },
-      { path: 'theme',         loadComponent: () => import('./features/dashboard/theme/theme-editor/theme-editor.component').then(m => m.ThemeEditorComponent) },
-      { path: 'analytics',     loadComponent: () => import('./features/dashboard/analytics/analytics/analytics.component').then(m => m.AnalyticsComponent) },
-      { path: 'tables',        loadComponent: () => import('./features/dashboard/tables/tables/tables.component').then(m => m.TablesComponent) },
-      { path: 'settings',      loadComponent: () => import('./features/dashboard/settings/settings/settings.component').then(m => m.SettingsComponent) },
+      { path: 'menu', loadChildren: () => import('./features/dashboard/menu/menu.routes').then(m => m.MENU_ROUTES) },
+      { path: 'orders', loadComponent: () => import('./features/dashboard/orders/pages/orders/orders.component').then(m => m.OrdersComponent) },
+      { path: 'history', loadComponent: () => import('./features/dashboard/orders/pages/order-history/order-history.component').then(m => m.OrderHistoryComponent) },
+      { path: 'reservations', loadComponent: () => import('./features/dashboard/reservations/reservations/reservations.component').then(m => m.ReservationsComponent) },
+      { path: 'theme', loadComponent: () => import('./features/dashboard/theme/theme-editor/theme-editor.component').then(m => m.ThemeEditorComponent) },
+      { path: 'analytics', loadComponent: () => import('./features/dashboard/analytics/analytics/analytics.component').then(m => m.AnalyticsComponent) },
+      { path: 'tables', loadComponent: () => import('./features/dashboard/tables/tables/tables.component').then(m => m.TablesComponent) },
+      { path: 'settings', loadComponent: () => import('./features/dashboard/settings/settings/settings.component').then(m => m.SettingsComponent) },
       { path: 'notifications', loadComponent: () => import('./features/dashboard/notifications/notification-bell/notification-bell.component').then(m => m.NotificationBellComponent) },
-      { path: 'staff',         loadComponent: () => import('./features/pos/pages/staff/staff.component').then(m => m.StaffComponent) },
-      { path: 'reports',       loadComponent: () => import('./features/dashboard/z-report/z-report.component').then(m => m.ZReportComponent)}
+      { path: 'staff', loadComponent: () => import('./features/pos/pages/staff/staff.component').then(m => m.StaffComponent) },
+      { path: 'reports', loadComponent: () => import('./features/dashboard/z-report/z-report.component').then(m => m.ZReportComponent) },
     ],
   },
 
   // ── POS — dashboard subdomain (owner quick access) ───────────────────────────
   {
-    path:     'pos',
-    loadChildren: () =>import('./features/pos/pos.routes').then(m => m.POS_ROUTES),
+    path: 'pos',
+    loadChildren: () => import('./features/pos/pos.routes').then(m => m.POS_ROUTES),
+  },
+
+  {
+    path: 'blog',
+    children: [
+      { path: '', loadComponent: () => import('./features/blog/pages/blog-list/blog-list.component').then(m => m.BlogListComponent) },
+      { path: 'tag/:tag', loadComponent: () => import('./features/blog/pages/blog-list/blog-list.component').then(m => m.BlogListComponent) },
+      { path: ':slug', loadComponent: () => import('./features/blog/pages/blog-post/blog-post.component').then(m => m.BlogPostComponent) },
+    ]
   },
 
   // ── Default redirects ─────────────────────────────────────────────────────────
   // Dashboard unknown paths → /dashboard
   {
-    path:      '**',
-    redirectTo:'',
+    path: '**',
+    redirectTo: '',
   },
 
   // Everything else (tenant subdomains, unknown) → public menu root
   {
-    path:      '**',
-    redirectTo:'',
+    path: '**',
+    redirectTo: '',
   },
 ];

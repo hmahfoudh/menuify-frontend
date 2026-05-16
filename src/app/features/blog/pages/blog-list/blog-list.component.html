@@ -1,0 +1,197 @@
+<app-navbar />
+
+<div class="bl-page">
+
+  <!-- ── Page header ─────────────────────────────────────────────────── -->
+  <div class="bl-hero">
+    <div class="container">
+      <div class="hero__tag">Journal et réflexions</div>
+      <h1 class="bl-hero__title">
+        @if (activeTag()) { #{{ activeTag() }} }
+        @else { Blog }
+      </h1>
+      <p class="bl-hero__sub">
+        @if (activeTag()) { Articles étiquetés avec <strong>#{{ activeTag() }}</strong> }
+        @else { Conseils de gestion de restaurant, guides de menus numériques et informations sur le secteur. }
+      </p>
+
+      <!-- Tag filter chips -->
+      <div class="bl-tags" role="group" aria-label="Filter by tag">
+        <button class="bl-tag-chip" [class.bl-tag-chip--active]="!activeTag()" (click)="clearTag()" type="button">
+          Tous
+        </button>
+        @for (tag of tags(); track tag.id) {
+          <button
+            class="bl-tag-chip"
+            [class.bl-tag-chip--active]="activeTag() === tag.slug"
+            (click)="filterByTag(tag.slug)"
+            type="button"
+          >{{ tag.name }}</button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ── Featured post ──────────────────────────────────────────────── -->
+    @if (featuredPost() && !activeTag()) {
+      <a [routerLink]="['/blog', featuredPost()!.slug]" class="bl-featured" [attr.aria-label]="'Featured: ' + featuredPost()!.title">
+        @if (featuredPost()!.coverImageUrl) {
+          <div class="bl-featured__img-wrap">
+            <img
+              [src]="featuredPost()!.coverImageUrl"
+              [alt]="featuredPost()!.coverImageAlt || featuredPost()!.title"
+              class="bl-featured__img"
+            />
+          </div>
+        }
+        <div class="bl-featured__body">
+          <div class="bl-featured__badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Featured
+          </div>
+          <h2 class="bl-featured__title">{{ featuredPost()!.title }}</h2>
+          @if (featuredPost()!.excerpt) {
+            <p class="bl-featured__excerpt">{{ featuredPost()!.excerpt }}</p>
+          }
+          <div class="bl-featured__meta">
+            @if (featuredPost()!.authorAvatarUrl) {
+              <img [src]="featuredPost()!.authorAvatarUrl" [alt]="featuredPost()!.authorName" class="bl-meta__avatar" />
+            }
+            <span>{{ featuredPost()!.authorName }}</span>
+            <span class="bl-meta__dot" aria-hidden="true">·</span>
+            <span>{{ formatDate(featuredPost()!.publishedAt) }}</span>
+            <span class="bl-meta__dot" aria-hidden="true">·</span>
+            <span>{{ featuredPost()!.readingTimeMinutes }} min temps de lecture</span>
+          </div>
+          <span class="bl-featured__cta">
+            Lire l'article
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </span>
+        </div>
+      </a>
+    }
+
+    <!-- ── Skeleton ────────────────────────────────────────────────────── -->
+    @if (loading()) {
+      <div class="bl-grid" aria-busy="true" aria-label="Loading articles">
+        @for (n of [1,2,3,4,5,6]; track n) {
+          <div class="bl-skeleton-card">
+            <div class="bl-skeleton__img"></div>
+            <div class="bl-skeleton__body">
+              <div class="bl-skeleton__line bl-skeleton__line--tag"></div>
+              <div class="bl-skeleton__line bl-skeleton__line--title"></div>
+              <div class="bl-skeleton__line"></div>
+              <div class="bl-skeleton__line bl-skeleton__line--short"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── Grid ───────────────────────────────────────────────────────── -->
+    @if (!loading()) {
+      @if (posts().length === 0) {
+        <div class="bl-empty">
+          <div class="bl-empty__icon" aria-hidden="true">📝</div>
+          <p>No articles yet. Check back soon.</p>
+        </div>
+      } @else {
+        <div class="bl-grid">
+          @for (post of posts(); track post.id) {
+            <a [routerLink]="['/blog', post.slug]" class="bl-card">
+              @if (post.coverImageUrl) {
+                <div class="bl-card__img-wrap">
+                  <img
+                    [src]="post.coverImageUrl"
+                    [alt]="post.coverImageAlt || post.title"
+                    class="bl-card__img"
+                    loading="lazy"
+                  />
+                </div>
+              } @else {
+                <div class="bl-card__img-placeholder" aria-hidden="true">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+                  </svg>
+                </div>
+              }
+              <div class="bl-card__body">
+                @if (post.tags.length > 0) {
+                  <div class="bl-card__tags">
+                    @for (tag of post.tags; track tag.id) {
+                      <span class="bl-card__tag">{{ tag.name }}</span>
+                    }
+                  </div>
+                }
+                <h3 class="bl-card__title">{{ post.title }}</h3>
+                @if (post.excerpt) {
+                  <p class="bl-card__excerpt">{{ post.excerpt }}</p>
+                }
+                <div class="bl-card__meta">
+                  @if (post.authorAvatarUrl) {
+                    <img [src]="post.authorAvatarUrl" [alt]="post.authorName" class="bl-meta__avatar" />
+                  }
+                  <span class="bl-card__author">{{ post.authorName }}</span>
+                  <span class="bl-meta__dot" aria-hidden="true">·</span>
+                  <time [attr.datetime]="post.publishedAt">{{ formatDate(post.publishedAt) }}</time>
+                  <span class="bl-meta__dot" aria-hidden="true">·</span>
+                  <span>{{ post.readingTimeMinutes }} min temps de lecture</span>
+                </div>
+              </div>
+            </a>
+          }
+        </div>
+
+        <!-- ── Pagination ────────────────────────────────────────────── -->
+        @if (totalPages() > 1) {
+          <nav class="bl-pagination" aria-label="Blog pagination">
+            <button
+              class="bl-page-btn"
+              [disabled]="currentPage() === 0"
+              (click)="goToPage(currentPage() - 1)"
+              type="button"
+              aria-label="Previous page"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+              Prev
+            </button>
+
+            @for (p of pages(); track p) {
+              <button
+                class="bl-page-btn"
+                [class.bl-page-btn--active]="currentPage() === p"
+                [attr.aria-current]="currentPage() === p ? 'page' : null"
+                (click)="goToPage(p)"
+                type="button"
+              >{{ p + 1 }}</button>
+            }
+
+            <button
+              class="bl-page-btn"
+              [disabled]="currentPage() === totalPages() - 1"
+              (click)="goToPage(currentPage() + 1)"
+              type="button"
+              aria-label="Next page"
+            >
+              Next
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </nav>
+        }
+      }
+    }
+
+  </div>
+</div>
+
+<app-footer />

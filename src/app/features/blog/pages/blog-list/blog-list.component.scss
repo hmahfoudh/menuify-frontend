@@ -1,0 +1,429 @@
+// ── Design tokens (mirrors landing_component.scss) ─────────────────────────
+:host {
+  --gold:      #c9a96e;
+  --gold-dk:   #b8935a;
+  --gold-lt:   #e0c28a;
+  --gold-bg:   rgba(201,169,110,0.08);
+  --gold-bg2:  rgba(201,169,110,0.15);
+  --ink:       #111110;
+  --body:      #f9f8f6;
+  --gray:      #f4f3f1;
+  --gray2:     #eae8e4;
+  --border:    #e8e5e0;
+  --text:      #1a1917;
+  --muted:     #6b6660;
+  --muted2:    #9c9690;
+  --r:         0.2s ease;
+  --radius:    14px;
+  --shadow:    0 2px 12px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.10);
+
+  display:     block;
+  background:  #fff;
+  color:       var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+.container {
+  max-width: 1120px;
+  margin:    0 auto;
+  padding:   0 1.5rem;
+}
+
+// ── Page hero / header ─────────────────────────────────────────────────────
+.bl-hero {
+  background:    var(--gray);
+  border-bottom: 1px solid var(--border);
+  padding:       72px 0 48px;
+  text-align:    center;
+}
+
+.hero__tag {
+  display:        inline-block;
+  padding:        5px 12px;
+  background:     var(--gold-bg);
+  border:         1px solid rgba(201,169,110,0.25);
+  border-radius:  20px;
+  font-size:      0.72rem;
+  font-weight:    600;
+  color:          var(--gold-dk);
+  margin-bottom:  1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.bl-hero__title {
+  font-size:      2.5rem;
+  font-weight:    800;
+  color:          var(--ink);
+  letter-spacing: -0.03em;
+  margin:         0 0 0.75rem;
+
+  @media (max-width: 768px) { font-size: 1.8rem; }
+}
+
+.bl-hero__sub {
+  font-size:   1rem;
+  color:       var(--muted);
+  line-height: 1.6;
+  margin:      0 0 2rem;
+
+  strong { color: var(--text); font-weight: 600; }
+}
+
+// ── Tag chips ──────────────────────────────────────────────────────────────
+.bl-tags {
+  display:         flex;
+  gap:             0.4rem;
+  flex-wrap:       wrap;
+  justify-content: center;
+}
+
+.bl-tag-chip {
+  padding:       6px 14px;
+  background:    #fff;
+  border:        1.5px solid var(--border);
+  border-radius: 20px;
+  font-size:     0.78rem;
+  font-weight:   500;
+  color:         var(--muted);
+  font-family:   inherit;
+  cursor:        pointer;
+  transition:    all var(--r);
+
+  &:hover { border-color: var(--gold); color: var(--gold-dk); }
+
+  &--active {
+    background:   var(--gold-bg);
+    border-color: rgba(201,169,110,0.4);
+    color:        var(--gold-dk);
+    font-weight:  600;
+  }
+}
+
+// ── Featured post ──────────────────────────────────────────────────────────
+.bl-featured {
+  display:         grid;
+  grid-template-columns: 1.1fr 1fr;
+  background:      #fff;
+  border:          1.5px solid var(--border);
+  border-radius:   var(--radius);
+  overflow:        hidden;
+  margin:          3rem 0 2.5rem;
+  text-decoration: none;
+  color:           inherit;
+  box-shadow:      var(--shadow);
+  transition:      all var(--r);
+
+  &:hover {
+    border-color: var(--gold);
+    box-shadow:   0 8px 32px rgba(201,169,110,0.12);
+    transform:    translateY(-2px);
+
+    .bl-featured__img { transform: scale(1.03); }
+    .bl-featured__cta { color: var(--gold-dk); gap: 8px; }
+  }
+
+  @media (max-width: 860px) { grid-template-columns: 1fr; }
+}
+
+.bl-featured__img-wrap {
+  overflow: hidden;
+  max-height: 400px;
+
+  @media (max-width: 860px) { max-height: 220px; }
+}
+
+.bl-featured__img {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  display:    block;
+  transition: transform 0.4s ease;
+}
+
+.bl-featured__body {
+  padding:        2.5rem 2.25rem;
+  display:        flex;
+  flex-direction: column;
+  justify-content:center;
+  gap:            0.85rem;
+
+  @media (max-width: 860px) { padding: 1.5rem; }
+}
+
+.bl-featured__badge {
+  display:        inline-flex;
+  align-items:    center;
+  gap:            5px;
+  padding:        4px 12px;
+  background:     var(--gold-bg);
+  border:         1px solid rgba(201,169,110,0.3);
+  border-radius:  20px;
+  font-size:      0.68rem;
+  font-weight:    700;
+  color:          var(--gold-dk);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  width:          fit-content;
+
+  svg { flex-shrink: 0; }
+}
+
+.bl-featured__title {
+  font-size:      1.6rem;
+  font-weight:    800;
+  color:          var(--ink);
+  line-height:    1.25;
+  letter-spacing: -0.02em;
+  margin:         0;
+
+  @media (max-width: 860px) { font-size: 1.3rem; }
+}
+
+.bl-featured__excerpt {
+  font-size:   0.9rem;
+  color:       var(--muted);
+  line-height: 1.7;
+  margin:      0;
+}
+
+.bl-featured__meta {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  font-size:   0.78rem;
+  color:       var(--muted);
+}
+
+.bl-featured__cta {
+  display:     inline-flex;
+  align-items: center;
+  gap:         5px;
+  font-size:   0.82rem;
+  font-weight: 600;
+  color:       var(--gold);
+  margin-top:  0.25rem;
+  transition:  all var(--r);
+}
+
+// ── Post grid ──────────────────────────────────────────────────────────────
+.bl-grid {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   1.25rem;
+  padding:               2.5rem 0 4rem;
+
+  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 560px) { grid-template-columns: 1fr; }
+}
+
+// ── Post card ──────────────────────────────────────────────────────────────
+.bl-card {
+  background:      #fff;
+  border:          1.5px solid var(--border);
+  border-radius:   var(--radius);
+  overflow:        hidden;
+  text-decoration: none;
+  color:           inherit;
+  display:         flex;
+  flex-direction:  column;
+  transition:      all var(--r);
+
+  &:hover {
+    border-color: var(--gold);
+    box-shadow:   0 4px 20px rgba(201,169,110,0.12);
+    transform:    translateY(-2px);
+
+    .bl-card__img { transform: scale(1.04); }
+  }
+}
+
+.bl-card__img-wrap {
+  aspect-ratio: 16 / 9;
+  overflow:     hidden;
+}
+
+.bl-card__img {
+  width:      100%;
+  height:     100%;
+  object-fit: cover;
+  display:    block;
+  transition: transform 0.35s ease;
+}
+
+.bl-card__img-placeholder {
+  aspect-ratio:    16 / 9;
+  background:      var(--gray);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  color:           var(--muted2);
+}
+
+.bl-card__body {
+  padding:        1.25rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.55rem;
+  flex:           1;
+}
+
+.bl-card__tags {
+  display:  flex;
+  gap:      0.35rem;
+  flex-wrap:wrap;
+}
+
+.bl-card__tag {
+  font-size:      0.65rem;
+  font-weight:    600;
+  color:          var(--gold-dk);
+  background:     var(--gold-bg);
+  border:         1px solid rgba(201,169,110,0.2);
+  padding:        2px 8px;
+  border-radius:  20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bl-card__title {
+  font-size:      0.95rem;
+  font-weight:    700;
+  color:          var(--ink);
+  line-height:    1.4;
+  margin:         0;
+  letter-spacing: -0.01em;
+}
+
+.bl-card__excerpt {
+  font-size:   0.82rem;
+  color:       var(--muted);
+  line-height: 1.6;
+  margin:      0;
+  flex:        1;
+
+  // Clamp to 3 lines
+  display:            -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow:           hidden;
+}
+
+.bl-card__meta {
+  display:     flex;
+  align-items: center;
+  gap:         0.4rem;
+  font-size:   0.72rem;
+  color:       var(--muted);
+  margin-top:  auto;
+  padding-top: 0.5rem;
+  border-top:  1px solid var(--gray2);
+  flex-wrap:   wrap;
+}
+
+.bl-card__author { font-weight: 500; color: var(--text); }
+
+// ── Shared meta ────────────────────────────────────────────────────────────
+.bl-meta__avatar {
+  width:         1.5rem;
+  height:        1.5rem;
+  border-radius: 50%;
+  object-fit:    cover;
+  flex-shrink:   0;
+}
+
+.bl-meta__dot { color: var(--muted2); }
+
+// ── Skeleton ───────────────────────────────────────────────────────────────
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+%shimmer {
+  background:      linear-gradient(90deg, var(--gray) 25%, var(--gray2) 50%, var(--gray) 75%);
+  background-size: 200% 100%;
+  animation:       shimmer 1.5s infinite;
+}
+
+.bl-skeleton-card {
+  background:    #fff;
+  border:        1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow:      hidden;
+}
+
+.bl-skeleton__img {
+  @extend %shimmer;
+  aspect-ratio: 16 / 9;
+}
+
+.bl-skeleton__body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.bl-skeleton__line {
+  @extend %shimmer;
+  height:        0.75rem;
+  border-radius: 4px;
+
+  &--tag   { width: 30%; height: 0.65rem; }
+  &--title { width: 85%; height: 1rem; }
+  &--short { width: 50%; }
+}
+
+// ── Empty state ────────────────────────────────────────────────────────────
+.bl-empty {
+  text-align:  center;
+  padding:     5rem 0;
+  color:       var(--muted);
+
+  .bl-empty__icon {
+    font-size:     2.5rem;
+    margin-bottom: 0.75rem;
+    display:       block;
+  }
+
+  p { font-size: 0.9rem; margin: 0; }
+}
+
+// ── Pagination ─────────────────────────────────────────────────────────────
+.bl-pagination {
+  display:         flex;
+  justify-content: center;
+  align-items:     center;
+  gap:             0.35rem;
+  padding-bottom:  4rem;
+  flex-wrap:       wrap;
+}
+
+.bl-page-btn {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           4px;
+  padding:       8px 14px;
+  background:    #fff;
+  border:        1.5px solid var(--border);
+  border-radius: 9px;
+  color:         var(--muted);
+  font-size:     0.82rem;
+  font-weight:   500;
+  font-family:   inherit;
+  cursor:        pointer;
+  transition:    all var(--r);
+
+  &:hover:not(:disabled) { border-color: var(--gold); color: var(--gold-dk); }
+  &:disabled             { opacity: 0.4; cursor: default; }
+
+  &--active {
+    background:   var(--gold-bg);
+    border-color: rgba(201,169,110,0.4);
+    color:        var(--gold-dk);
+    font-weight:  600;
+  }
+}
