@@ -1,9 +1,10 @@
 import {
   Component, inject, signal, computed,
-  OnInit, OnDestroy,
+  OnInit, AfterViewInit, OnDestroy,
   ViewChild, ElementRef, PLATFORM_ID,
   ChangeDetectorRef
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TitleCasePipe } from '@angular/common';
 import Quill from 'quill';
@@ -18,7 +19,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './blog-admin-editor.component.html',
   styleUrl: './blog-admin-editor.component.scss'
 })
-export class BlogAdminEditorComponent implements OnInit, OnDestroy {
+export class BlogAdminEditorComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -109,6 +110,13 @@ export class BlogAdminEditorComponent implements OnInit, OnDestroy {
       }
     })
 
+  }
+
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    // setTimeout(0) ensures Angular finishes rendering @if(!loading()) before
+    // Quill mounts — without it the ViewChild ref may not exist yet
+    setTimeout(() => this.initQuill(), 0);
   }
 
   ngOnDestroy(): void {
