@@ -1,0 +1,879 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// TOKENS — identical to dashboard-shell dark palette
+// ─────────────────────────────────────────────────────────────────────────────
+:host {
+  --gold:    #c9a96e;
+  --gold-dk: #b8935a;
+  --gold-lo: rgba(201,169,110,0.12);
+  --gold-hi: rgba(201,169,110,0.22);
+  --ink:     #0d0c0b;
+  --ink-2:   #161412;
+  --ink-3:   #1e1c18;
+  --ink-4:   #272420;
+  --line:    rgba(210,180,120,0.10);
+  --line-2:  rgba(210,180,120,0.20);
+  --cream:   #f0ebe2;
+  --cream-2: #c8c0b4;
+  --fog:     #7a7268;
+  --fog-2:   #504c46;
+  --r:       0.2s ease;
+  --radius:  10px;
+
+  display:     block;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background:  var(--ink);
+  min-height:  100vh;
+  color:       var(--cream-2);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOPBAR
+// ─────────────────────────────────────────────────────────────────────────────
+.editor__topbar {
+  display:       flex;
+  align-items:   center;
+  gap:           1rem;
+  padding:       0 1.5rem;
+  height:        56px;
+  background:    var(--ink-2);
+  border-bottom: 1px solid var(--line);
+  position:      sticky;
+  top:           0;
+  z-index:       20;
+  flex-wrap:     wrap;
+}
+
+.editor__back {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             5px;
+  font-size:       0.8rem;
+  color:           var(--fog);
+  text-decoration: none;
+  transition:      color var(--r);
+  white-space:     nowrap;
+  flex-shrink:     0;
+
+  &:hover { color: var(--cream-2); }
+}
+
+.editor__heading {
+  font-size:     0.95rem;
+  font-weight:   600;
+  color:         var(--cream);
+  margin:        0;
+  flex:          1;
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.editor__topbar-actions {
+  display:     flex;
+  align-items: center;
+  gap:         0.5rem;
+  flex-shrink: 0;
+  flex-wrap:   wrap;
+}
+
+.editor__error {
+  font-size:     0.75rem;
+  color:         #e07070;
+  max-width:     200px;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+  white-space:   nowrap;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BUTTONS
+// ─────────────────────────────────────────────────────────────────────────────
+.btn-primary {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           6px;
+  padding:       8px 18px;
+  background:    var(--gold);
+  color:         var(--ink);
+  border:        none;
+  border-radius: var(--radius);
+  font-size:     0.83rem;
+  font-weight:   700;
+  font-family:   inherit;
+  cursor:        pointer;
+  transition:    background var(--r);
+  white-space:   nowrap;
+
+  &:hover:not(:disabled) { background: #d4b47a; }
+  &:disabled             { opacity: 0.55; cursor: default; }
+}
+
+.btn-ghost {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           6px;
+  padding:       8px 16px;
+  background:    transparent;
+  color:         var(--fog);
+  border:        1px solid var(--line-2);
+  border-radius: var(--radius);
+  font-size:     0.83rem;
+  font-weight:   500;
+  font-family:   inherit;
+  cursor:        pointer;
+  transition:    all var(--r);
+  white-space:   nowrap;
+
+  &:hover:not(:disabled) { background: var(--ink-4); color: var(--cream-2); }
+  &:disabled             { opacity: 0.45; cursor: default; }
+
+  &--sm { padding: 5px 10px; font-size: 0.75rem; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SKELETON
+// ─────────────────────────────────────────────────────────────────────────────
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.editor__skeleton {
+  display:        flex;
+  flex-direction: column;
+  gap:            1rem;
+  padding:        2rem;
+  max-width:      720px;
+}
+
+.sk {
+  border-radius:   6px;
+  background:      linear-gradient(90deg, var(--ink-3) 25%, var(--ink-4) 50%, var(--ink-3) 75%);
+  background-size: 200% 100%;
+  animation:       shimmer 1.5s infinite;
+
+  &--title { height: 2rem;   width: 55%; }
+  &--line  { height: 0.85rem; width: 100%; }
+  &--short { width: 40%; }
+  &--block { height: 200px; width: 100%; margin-top: 0.5rem; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BODY LAYOUT
+// ─────────────────────────────────────────────────────────────────────────────
+.editor__body {
+  display:               grid;
+  grid-template-columns: 1fr 288px;
+  gap:                   1.5rem;
+  padding:               1.5rem;
+  align-items:           start;
+
+  @media (max-width: 960px) { grid-template-columns: 1fr; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN PANEL
+// ─────────────────────────────────────────────────────────────────────────────
+.editor__main {
+  background:    var(--ink-2);
+  border:        1px solid var(--line);
+  border-radius: 12px;
+  overflow:      hidden;
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+.editor__tabs {
+  display:       flex;
+  border-bottom: 1px solid var(--line);
+  padding:       0 0.25rem;
+}
+
+.editor__tab {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           6px;
+  padding:       0.85rem 1rem;
+  background:    transparent;
+  border:        none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color:         var(--fog);
+  font-size:     0.8rem;
+  font-weight:   500;
+  font-family:   inherit;
+  cursor:        pointer;
+  transition:    all var(--r);
+  white-space:   nowrap;
+
+  &:hover    { color: var(--cream-2); }
+  &--active  { color: var(--gold); border-bottom-color: var(--gold); font-weight: 600; }
+}
+
+.editor__panel {
+  display:        flex;
+  flex-direction: column;
+  gap:            1.25rem;
+  padding:        1.5rem;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FORM FIELDS
+// ─────────────────────────────────────────────────────────────────────────────
+.field {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.35rem;
+}
+
+.field__label {
+  font-size:      0.72rem;
+  font-weight:    600;
+  color:          var(--fog);
+  letter-spacing: 0.01em;
+}
+
+.field__label-row {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+}
+
+.field__counter {
+  font-size:  0.68rem;
+  font-weight:400;
+  color:      var(--fog-2);
+
+  &--warn { color: #e07070; font-weight: 600; }
+}
+
+.field__input {
+  padding:       9px 12px;
+  background:    var(--ink-3);
+  border:        1px solid var(--line-2);
+  border-radius: 8px;
+  color:         var(--cream-2);
+  font-size:     0.88rem;
+  font-family:   inherit;
+  outline:       none;
+  width:         100%;
+  box-sizing:    border-box;
+  transition:    border-color var(--r), background var(--r);
+
+  &::placeholder { color: var(--fog-2); }
+  &:focus        { border-color: rgba(201,169,110,0.45); background: var(--ink-4); }
+
+  &--title  { font-size: 1.05rem; font-weight: 600; color: var(--cream); }
+  &--prefix { border-radius: 0 8px 8px 0; border-left: none; }
+  &--sm     { padding: 7px 10px; font-size: 0.8rem; }
+}
+
+.field__prefix-wrap {
+  display:     flex;
+  align-items: stretch;
+}
+
+.field__prefix {
+  display:       flex;
+  align-items:   center;
+  padding:       0 10px;
+  background:    var(--ink-4);
+  border:        1px solid var(--line-2);
+  border-right:  none;
+  border-radius: 8px 0 0 8px;
+  font-size:     0.8rem;
+  color:         var(--fog);
+  white-space:   nowrap;
+  font-family:   monospace;
+  flex-shrink:   0;
+}
+
+.field__textarea {
+  resize:      vertical;
+  min-height:  80px;
+  line-height: 1.65;
+}
+
+.field__select {
+  cursor: pointer;
+  option { background: var(--ink-3); color: var(--cream-2); }
+}
+
+.field__hint {
+  font-size:   0.68rem;
+  color:       var(--fog-2);
+  line-height: 1.5;
+}
+
+// ── Settings tab ──────────────────────────────────────────────────────────
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.author-preview {
+  display:     flex;
+  align-items: center;
+  gap:         0.65rem;
+  padding:     0.85rem;
+  background:  var(--ink-3);
+  border:      1px solid var(--line);
+  border-radius:8px;
+}
+
+.author-preview__img {
+  width:         36px;
+  height:        36px;
+  border-radius: 50%;
+  object-fit:    cover;
+  flex-shrink:   0;
+  border:        1px solid var(--line-2);
+}
+
+.author-preview__name {
+  font-size:   0.82rem;
+  font-weight: 500;
+  color:       var(--cream-2);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// QUILL RICH TEXT EDITOR
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Wrapper applies border + focus-within ring
+.quill-wrap {
+  border:        1px solid var(--line-2);
+  border-radius: 8px;
+  overflow:      hidden;
+  transition:    border-color var(--r);
+
+  &:focus-within { border-color: rgba(201,169,110,0.45); }
+}
+
+// ::ng-deep required because Quill renders outside Angular's shadow DOM
+:host ::ng-deep {
+
+  // ── Toolbar ────────────────────────────────────────────────────────────
+  .ql-toolbar.ql-snow {
+    background:    var(--ink-3);
+    border:        none;
+    border-bottom: 1px solid var(--line-2);
+    padding:       8px 10px;
+    flex-wrap:     wrap;
+    gap:           2px;
+
+    .ql-formats { margin-right: 8px; }
+
+    // Toolbar buttons
+    button {
+      color:  var(--fog);
+      border: none;
+
+      &:hover svg .ql-stroke,
+      &.ql-active svg .ql-stroke { stroke: var(--gold); }
+
+      &:hover svg .ql-fill,
+      &.ql-active svg .ql-fill   { fill: var(--gold); }
+
+      svg .ql-stroke             { stroke: var(--fog); transition: stroke var(--r); }
+      svg .ql-fill               { fill:   var(--fog); transition: fill   var(--r); }
+    }
+
+    // Picker labels (Header dropdown)
+    .ql-picker-label {
+      color:       var(--fog);
+      border:      none;
+      font-size:   0.78rem;
+      font-family: inherit;
+
+      &:hover,
+      &.ql-active              { color: var(--gold); }
+
+      // Dropdown arrow
+      .ql-stroke               { stroke: var(--fog); }
+      &:hover .ql-stroke,
+      &.ql-active .ql-stroke   { stroke: var(--gold); }
+    }
+
+    // Dropdown options panel
+    .ql-picker-options {
+      background:    var(--ink-3);
+      border:        1px solid var(--line-2);
+      border-radius: 6px;
+      box-shadow:    0 4px 20px rgba(0,0,0,0.5);
+      padding:       4px;
+      z-index:       100;
+
+      .ql-picker-item {
+        color:         var(--cream-2);
+        border-radius: 4px;
+        font-size:     0.8rem;
+        padding:       4px 8px;
+        font-family:   inherit;
+
+        &:hover       { background: var(--ink-4); color: var(--gold); }
+        &.ql-selected { color: var(--gold); }
+      }
+    }
+  }
+
+  // ── Editor area ────────────────────────────────────────────────────────
+  .ql-container.ql-snow {
+    background:  var(--ink-3);
+    border:      none;
+    font-size:   0.93rem;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .ql-editor {
+    min-height:  520px;
+    color:       var(--cream-2);
+    line-height: 1.8;
+    padding:     1.25rem 1.5rem;
+    caret-color: var(--gold);
+
+    // Placeholder
+    &.ql-blank::before {
+      color:      var(--fog-2);
+      font-style: normal;
+      font-size:  0.9rem;
+    }
+
+    // ── Typography ───────────────────────────────────────────────────────
+    h2 {
+      font-size:      1.4rem;
+      font-weight:    700;
+      color:          var(--cream);
+      letter-spacing: -0.02em;
+      margin:         1.75rem 0 0.6rem;
+      padding-bottom: 0.4rem;
+      border-bottom:  1px solid var(--line);
+    }
+
+    h3 {
+      font-size:   1.1rem;
+      font-weight: 600;
+      color:       var(--cream);
+      margin:      1.5rem 0 0.5rem;
+    }
+
+    h4 {
+      font-size:   0.95rem;
+      font-weight: 600;
+      color:       var(--cream-2);
+      margin:      1.25rem 0 0.4rem;
+    }
+
+    p              { margin: 0 0 1rem; }
+    p:last-child   { margin-bottom: 0; }
+
+    a {
+      color:                 var(--gold);
+      text-decoration:       underline;
+      text-underline-offset: 2px;
+      &:hover { color: var(--gold-dk); }
+    }
+
+    strong { color: var(--cream); font-weight: 700; }
+    em     { font-style: italic; color: var(--cream-2); }
+
+    ul, ol {
+      padding-left: 1.5rem;
+      margin:       0 0 1rem;
+    }
+    li { margin-bottom: 0.3rem; }
+
+    blockquote {
+      border-left:   3px solid var(--gold);
+      background:    rgba(201,169,110,0.06);
+      border-radius: 0 6px 6px 0;
+      margin:        1.25rem 0;
+      padding:       0.85rem 1.25rem;
+      color:         var(--fog);
+      font-style:    italic;
+    }
+
+    pre.ql-syntax {
+      background:    var(--ink-4);
+      border:        1px solid var(--line-2);
+      border-radius: 6px;
+      color:         var(--cream-2);
+      font-family:   'JetBrains Mono', 'Fira Code', monospace;
+      font-size:     0.82rem;
+      padding:       1rem 1.1rem;
+      margin:        1rem 0;
+      overflow-x:    auto;
+    }
+
+    code {
+      background:    var(--ink-4);
+      border:        1px solid var(--line-2);
+      border-radius: 3px;
+      color:         var(--gold);
+      font-family:   'JetBrains Mono', 'Fira Code', monospace;
+      font-size:     0.85em;
+      padding:       1px 5px;
+    }
+
+    pre code { background: transparent; border: none; padding: 0; color: inherit; }
+
+    img {
+      max-width:     100%;
+      border-radius: 6px;
+      border:        1px solid var(--line);
+      margin:        0.5rem 0;
+    }
+
+    hr {
+      border:     none;
+      border-top: 1px solid var(--line);
+      margin:     1.5rem 0;
+    }
+
+    // Quill alignment classes
+    .ql-align-center  { text-align: center; }
+    .ql-align-right   { text-align: right; }
+    .ql-align-justify { text-align: justify; }
+
+    // Quill indent
+    .ql-indent-1 { padding-left: 2rem; }
+    .ql-indent-2 { padding-left: 4rem; }
+    .ql-indent-3 { padding-left: 6rem; }
+  }
+
+  // ── Link / image tooltip ──────────────────────────────────────────────
+  .ql-snow .ql-tooltip {
+    background:    var(--ink-3);
+    border:        1px solid var(--line-2);
+    border-radius: 8px;
+    box-shadow:    0 4px 20px rgba(0,0,0,0.5);
+    color:         var(--cream-2);
+    font-family:   inherit;
+    font-size:     0.8rem;
+    z-index:       200;
+    left:          0 !important; // prevent overflow off screen
+
+    input[type='text'] {
+      background:    var(--ink-4);
+      border:        1px solid var(--line-2);
+      border-radius: 5px;
+      color:         var(--cream-2);
+      font-family:   inherit;
+      font-size:     0.8rem;
+      outline:       none;
+      padding:       4px 8px;
+
+      &:focus { border-color: rgba(201,169,110,0.45); }
+    }
+
+    a.ql-action,
+    a.ql-remove {
+      color:       var(--gold);
+      margin-left: 8px;
+      &:hover { color: var(--gold-dk); }
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SEO PREVIEW
+// ─────────────────────────────────────────────────────────────────────────────
+.serp-preview { display: flex; flex-direction: column; gap: 0.65rem; }
+
+.serp-preview__label {
+  display:        inline-flex;
+  align-items:    center;
+  gap:            5px;
+  font-size:      0.65rem;
+  font-weight:    700;
+  color:          var(--fog-2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.serp-preview__card {
+  background:    var(--ink-3);
+  border:        1px solid var(--line);
+  border-radius: var(--radius);
+  padding:       1.1rem 1.25rem;
+  display:       flex;
+  flex-direction:column;
+  gap:           0.25rem;
+}
+
+.serp-preview__url   { font-size: 0.72rem; color: #6aa87a; font-family: monospace; }
+.serp-preview__title { font-size: 1rem;    color: #7aa8e8; font-weight: 500; text-decoration: underline; }
+.serp-preview__desc  { font-size: 0.8rem;  color: var(--cream-2); line-height: 1.55; margin-top: 2px; }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────────────────────────────────────────
+.editor__sidebar {
+  display:        flex;
+  flex-direction: column;
+  gap:            1rem;
+  position:       sticky;
+  top:            calc(56px + 1.5rem);
+}
+
+.sidebar-card {
+  background:     var(--ink-2);
+  border:         1px solid var(--line);
+  border-radius:  12px;
+  padding:        1.1rem;
+  display:        flex;
+  flex-direction: column;
+  gap:            0.75rem;
+
+  &--actions { gap: 0.4rem; }
+}
+
+.sidebar-card__title {
+  font-size:      0.65rem;
+  font-weight:    700;
+  color:          var(--fog-2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+// ── Status hint ───────────────────────────────────────────────────────────
+.status-hint {
+  display:     flex;
+  align-items: center;
+  gap:         5px;
+  font-size:   0.7rem;
+  color:       var(--fog);
+
+  svg { flex-shrink: 0; }
+}
+
+// ── Cover dropzone ────────────────────────────────────────────────────────
+.cover-drop {
+  border:          1.5px dashed var(--line-2);
+  border-radius:   var(--radius);
+  overflow:        hidden;
+  cursor:          pointer;
+  transition:      border-color var(--r), background var(--r);
+  min-height:      110px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  position:        relative;
+
+  &:hover,
+  &:focus-visible {
+    border-color: rgba(201,169,110,0.45);
+    background:   var(--gold-lo);
+    outline:      none;
+  }
+
+  &--filled { border-style: solid; border-color: var(--line-2); min-height: unset; }
+}
+
+.cover-drop__img {
+  width:      100%;
+  height:     140px;
+  object-fit: cover;
+  display:    block;
+}
+
+.cover-drop__overlay {
+  position:        absolute;
+  inset:           0;
+  background:      rgba(0,0,0,0.5);
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  gap:             0.35rem;
+  color:           #fff;
+  font-size:       0.75rem;
+  font-weight:     600;
+  opacity:         0;
+  transition:      opacity var(--r);
+
+  .cover-drop:hover & { opacity: 1; }
+}
+
+.cover-drop__empty {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            0.4rem;
+  padding:        1.25rem;
+  color:          var(--fog);
+  text-align:     center;
+}
+
+.cover-drop__label { font-size: 0.78rem; font-weight: 600; color: var(--cream-2); }
+.cover-drop__hint  { font-size: 0.67rem; color: var(--fog-2); }
+.cover-file-input  { display: none; }
+
+.cover-file-name {
+  display:       flex;
+  align-items:   center;
+  gap:           5px;
+  font-size:     0.68rem;
+  color:         var(--fog);
+  font-family:   monospace;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+  white-space:   nowrap;
+
+  svg { flex-shrink: 0; color: var(--gold); }
+}
+
+.cover-alt-field { margin-top: 0.1rem; }
+
+.cover-clear-btn {
+  display:     inline-flex;
+  align-items: center;
+  gap:         4px;
+  padding:     4px 10px;
+  background:  transparent;
+  border:      1px solid var(--line-2);
+  border-radius:6px;
+  font-size:   0.68rem;
+  color:       var(--fog);
+  font-family: inherit;
+  cursor:      pointer;
+  align-self:  flex-start;
+  transition:  all var(--r);
+
+  &:hover { border-color: rgba(220,80,70,0.4); color: #e07070; }
+}
+
+// ── Tags ──────────────────────────────────────────────────────────────────
+.tags-empty { font-size: 0.75rem; color: var(--fog-2); margin: 0; }
+
+.tag-list { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+
+.tag-toggle {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           4px;
+  padding:       4px 10px;
+  background:    var(--ink-3);
+  border:        1px solid var(--line-2);
+  border-radius: 20px;
+  font-size:     0.72rem;
+  font-weight:   500;
+  color:         var(--fog);
+  font-family:   inherit;
+  cursor:        pointer;
+  transition:    all var(--r);
+
+  &:hover    { border-color: rgba(201,169,110,0.35); color: var(--cream-2); }
+  &--active  { background: var(--gold-lo); border-color: rgba(201,169,110,0.4); color: var(--gold); font-weight: 600; }
+}
+
+.tag-create {
+  display:     flex;
+  gap:         0.4rem;
+  align-items: center;
+  margin-top:  0.1rem;
+}
+
+// ── Featured toggle ───────────────────────────────────────────────────────
+.featured-row {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  gap:             1rem;
+  background:      transparent;
+  border:          none;
+  padding:         0;
+  cursor:          pointer;
+  width:           100%;
+  text-align:      left;
+  font-family:     inherit;
+}
+
+.featured-row__text  { display: flex; flex-direction: column; gap: 0.2rem; }
+.featured-row__label { font-size: 0.82rem; font-weight: 600; color: var(--cream-2); }
+.featured-row__hint  { font-size: 0.68rem; color: var(--fog); line-height: 1.4; }
+
+.toggle {
+  width:         38px;
+  height:        22px;
+  border-radius: 11px;
+  background:    var(--ink-4);
+  border:        1px solid var(--line-2);
+  position:      relative;
+  flex-shrink:   0;
+  transition:    background var(--r), border-color var(--r);
+
+  &--on { background: var(--gold); border-color: var(--gold); }
+}
+
+.toggle__thumb {
+  position:      absolute;
+  top:           2px;
+  left:          2px;
+  width:         16px;
+  height:        16px;
+  border-radius: 50%;
+  background:    var(--fog-2);
+  transition:    transform var(--r), background var(--r);
+  box-shadow:    0 1px 3px rgba(0,0,0,0.4);
+
+  .toggle--on & { transform: translateX(16px); background: var(--ink); }
+}
+
+// ── Quick actions ─────────────────────────────────────────────────────────
+.action-link {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             6px;
+  padding:         7px 11px;
+  background:      transparent;
+  border:          1px solid var(--line-2);
+  border-radius:   8px;
+  color:           var(--fog);
+  font-size:       0.75rem;
+  font-weight:     500;
+  text-decoration: none;
+  transition:      all var(--r);
+  width:           100%;
+  box-sizing:      border-box;
+
+  &:hover { background: var(--ink-3); color: var(--cream-2); }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SPINNERS
+// ─────────────────────────────────────────────────────────────────────────────
+.spinner-sm {
+  width:         13px;
+  height:        13px;
+  border:        2px solid rgba(13,12,11,0.3);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation:     spin 0.6s linear infinite;
+  display:       inline-block;
+}
+
+.spinner-xs {
+  width:         11px;
+  height:        11px;
+  border:        2px solid var(--line-2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation:     spin 0.6s linear infinite;
+  display:       inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RESPONSIVE
+// ─────────────────────────────────────────────────────────────────────────────
+@media (max-width: 640px) {
+  .editor__topbar { padding: 0 1rem; height: auto; min-height: 56px; padding-block: 0.75rem; }
+  .editor__body   { padding: 1rem; }
+  .editor__panel  { padding: 1rem; }
+
+  :host ::ng-deep .ql-editor { min-height: 300px; padding: 1rem; }
+}

@@ -56,9 +56,6 @@ export function app(): express.Express {
       res.send(
         `User-agent: *\n` +
         `Allow: /\n` +
-        `Disallow: /dashboard/\n` +
-        `Disallow: /admin/\n` +
-        `Disallow: /auth/\n` +
         `Sitemap: https://menuify.tn/sitemap.xml\n`
       );
     } else {

@@ -3,57 +3,7 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        NAVBAR
   ═══════════════════════════════════════════════════════════════════════ -->
-  <nav class="nav" [class.nav--scrolled]="scrolled()" aria-label="Navigation principale">
-    <div class="nav__inner">
-
-      <a class="nav__brand" routerLink="/" aria-label="Menuify - Accueil">
-        <img src="/assets/brand/logo-light.svg" alt="Menuify" height="36" width="auto">
-      </a>
-
-      <!-- Desktop links -->
-      <div class="nav__links">
-        <button class="nav__link" (click)="scrollTo('features')" type="button">{{ 'nav.features' | translate }}</button>
-        <button class="nav__link" (click)="scrollTo('pricing')" type="button">{{ 'nav.pricing' | translate }}</button>
-        <button class="nav__link" (click)="scrollTo('contact')" type="button">{{ 'nav.contact' | translate }}</button>
-        <button class="nav__link" (click)="scrollTo('about')" type="button">{{ 'nav.about' | translate }}</button>
-      </div>
-
-      <div class="nav__actions">
-        <!-- Language switcher -->
-        <div class="lang-switch" role="group" aria-label="Choisir la langue">
-          <button class="lang-btn" [class.lang-btn--active]="currentLang()==='fr'" (click)="setLang('fr')" type="button"
-            aria-label="Français">FR</button>
-          <button class="lang-btn" [class.lang-btn--active]="currentLang()==='en'" (click)="setLang('en')" type="button"
-            aria-label="English">EN</button>
-          <button class="lang-btn" [class.lang-btn--active]="currentLang()==='ar'" (click)="setLang('ar')" type="button"
-            aria-label="العربية">ع</button>
-        </div>
-        <a class="btn-ghost-sm" routerLink="/auth/login">{{ 'nav.signin' | translate }}</a>
-        <a class="btn-gold-sm" routerLink="/auth/register">{{ 'nav.signup' | translate }}</a>
-      </div>
-
-      <button class="nav__burger" (click)="updateMobileOpenState()" type="button"
-        [attr.aria-expanded]="mobileMenuOpen()" aria-label="Menu mobile">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-
-    @if (mobileMenuOpen()) {
-    <div class="nav__mobile">
-      <button class="nav__mobile-link" (click)="scrollTo('features')" type="button">{{ 'nav.features' | translate
-        }}</button>
-      <button class="nav__mobile-link" (click)="scrollTo('pricing')" type="button">{{ 'nav.pricing' | translate
-        }}</button>
-      <button class="nav__mobile-link" (click)="scrollTo('contact')" type="button">{{ 'nav.contact' | translate
-        }}</button>
-      <button class="nav__mobile-link" (click)="scrollTo('about')" type="button">{{ 'nav.about' | translate }}</button>
-      <div class="nav__mobile-ctas">
-        <a class="btn-ghost-sm" routerLink="/auth/login">{{ 'nav.signin' | translate }}</a>
-        <a class="btn-gold-sm" routerLink="/auth/register">{{ 'nav.signup' | translate }}</a>
-      </div>
-    </div>
-    }
-  </nav>
+  <app-navbar />
 
   <!-- ═══════════════════════════════════════════════════════════════════════
        HERO
@@ -63,13 +13,7 @@
       <div class="hero__inner">
         <div class="hero__content">
           <div class="hero__tag">{{ 'hero.tag' | translate }}</div>
-
-          <!--
-            h1: the single most important on-page SEO element.
-            The text is rendered by ngx-translate at runtime. If SSR is
-            hydrating translations correctly, Google will see this content.
-            Run `curl https://menuify.tn/ | grep -A2 "<h1"` to verify.
-          -->
+          
           <h1 id="hero-title" class="hero__title">
             {{ 'hero.title1' | translate }}<br>
             <span class="hero__title-accent">{{ 'hero.title2' | translate }}</span>
@@ -425,28 +369,6 @@
   <!-- ═══════════════════════════════════════════════════════════════════════
        FOOTER
   ═══════════════════════════════════════════════════════════════════════ -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer__inner">
-        <div class="footer__brand">
-          <div class="footer__logo">
-            <img src="/assets/brand/logo-dark.svg" alt="Menuify" height="36" width="auto">
-          </div>
-          <p class="footer__tagline">{{ 'footer.tagline' | translate }}</p>
-        </div>
-        <nav class="footer__links" aria-label="Liens du pied de page">
-          <button class="footer__link" (click)="scrollTo('about')" type="button">{{ 'footer.about' | translate
-            }}</button>
-          <button class="footer__link" (click)="scrollTo('contact')" type="button">{{ 'footer.contact' | translate
-            }}</button>
-          <a class="footer__link" href="/privacy">{{ 'footer.privacy' | translate }}</a>
-          <a class="footer__link" href="/terms">{{ 'footer.terms' | translate }}</a>
-        </nav>
-      </div>
-      <div class="footer__bottom">
-        <span>{{ 'footer.rights' | translate }}</span>
-      </div>
-    </div>
-  </footer>
+  <app-footer />
 
 </div>

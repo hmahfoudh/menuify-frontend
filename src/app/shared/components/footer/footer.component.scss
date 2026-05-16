@@ -1,0 +1,71 @@
+:host {
+  --gold:    #c9a96e;
+  --gold-dk: #b8935a;
+  --ink:     #111110;
+  --muted:   #6b6660;
+  --border:  #e8e5e0;
+  --r:       0.2s ease;
+
+  display:     block;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.container {
+  max-width: 1120px;
+  margin:    0 auto;
+  padding:   0 1.5rem;
+}
+
+.footer {
+  background: var(--ink);
+  color:      #a09890;
+  padding:    3rem 0 2rem;
+}
+
+.footer__inner {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     flex-start;
+  gap:             2rem;
+  flex-wrap:       wrap;
+  margin-bottom:   2rem;
+}
+
+.footer__brand   { max-width: 240px; }
+
+.footer__logo {
+  display:       flex;
+  align-items:   center;
+  gap:           8px;
+  margin-bottom: 0.5rem;
+}
+
+.footer__tagline { font-size: 0.8rem; color: #6b6660; margin: 0; line-height: 1.5; }
+
+.footer__links {
+  display:   flex;
+  gap:       0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.footer__link {
+  padding:         6px 10px;
+  background:      transparent;
+  border:          none;
+  color:           #6b6660;
+  font-size:       0.8rem;
+  font-family:     inherit;
+  cursor:          pointer;
+  text-decoration: none;
+  transition:      color var(--r);
+  &:hover { color: var(--gold); }
+}
+
+.footer__bottom {
+  border-top:  1px solid #2a2724;
+  padding-top: 1.5rem;
+  font-size:   0.75rem;
+  color:       #4a4540;
+  text-align:  center;
+}

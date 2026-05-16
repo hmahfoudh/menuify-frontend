@@ -1,0 +1,246 @@
+<!-- ── SUCCESS TOAST ──────────────────────────────────────────────────────── -->
+@if (success()) {
+  <div class="toast" role="status">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+    {{ success() }}
+  </div>
+}
+
+<!-- ── STATS BAR ──────────────────────────────────────────────────────────── -->
+@if (stats(); as s) {
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-card__val">{{ s.totalTenants }}</div>
+      <div class="stat-card__label">Total tenants</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__val stat-card__val--green">{{ s.activeTenants }}</div>
+      <div class="stat-card__label">Active</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__val stat-card__val--amber">{{ s.tenantsOnTrial }}</div>
+      <div class="stat-card__label">On trial</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__val stat-card__val--red">{{ s.expiredTrials }}</div>
+      <div class="stat-card__label">Expired trials</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__val">{{ s.totalOrders }}</div>
+      <div class="stat-card__label">Total orders</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__val stat-card__val--blue">{{ s.ordersToday }}</div>
+      <div class="stat-card__label">Orders today</div>
+    </div>
+  </div>
+}
+
+<!-- ── TENANTS PANEL ───────────────────────────────────────────────────────── -->
+<div class="tenants-wrap" [class.tenants-wrap--split]="selected()">
+
+  <!-- List column -->
+  <div class="list-col">
+    <div class="list-head">
+      <div class="list-head__search-wrap">
+        <svg class="list-head__search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input
+          type="search"
+          class="list-head__search"
+          placeholder="Search by name, email or subdomain…"
+          [value]="searchQuery()"
+          (input)="setSearch($any($event.target).value)"
+        />
+      </div>
+      <div class="list-head__meta">
+        <span class="list-head__count">{{ filteredTenants().length }} tenants</span>
+        <a routerLink="/admin/tenants/new" class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New tenant
+        </a>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="list-loading"><div class="spinner"></div></div>
+    }
+
+    @if (error()) {
+      <div class="list-error">{{ error() }}</div>
+    }
+
+    <div class="tenant-list">
+      @for (t of filteredTenants(); track t.id) {
+        <div
+          class="tenant-row"
+          [class.tenant-row--selected]="selected()?.id === t.id"
+          [class.tenant-row--inactive]="!t.active"
+          (click)="selectTenant(t)"
+          role="button"
+          [attr.aria-selected]="selected()?.id === t.id"
+          tabindex="0"
+          (keydown.enter)="selectTenant(t)"
+        >
+          <div class="tenant-row__avatar">{{ t.name.charAt(0).toUpperCase() }}</div>
+
+          <div class="tenant-row__main">
+            <div class="tenant-row__name">{{ t.name }}</div>
+            <div class="tenant-row__meta">{{ t.ownerEmail ?? '—' }} · {{ t.subdomain }}.menuify.tn</div>
+          </div>
+
+          <div class="tenant-row__right">
+            <div class="tenant-row__badges">
+              <span class="badge" [class]="'badge--' + t.plan.toLowerCase()">{{ planMeta[t.plan].label }}</span>
+              @if (!t.active) {
+                <span class="badge badge--inactive">Inactive</span>
+              } @else if (t.trialExpired) {
+                <span class="badge badge--danger">Expired</span>
+              } @else if (t.onTrial) {
+                <span class="badge badge--warning">{{ t.daysRemaining }}d</span>
+              }
+            </div>
+            <div class="tenant-row__orders">{{ t.orderCount }} orders</div>
+          </div>
+        </div>
+      }
+
+      @if (!loading() && filteredTenants().length === 0) {
+        <div class="list-empty">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <p>No tenants found</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Detail panel -->
+  @if (selected(); as t) {
+    <aside class="detail-panel">
+
+      <div class="detail-head">
+        <div>
+          <h2 class="detail-title">{{ t.name }}</h2>
+          <p class="detail-sub">{{ t.subdomain }}.menuify.tn</p>
+        </div>
+        <button class="detail-close" (click)="closePanel()" type="button" aria-label="Close panel">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Owner -->
+      <div class="detail-section">
+        <div class="detail-section__label">Owner</div>
+        <div class="detail-row">
+          <span class="detail-row__key">Name</span>
+          <span>{{ t.ownerName ?? '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__key">Email</span>
+          <span class="detail-row__email">{{ t.ownerEmail ?? '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__key">Verified</span>
+          <span [class]="t.ownerEmailVerified ? 'text-green' : 'text-amber'">
+            {{ t.ownerEmailVerified ? '✓ Yes' : '✗ No' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Plan & trial -->
+      <div class="detail-section">
+        <div class="detail-section__label">Plan & Trial</div>
+        <div class="detail-row">
+          <span class="detail-row__key">Plan</span>
+          <span class="badge" [class]="'badge--' + t.plan.toLowerCase()">{{ planMeta[t.plan].label }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__key">Trial</span>
+          <span class="badge" [class]="trialClass(t)">{{ trialLabel(t) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__key">Orders</span>
+          <span>{{ t.orderCount }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__key">Menu items</span>
+          <span>{{ t.menuItemCount }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__key">Created</span>
+          <span>{{ t.createdAt | date:'dd MMM yyyy' }}</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="detail-section">
+        <div class="detail-section__label">Actions</div>
+
+        <!-- Extend trial -->
+        @if (!extending()) {
+          <button class="action-btn" (click)="extending.set(true)" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Extend trial
+          </button>
+        } @else {
+          <div class="inline-form">
+            <input type="number" class="inline-input" [value]="extendDays()"
+              (input)="setExtendDays($any($event.target).value)" min="1" max="365" />
+            <span class="inline-form__unit">days</span>
+            <button class="action-btn action-btn--primary" [disabled]="actioning()" (click)="submitExtend()" type="button">Confirm</button>
+            <button class="action-btn" (click)="extending.set(false)" type="button">Cancel</button>
+          </div>
+        }
+
+        <!-- Change plan -->
+        @if (!changingPlan()) {
+          <button class="action-btn" (click)="changingPlan.set(true)" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Change plan
+          </button>
+        } @else {
+          <div class="inline-form">
+            <select class="inline-input" [value]="newPlan()" (change)="setNewPlan($any($event.target).value)">
+              @for (p of plans; track p) {
+                <option [value]="p">{{ planMeta[p].label }}</option>
+              }
+            </select>
+            <button class="action-btn action-btn--primary" [disabled]="actioning()" (click)="submitPlanChange()" type="button">Confirm</button>
+            <button class="action-btn" (click)="changingPlan.set(false)" type="button">Cancel</button>
+          </div>
+        }
+
+        <!-- Toggle active -->
+        <button
+          class="action-btn"
+          [class.action-btn--danger]="t.active"
+          [disabled]="actioning()"
+          (click)="toggleActive(t)"
+          type="button"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            @if (t.active) { <path d="M18.36 6.64A9 9 0 1 1 5.64 5.64"/><line x1="12" y1="2" x2="12" y2="12"/> }
+            @else { <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/><polyline points="9 11 12 14 15 11"/> }
+          </svg>
+          {{ t.active ? 'Deactivate tenant' : 'Activate tenant' }}
+        </button>
+
+        <!-- Impersonate -->
+        <button
+          class="action-btn action-btn--impersonate"
+          [disabled]="impersonating() || !t.active"
+          (click)="impersonate(t)"
+          type="button"
+        >
+          @if (impersonating()) {
+            <span class="spinner-xs"></span> Logging in…
+          } @else {
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Log in as owner
+          }
+        </button>
+      </div>
+
+    </aside>
+  }
+
+</div>

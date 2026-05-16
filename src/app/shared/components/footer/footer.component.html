@@ -1,0 +1,25 @@
+<footer class="footer">
+  <div class="container">
+    <div class="footer__inner">
+
+      <div class="footer__brand">
+        <div class="footer__logo">
+          <img src="/assets/brand/logo-dark.svg" alt="Menuify" height="36" width="auto">
+        </div>
+        <p class="footer__tagline">{{ 'footer.tagline' | translate }}</p>
+      </div>
+
+      <nav class="footer__links" aria-label="Liens du pied de page">
+        <button class="footer__link" (click)="navigateTo('about')"   type="button">{{ 'footer.about'   | translate }}</button>
+        <button class="footer__link" (click)="navigateTo('contact')" type="button">{{ 'footer.contact' | translate }}</button>
+        <a class="footer__link" routerLink="/blog">{{ 'footer.blog' | translate }}</a>
+        <a class="footer__link" routerLink="/privacy">{{ 'footer.privacy' | translate }}</a>
+        <a class="footer__link" routerLink="/terms">{{ 'footer.terms'   | translate }}</a>
+      </nav>
+
+    </div>
+    <div class="footer__bottom">
+      <span>{{ 'footer.rights' | translate }}</span>
+    </div>
+  </div>
+</footer>

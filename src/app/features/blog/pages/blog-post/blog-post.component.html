@@ -1,0 +1,127 @@
+<app-navbar />
+
+<div class="bp-page">
+  @if (loading()) {
+    <!-- ── Skeleton ──────────────────────────────────────────────────── -->
+    <div class="bp-skeleton-wrap container" aria-busy="true">
+      <div class="bp-skeleton__breadcrumb">
+        <div class="bp-sk-line" style="width:60px"></div>
+        <div class="bp-sk-line" style="width:8px"></div>
+        <div class="bp-sk-line" style="width:120px"></div>
+      </div>
+      <div class="bp-sk-line bp-sk-line--title"></div>
+      <div class="bp-sk-line" style="width:75%"></div>
+      <div class="bp-sk-line" style="width:55%"></div>
+      <div class="bp-skeleton__img"></div>
+    </div>
+
+  } @else if (notFound()) {
+    <!-- ── 404 ──────────────────────────────────────────────────────── -->
+    <div class="bp-not-found container">
+      <div class="bp-not-found__icon" aria-hidden="true">📄</div>
+      <h1>Article not found</h1>
+      <p>This article may have been moved or deleted.</p>
+      <a routerLink="/blog" class="btn-gold">
+        ← Back to blog
+      </a>
+    </div>
+
+  } @else if (post()) {
+    <!-- ── Hero header ────────────────────────────────────────────── -->
+    <div class="bp-hero">
+      <div class="container">
+        <!-- Breadcrumb -->
+        <nav class="bp-breadcrumb" aria-label="Breadcrumb">
+          <a routerLink="/blog" class="bp-breadcrumb__link">Blog</a>
+          @for (tag of post()!.tags; track tag.id) {
+            <span class="bp-breadcrumb__sep" aria-hidden="true">›</span>
+            <a [routerLink]="['/blog/tag', tag.slug]" class="bp-breadcrumb__link">{{ tag.name }}</a>
+          }
+        </nav>
+
+        <!-- Tags -->
+        @if (post()!.tags.length > 0) {
+          <div class="bp-tags">
+            @for (tag of post()!.tags; track tag.id) {
+              <a [routerLink]="['/blog/tag', tag.slug]" class="bp-tag">{{ tag.name }}</a>
+            }
+          </div>
+        }
+
+        <!-- Title -->
+        <h1 class="bp-title">{{ post()!.title }}</h1>
+
+        <!-- Excerpt -->
+        @if (post()!.excerpt) {
+          <p class="bp-excerpt">{{ post()!.excerpt }}</p>
+        }
+
+        <!-- Author + meta bar -->
+        <div class="bp-meta-bar">
+          <div class="bp-author">
+            @if (post()!.authorAvatarUrl) {
+              <img [src]="post()!.authorAvatarUrl" [alt]="post()!.authorName" class="bp-author__avatar" />
+            } @else {
+              <div class="bp-author__avatar bp-author__avatar--fallback" aria-hidden="true">
+                {{ post()!.authorName ? post()!.authorName.charAt(0) : 'M' }}
+              </div>
+            }
+            <div class="bp-author__info">
+              <span class="bp-author__name">{{ post()!.authorName }}</span>
+              <span class="bp-author__detail">
+                <time [attr.datetime]="post()!.publishedAt">{{ formatDate(post()!.publishedAt) }}</time>
+                &nbsp;·&nbsp;
+                {{ post()!.readingTimeMinutes }} min temps de lecture
+              </span>
+            </div>
+          </div>
+          <div class="bp-meta-bar__stats">
+            <span class="bp-stat">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              {{ post()!.viewCount }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Cover image ────────────────────────────────────────────── -->
+    @if (post()!.coverImageUrl) {
+      <div class="bp-cover">
+        <div class="container">
+          <img
+            [src]="post()!.coverImageUrl"
+            [alt]="post()!.coverImageAlt || post()!.title"
+            class="bp-cover__img"
+          />
+        </div>
+      </div>
+    }
+
+    <!-- ── Article body ───────────────────────────────────────────── -->
+    <div class="bp-body">
+      <div class="bp-body__inner">
+        <article class="bp-content" [innerHTML]="post()!.content"></article>
+
+        <!-- Footer -->
+        <footer class="bp-footer">
+          <div class="bp-footer__tags">
+            @for (tag of post()!.tags; track tag.id) {
+              <a [routerLink]="['/blog/tag', tag.slug]" class="bp-tag">{{ tag.name }}</a>
+            }
+          </div>
+          <a routerLink="/blog" class="btn-outline">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Retour à tous les articles
+          </a>
+        </footer>
+      </div>
+    </div>
+  }
+</div>
+
+<app-footer />

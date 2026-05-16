@@ -32,9 +32,12 @@
               "src/sitemap.xml"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/quill/dist/quill.snow.css"
             ],
-            "scripts": [],
+            "scripts": [
+              "node_modules/quill/dist/quill.js"
+            ],
             "server": "src/main.server.ts",
             "prerender": true,
             "ssr": {

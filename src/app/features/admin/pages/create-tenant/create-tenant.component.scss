@@ -1,0 +1,194 @@
+:host {
+  --gold:    #c9a96e;
+  --gold-dk: #b8935a;
+  --ink:     #0d0c0b;
+  --ink-2:   #161412;
+  --ink-3:   #1e1c18;
+  --ink-4:   #272420;
+  --line:    rgba(210,180,120,0.10);
+  --line-2:  rgba(210,180,120,0.20);
+  --cream:   #f0ebe2;
+  --cream-2: #c8c0b4;
+  --fog:     #7a7268;
+  --fog-2:   #504c46;
+  --r:       0.2s ease;
+
+  display:     block;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.create-wrap {
+  max-width: 860px;
+}
+
+.create-card {
+  background:    var(--ink-2);
+  border:        1px solid var(--line);
+  border-radius: 14px;
+  overflow:      hidden;
+}
+
+.create-head {
+  display:         flex;
+  align-items:     flex-start;
+  justify-content: space-between;
+  gap:             1rem;
+  padding:         1.5rem;
+  border-bottom:   1px solid var(--line);
+}
+
+.create-title {
+  font-size:      1.15rem;
+  font-weight:    700;
+  color:          var(--cream);
+  letter-spacing: -0.02em;
+  margin:         0 0 0.2rem;
+}
+
+.create-sub {
+  font-size: 0.78rem;
+  color:     var(--fog);
+  margin:    0;
+}
+
+.form-error {
+  margin:        1rem 1.5rem 0;
+  padding:       0.65rem 1rem;
+  background:    rgba(220,80,70,0.1);
+  border:        1px solid rgba(220,80,70,0.25);
+  border-radius: 8px;
+  color:         #e07070;
+  font-size:     0.82rem;
+}
+
+.form-grid {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   0;
+
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+.form-section {
+  padding:       1.5rem;
+  border-right:  1px solid var(--line);
+  display:       flex;
+  flex-direction:column;
+  gap:           0.85rem;
+
+  &:last-child { border-right: none; }
+
+  @media (max-width: 768px) {
+    border-right:  none;
+    border-bottom: 1px solid var(--line);
+    &:last-child { border-bottom: none; }
+  }
+}
+
+.form-section__label {
+  font-size:      0.65rem;
+  font-weight:    700;
+  color:          var(--fog-2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom:  0.25rem;
+}
+
+.field { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.field-label {
+  font-size:   0.72rem;
+  font-weight: 600;
+  color:       var(--fog);
+}
+
+.field-input {
+  padding:       8px 11px;
+  background:    var(--ink-3);
+  border:        1px solid var(--line-2);
+  border-radius: 8px;
+  color:         var(--cream-2);
+  font-size:     0.85rem;
+  font-family:   inherit;
+  outline:       none;
+  width:         100%;
+  box-sizing:    border-box;
+  transition:    border-color var(--r);
+
+  &::placeholder { color: var(--fog-2); }
+  &:focus        { border-color: rgba(201,169,110,0.4); }
+  &--suffix      { border-radius: 8px 0 0 8px; border-right: none; }
+
+  option { background: var(--ink-3); }
+}
+
+.field-suffix-wrap { display: flex; }
+.field-suffix {
+  display:       flex;
+  align-items:   center;
+  padding:       0 10px;
+  background:    var(--ink-4);
+  border:        1px solid var(--line-2);
+  border-radius: 0 8px 8px 0;
+  font-size:     0.78rem;
+  color:         var(--fog);
+  white-space:   nowrap;
+  font-family:   monospace;
+}
+
+.create-foot {
+  display:         flex;
+  justify-content: flex-end;
+  align-items:     center;
+  gap:             0.75rem;
+  padding:         1.25rem 1.5rem;
+  border-top:      1px solid var(--line);
+}
+
+.btn-primary {
+  display:     inline-flex;
+  align-items: center;
+  gap:         6px;
+  padding:     9px 20px;
+  background:  var(--gold);
+  color:       var(--ink);
+  border:      none;
+  border-radius:9px;
+  font-size:   0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor:      pointer;
+  transition:  background var(--r);
+  &:hover     { background: #d4b47a; }
+  &:disabled  { opacity: 0.5; cursor: default; }
+}
+
+.btn-ghost {
+  display:         inline-flex;
+  align-items:     center;
+  gap:             5px;
+  padding:         8px 16px;
+  background:      transparent;
+  color:           var(--fog);
+  border:          1px solid var(--line-2);
+  border-radius:   9px;
+  font-size:       0.85rem;
+  font-weight:     500;
+  font-family:     inherit;
+  cursor:          pointer;
+  text-decoration: none;
+  transition:      all var(--r);
+  &:hover { background: var(--ink-3); color: var(--cream-2); }
+}
+
+.spinner-sm {
+  width:         13px;
+  height:        13px;
+  border:        2px solid rgba(13,12,11,0.3);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation:     spin 0.6s linear infinite;
+  display:       inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
