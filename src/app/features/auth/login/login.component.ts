@@ -47,10 +47,5 @@ export class LoginComponent {
         this.error.set(err.error?.message || 'Login failed. Please try again.');
       }
     });
-    // TODO: inject AuthService and call authService.login(this.form.value)
-    setTimeout(() => {
-      this.loading.set(false);
-      this.router.navigate(['/dashboard']);
-    }, 1200);
   }
 }
