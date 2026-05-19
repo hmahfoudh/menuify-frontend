@@ -7,19 +7,28 @@
 
   <!-- ═══════════════════════════════════════════════════════════════════════
        HERO
+       SEO: hero.tag becomes the real <h1> (keyword-rich, crawlable).
+            The visual "title1 / title2" is demoted to a <p> for design,
+            hidden from screen-readers to avoid duplicate heading noise.
   ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="hero" aria-labelledby="hero-title">
+  <section class="hero" aria-labelledby="hero-heading">
     <div class="container">
       <div class="hero__inner">
         <div class="hero__content">
-          <div class="hero__tag">{{ 'hero.tag' | translate }}</div>
-          
-          <h1 id="hero-title" class="hero__title">
-            {{ 'hero.title1' | translate }}<br>
-            <span class="hero__title-accent">{{ 'hero.title2' | translate }}</span>
+
+          <!-- TRUE SEO H1 — keyword: "menu digital QR code … Tunisie" -->
+          <h1 id="hero-heading" class="hero__h1-seo">
+            {{ 'hero.tag' | translate }}
           </h1>
 
+          <!-- Visual display title — purely decorative, aria-hidden -->
+          <p class="hero__title" aria-hidden="true">
+            {{ 'hero.title1' | translate }}<br>
+            <span class="hero__title-accent">{{ 'hero.title2' | translate }}</span>
+          </p>
+
           <p class="hero__sub">{{ 'hero.sub' | translate }}</p>
+
           <div class="hero__ctas">
             <a class="btn-gold" routerLink="/auth/register">
               {{ 'hero.cta1' | translate }}
@@ -32,6 +41,7 @@
               {{ 'hero.cta2' | translate }}
             </button>
           </div>
+
           <div class="hero__trust">
             <div class="trust-avatars" aria-hidden="true">
               <div class="trust-av trust-av--1">R</div>
@@ -44,7 +54,7 @@
           </div>
         </div>
 
-        <!-- Phone mockup — decorative, no meaningful content for crawlers -->
+        <!-- Phone mockup — decorative visual, no meaningful SEO content -->
         <div class="hero__visual" aria-hidden="true">
           <div class="phone-mockup">
             <div class="phone-mockup__screen">
@@ -65,8 +75,8 @@
                 <div class="mockup-item">
                   <div class="mockup-item__img"></div>
                   <div class="mockup-item__info">
-                    <div class="mockup-item__name">Plat {{i}}</div>
-                    <div class="mockup-item__price">{{i * 12}} DT</div>
+                    <div class="mockup-item__name">Plat {{ i }}</div>
+                    <div class="mockup-item__price">{{ i * 12 }} DT</div>
                   </div>
                   <button class="mockup-item__add" type="button">+</button>
                 </div>
@@ -76,11 +86,11 @@
           </div>
           <div class="float-badge float-badge--1">
             <span class="float-badge__icon">✓</span>
-            <span>Commande reçue</span>
+            <span>{{ 'hero.badgeOrder' | translate }}</span>
           </div>
           <div class="float-badge float-badge--2">
             <span class="float-badge__icon">⚡</span>
-            <span>En temps réel</span>
+            <span>{{ 'hero.badgeRealtime' | translate }}</span>
           </div>
         </div>
       </div>
@@ -88,9 +98,9 @@
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════════════
-       STATS
+       STATS BAR
   ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="stats-bar" aria-label="Chiffres clés">
+  <section class="stats-bar" [attr.aria-label]="'stats.ariaLabel' | translate">
     <div class="container">
       <div class="stats-bar__grid">
         <div class="stat-item">
@@ -113,6 +123,8 @@
 
   <!-- ═══════════════════════════════════════════════════════════════════════
        DIRECTORY
+       SEO: h2 contains brand name + "restaurants" keyword.
+            Each tenant card links to its subdomain — crawlable anchor text.
   ═══════════════════════════════════════════════════════════════════════ -->
   <section class="section" id="directory" aria-labelledby="directory-title">
     <div class="container">
@@ -127,13 +139,15 @@
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
-        <input class="dir-search" type="search" [attr.aria-label]="'directory.search' | translate"
-          [placeholder]="'directory.search' | translate" [value]="searchQuery()"
+        <input class="dir-search" type="search"
+          [attr.aria-label]="'directory.search' | translate"
+          [placeholder]="'directory.search' | translate"
+          [value]="searchQuery()"
           (input)="setSearch($any($event.target).value)">
       </div>
 
       @if (loadingDir()) {
-      <div class="dir-loading" role="status" aria-label="Chargement...">
+      <div class="dir-loading" role="status" [attr.aria-label]="'directory.loading' | translate">
         <div class="spinner"></div>
       </div>
       }
@@ -147,11 +161,19 @@
 
       <div class="dir-grid">
         @for (tenant of filteredTenants(); track tenant.id) {
-        <a class="resto-card" [href]="'https://' + tenant.subdomain + '.menuify.tn/menu'" target="_blank" rel="noopener"
-          [attr.aria-label]="tenant.name">
+        <a class="resto-card"
+          [href]="'https://' + tenant.subdomain + '.menuify.tn/menu'"
+          target="_blank"
+          rel="noopener"
+          [attr.aria-label]="tenant.name + ' — ' + ('directory.visit' | translate)">
           <div class="resto-card__logo">
             @if (tenant.logoUrl) {
-            <img [src]="tenant.logoUrl" [alt]="tenant.name + ' logo'" class="resto-card__logo-img" loading="lazy">
+            <img [src]="tenant.logoUrl"
+              [alt]="tenant.name + ' — menu digital restaurant et café Tunisie'"
+              class="resto-card__logo-img"
+              loading="lazy"
+              width="48"
+              height="48">
             } @else {
             <span class="resto-card__logo-fallback" aria-hidden="true">{{ tenantInitial(tenant.name) }}</span>
             }
@@ -194,6 +216,8 @@
 
   <!-- ═══════════════════════════════════════════════════════════════════════
        FEATURES
+       SEO: h2 with keyword-rich subtitle. Each feature uses <h3>.
+            featureDetails keys add crawlable body text per feature.
   ═══════════════════════════════════════════════════════════════════════ -->
   <section class="section section--gray" id="features" aria-labelledby="features-title">
     <div class="container">
@@ -210,11 +234,8 @@
               <path [attr.d]="featureIcons[key]" />
             </svg>
           </div>
-          <!--
-              Changed from <div> to <h3>: Google uses heading hierarchy to understand
-              page structure and feature importance. h2 = section title, h3 = feature name.
-            -->
           <h3 class="feat-card__label">{{ 'features.' + key | translate }}</h3>
+          <p class="feat-card__desc">{{ 'featureDetails.' + key | translate }}</p>
         </div>
         }
       </div>
@@ -223,11 +244,14 @@
 
   <!-- ═══════════════════════════════════════════════════════════════════════
        HOW IT WORKS
+       SEO: h2 contains "digitaliser votre restaurant avec Menuify" — exact
+            long-tail keyword. Sub adds supporting keyword sentence.
   ═══════════════════════════════════════════════════════════════════════ -->
   <section class="section" id="about" aria-labelledby="how-title">
     <div class="container">
       <div class="section-head">
         <h2 id="how-title" class="section-title">{{ 'how.title' | translate }}</h2>
+        <p class="section-sub">{{ 'how.sub' | translate }}</p>
       </div>
       <div class="how-grid">
         @for (step of ['step1','step2','step3']; track step; let i = $index) {
@@ -244,6 +268,7 @@
 
   <!-- ═══════════════════════════════════════════════════════════════════════
        PRICING
+       SEO: plan names rendered as <h3>. Price in DT visible in text.
   ═══════════════════════════════════════════════════════════════════════ -->
   <section class="section section--gray" id="pricing" aria-labelledby="pricing-title">
     <div class="container">
@@ -257,9 +282,14 @@
           @if (plan.popular) {
           <div class="price-card__popular-badge">{{ 'pricing.popular' | translate }}</div>
           }
-          <h3 class="price-card__name">{{ plan.key | titlecase }}</h3>
-          <div class="price-card__price">{{ 'pricing.' + plan.key + '.price' | translate }}</div>
-          <ul class="price-card__features" [attr.aria-label]="'Fonctionnalités du plan ' + plan.key">
+          <h3 class="price-card__name">{{ 'pricing.' + plan.key + '.name' | translate }}</h3>
+          <div class="price-card__price">
+            <span class="price-card__amount">{{ 'pricing.' + plan.key + '.price' | translate }}</span>
+            <span class="price-card__currency">DT</span>
+            <span class="price-card__period">{{ 'pricing.perMonth' | translate }}</span>
+          </div>
+          <p class="price-card__trial">{{ 'pricing.trialNote' | translate }}</p>
+          <ul class="price-card__features" [attr.aria-label]="('pricing.' + plan.key + '.name' | translate) + ' — fonctionnalités'">
             @for (feat of planFeatures(plan.key); track idx; let idx = $index) {
             <li class="price-card__feat">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -279,10 +309,40 @@
     </div>
   </section>
 
+  <section class="section" id="faq" aria-labelledby="faq-title">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="faq-title" class="section-title">{{ 'faq.title' | translate }}</h2>
+        <p class="section-sub">{{ 'faq.sub' | translate }}</p>
+      </div>
+
+      <div class="faq-list" itemscope itemtype="https://schema.org/FAQPage">
+        @for (item of faqItems(); track idx; let idx = $index) {
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <details class="faq-details">
+            <summary class="faq-summary">
+              <h3 class="faq-question" itemprop="name">{{ item.q }}</h3>
+              <span class="faq-chevron" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
+            </summary>
+            <div class="faq-answer" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+              <p itemprop="text">{{ item.a }}</p>
+            </div>
+          </details>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+
   <!-- ═══════════════════════════════════════════════════════════════════════
        CONTACT
   ═══════════════════════════════════════════════════════════════════════ -->
-  <section class="section" id="contact" aria-labelledby="contact-title">
+  <section class="section section--gray" id="contact" aria-labelledby="contact-title">
     <div class="container">
       <div class="contact-wrap">
         <div class="contact-info">
@@ -305,7 +365,7 @@
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
-              {{ 'contact.address' | translate }}
+              <span>{{ 'contact.address' | translate }}</span>
             </div>
             <div class="contact-detail">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -313,10 +373,7 @@
                 <path
                   d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.77.63 2.61a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.47-1.15a2 2 0 0 1 2.11-.45c.84.3 1.71.51 2.61.63A2 2 0 0 1 22 16.92z" />
               </svg>
-
-              <a href="tel:+21626935040">
-                +216 26 935 040
-              </a>
+              <a href="tel:+21626935040">+216 26 935 040</a>
             </div>
           </div>
         </div>
@@ -334,23 +391,28 @@
           <div class="form-grid">
             <div class="form-field">
               <label class="form-label" for="contact-name">{{ 'contact.name' | translate }} *</label>
-              <input id="contact-name" class="form-input" type="text" autocomplete="name" [value]="cName()"
+              <input id="contact-name" class="form-input" type="text" autocomplete="name"
+                [value]="cName()"
                 (input)="cName.set($any($event.target).value)">
             </div>
             <div class="form-field">
               <label class="form-label" for="contact-email">{{ 'contact.email' | translate }} *</label>
-              <input id="contact-email" class="form-input" type="email" autocomplete="email" [value]="cEmail()"
+              <input id="contact-email" class="form-input" type="email" autocomplete="email"
+                [value]="cEmail()"
                 (input)="cEmail.set($any($event.target).value)">
             </div>
             <div class="form-field form-field--full">
               <label class="form-label" for="contact-resto">{{ 'contact.resto' | translate }}</label>
-              <input id="contact-resto" class="form-input" type="text" autocomplete="organization" [value]="cResto()"
+              <input id="contact-resto" class="form-input" type="text" autocomplete="organization"
+                [value]="cResto()"
                 (input)="cResto.set($any($event.target).value)">
             </div>
             <div class="form-field form-field--full">
               <label class="form-label" for="contact-message">{{ 'contact.message' | translate }} *</label>
-              <textarea id="contact-message" class="form-input form-textarea" [value]="cMsg()"
-                (input)="cMsg.set($any($event.target).value)" rows="4"></textarea>
+              <textarea id="contact-message" class="form-input form-textarea"
+                [value]="cMsg()"
+                (input)="cMsg.set($any($event.target).value)"
+                rows="4"></textarea>
             </div>
           </div>
           @if (cError()) {
