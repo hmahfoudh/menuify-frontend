@@ -153,6 +153,9 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   private _scrollingProgrammatically = false;
   private _scrollGuardTimer?: ReturnType<typeof setTimeout>;
 
+  // ── Back-button (popstate) handler — bound so we can removeEventListener ──
+  private _onPopState = () => this.onBackButton();
+
   // ── WiFi password copy state ───────────────────────────────────────────────
   wifiCopied = signal(false);
 
@@ -260,6 +263,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (table) this.tableNumber.set(table);
 
     if (this.isBrowser) {
+      window.addEventListener('popstate', this._onPopState);
       const ref = new URLSearchParams(window.location.search).get('track');
       if (ref) {
         this.trackingRef.set(ref);
@@ -463,6 +467,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.selectedMods.set(defaults);
 
     this.menuSvc.trackItemView(item.id, catId, this.session.getSessionId());
+    this.pushModalState();
   }
 
   closeModal(): void { this.modalItem.set(null); }
@@ -528,6 +533,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       this.cart.isEmpty() && this.hasActiveOrders() ? 'orders' : 'cart'
     );
     this.cart.open();
+    this.pushModalState();
   }
 
   closeCart(): void { this.cart.close(); }
@@ -552,6 +558,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.cart.close();
     this.orderStep.set('checkout');
     this.orderError.set(null);
+    this.pushModalState();
   }
 
   backToCart(): void {
@@ -612,6 +619,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.trackingError.set(null);
     this.trackingView.set(true);
     if (ref) this.expandedRef.set(ref);
+    this.pushModalState();
   }
 
   closeTracking(): void {
@@ -915,6 +923,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     clearInterval(this.hoursCheckInterval);
     clearTimeout(this.toastTimer);
     clearTimeout(this._scrollGuardTimer);
+    if (this.isBrowser) window.removeEventListener('popstate', this._onPopState);
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -925,5 +934,25 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (this.trackingView()) { this.closeTracking(); return; }
     if (this.cartOpen()) { this.cart.close(); return; }
     if (this.orderStep() === 'checkout') { this.backToCart(); }
+  }
+
+  // ── Back-button (Android / browser back) ─────────────────────────────────
+  //
+  // Strategy: whenever a panel opens we push a dummy history entry so the
+  // back button pops it instead of leaving the page. onBackButton mirrors
+  // the same priority order as onEscape and calls pushModalState() again
+  // for any panel that is still open underneath (so the back button keeps
+  // working if multiple panels are stacked).
+
+  pushModalState(): void {
+    if (this.isBrowser) window.history.pushState({ modal: true }, '');
+  }
+
+  onBackButton(): void {
+    if (this.modalItem()) { this.closeModal(); this.pushModalState(); return; }
+    if (this.orderStep() === 'checkout') { this.backToCart(); this.pushModalState(); return; }
+    if (this.trackingView()) { this.closeTracking(); this.pushModalState(); return; }
+    if (this.cartOpen()) { this.cart.close(); this.pushModalState(); return; }
+    // Nothing open — let the browser navigate back normally (already popped)
   }
 }
