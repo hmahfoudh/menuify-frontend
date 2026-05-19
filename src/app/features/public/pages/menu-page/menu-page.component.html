@@ -53,7 +53,8 @@
     [likedItems]="likedItems()"
     [itemLikeCounts]="itemLikeCounts()"
     (openItem)="openItem($event)"
-    (toggleLike)="toggleItemLike($event)">
+    (toggleLike)="toggleItemLike($event)"
+    (activeSectionChange)="onActiveSectionChange($event)">
   </app-menu-grid>
 
   <!-- FOOTER -->

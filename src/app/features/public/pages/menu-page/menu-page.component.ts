@@ -149,6 +149,10 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   readonly trackingSteps = TRACKING_STEPS;
   readonly trackingMetaMap = TRACKING_STATUS_META;
 
+  // ── Scroll-spy guard — suppresses observer while programmatic scroll runs ──
+  private _scrollingProgrammatically = false;
+  private _scrollGuardTimer?: ReturnType<typeof setTimeout>;
+
   // ── WiFi password copy state ───────────────────────────────────────────────
   wifiCopied = signal(false);
 
@@ -406,51 +410,37 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     const cat = this.categories().find(c => c.id === id);
     const firstSub = cat?.subcategories?.[0];
     this.activeSubcategory.set(firstSub?.id ?? '');
-    if (!firstSub) {
-      if (this.isBrowser) {
-        setTimeout(() => {
-          document.getElementById(`section-${id}`)
-            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 50);
-      }
-    } else {
-      if (this.isBrowser) {
-        setTimeout(() => {
-          const el = document.getElementById(`section-${id}`);
-
-          if (!el) return;
-
-          const yOffset = -100; // your offset
-          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
-          window.scrollTo({
-            top: y,
-            behavior: 'smooth',
-          });
-        }, 50);
-      }
-    }
-
+    this.scrollToSection(firstSub?.id ?? id);
   }
 
   selectSubcategory(subId: string): void {
     this.activeSubcategory.set(subId);
+    this.scrollToSection(subId);
+  }
 
-    if (this.isBrowser) {
-      setTimeout(() => {
-        const el = document.getElementById(`section-${subId}`);
+  /** Scroll to a section by id, suppressing the IntersectionObserver during animation */
+  private scrollToSection(id: string): void {
+    if (!this.isBrowser) return;
+    this._scrollingProgrammatically = true;
+    clearTimeout(this._scrollGuardTimer);
+    setTimeout(() => {
+      const el = document.getElementById(`section-${id}`);
+      if (!el) return;
+      const yOffset = -100;
+      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }, 50);
+    // Re-enable after smooth scroll animation completes (~700 ms)
+    this._scrollGuardTimer = setTimeout(() => {
+      this._scrollingProgrammatically = false;
+    }, 750);
+  }
 
-        if (!el) return;
-
-        const yOffset = -100; // your offset
-        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
-        window.scrollTo({
-          top: y,
-          behavior: 'smooth',
-        });
-      }, 50);
-    }
+  /** Called by MenuGridComponent when the user scrolls to a new section */
+  onActiveSectionChange(event: { catId: string; subId: string | null }): void {
+    if (this._scrollingProgrammatically) return;
+    this.activeCategory.set(event.catId);
+    this.activeSubcategory.set(event.subId ?? '');
   }
 
   // ── Item modal ────────────────────────────────────────────────────────────
@@ -924,6 +914,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.trackPoll?.unsubscribe();
     clearInterval(this.hoursCheckInterval);
     clearTimeout(this.toastTimer);
+    clearTimeout(this._scrollGuardTimer);
     this.destroy$.next();
     this.destroy$.complete();
   }
