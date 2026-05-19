@@ -33,13 +33,15 @@ import { OpenShiftRequest, CloseShiftRequest } from '../../models/shift.models';
 import { CashMovementRequest } from '../../models/cash.models';
 import { PaymentMethod } from '../../models/payment.models';
 import { IssueRefundRequest } from '../../models/refund.models';
-import { OrderStatus, PosOrder } from '../../models/pos-order.models';
+import { PosOrder } from '../../models/pos-order.models';
 import { ZReportResponse } from '../../models/report.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LangSwitcherComponent } from '../../../../shared/components/lang-switcher/lang-switcher.component';
 import { OrderService } from '../../../dashboard/orders/services/order.service';
 import { PosTablesColumnComponent } from './components/pos-tables-column/pos-tables-column.component';
+import { ReceiptPdfService } from '../../services/receipt-pdf.service';
+import { buildReceiptFromPos } from '../../models/receipt.model';
 
 // ── View states ───────────────────────────────────────────────────────────────
 type PosView = 'pos' | 'payment' | 'orderSent';
@@ -55,35 +57,37 @@ type ModalView = 'none' | 'item' | 'openShift' | 'closeShift' | 'itemNote'
 })
 export class PosComponent implements OnInit, OnDestroy {
 
-  private posSvc      = inject(PosService);
+  private posSvc = inject(PosService);
   private authService = inject(AuthService);
-  private cart        = inject(PosCartService);
-  private router      = inject(Router);
-  private shiftSvc    = inject(ShiftService);
-  private cashSvc     = inject(CashService);
-  private paymentSvc  = inject(PaymentService);
-  private refundSvc   = inject(RefundService);
-  private reportSvc   = inject(ReportService);
+  private cart = inject(PosCartService);
+  private router = inject(Router);
+  private shiftSvc = inject(ShiftService);
+  private cashSvc = inject(CashService);
+  private paymentSvc = inject(PaymentService);
+  private refundSvc = inject(RefundService);
+  private reportSvc = inject(ReportService);
   private posOrderSvc = inject(PosOrderService);
-  private orderSvc    = inject(OrderService);
-  private platformId = inject(PLATFORM_ID); 
+  private orderSvc = inject(OrderService);
+  private platformId = inject(PLATFORM_ID);
+  private receiptPdf = inject(ReceiptPdfService);
+
 
   parseFloat = parseFloat;
 
   // ── Data ──────────────────────────────────────────────────────────────────
-  tables     = signal<TableStatusResponse[]>([]);
+  tables = signal<TableStatusResponse[]>([]);
   categories = signal<PublicCategoryResponse[]>([]);
-  loading    = signal(true);
-  error      = signal<string | null>(null);
+  loading = signal(true);
+  error = signal<string | null>(null);
 
   // ── Shift & Cash ──────────────────────────────────────────────────────────
-  currentShift  = this.shiftSvc.currentShift;
-  drawerState   = this.cashSvc.drawer;
-  shiftLoading  = signal(false);
-  shiftError    = signal<string | null>(null);
+  currentShift = this.shiftSvc.currentShift;
+  drawerState = this.cashSvc.drawer;
+  shiftLoading = signal(false);
+  shiftError = signal<string | null>(null);
 
   // Open shift form
-  openFloatInput  = signal('50.000');
+  openFloatInput = signal('50.000');
   // Close shift form
   closeCountInput = signal('');
   closeNotesInput = signal('');
@@ -101,15 +105,15 @@ export class PosComponent implements OnInit, OnDestroy {
   // ── Active order for the selected table ───────────────────────────────────
   // Loaded from backend when a table with an active order is selected.
   // Shown read-only in the order panel so the cashier can see what was ordered.
-  tableActiveOrder        = signal<PosOrder | null>(null);
+  tableActiveOrder = signal<PosOrder | null>(null);
   tableActiveOrderLoading = signal(false);
   // When set, "Valider" will append items to this order instead of creating new
-  addingToOrderId         = signal<string | null>(null);
+  addingToOrderId = signal<string | null>(null);
 
   // ── Category / menu navigation ────────────────────────────────────────────
-  activeCatId  = signal<string | null>(null);
-  searchQuery  = signal('');
-  qtyPreset    = signal(1);
+  activeCatId = signal<string | null>(null);
+  searchQuery = signal('');
+  qtyPreset = signal(1);
 
   categoryAccents = computed(() => {
     const map = new Map<string, string>();
@@ -121,8 +125,8 @@ export class PosComponent implements OnInit, OnDestroy {
 
   filteredItems = computed(() => {
     const catId = this.activeCatId();
-    const q     = this.searchQuery().trim().toLowerCase();
-    let cats    = this.categories();
+    const q = this.searchQuery().trim().toLowerCase();
+    let cats = this.categories();
     if (catId) cats = cats.filter(c => c.id === catId);
     let items = cats.flatMap(c => c.items.map(i => ({
       ...i, _accent: this.categoryAccents().get(c.id) ?? '#c9a96e'
@@ -132,9 +136,9 @@ export class PosComponent implements OnInit, OnDestroy {
   });
 
   // ── Item modal ────────────────────────────────────────────────────────────
-  modalItem    = signal<(PublicItemResponse & { _accent: string }) | null>(null);
+  modalItem = signal<(PublicItemResponse & { _accent: string }) | null>(null);
   modalVariant = signal<PublicVariantResponse | null>(null);
-  modalMods    = signal<Set<string>>(new Set());
+  modalMods = signal<Set<string>>(new Set());
 
   modalUnitPrice = computed(() => {
     const item = this.modalItem();
@@ -149,53 +153,53 @@ export class PosComponent implements OnInit, OnDestroy {
 
   // ── Item note modal ───────────────────────────────────────────────────────
   noteTargetCartId = signal<string | null>(null);
-  noteInput        = signal('');
+  noteInput = signal('');
 
   // ── Cart ──────────────────────────────────────────────────────────────────
-  cartItems    = this.cart.items;
-  cartCount    = this.cart.count;
+  cartItems = this.cart.items;
+  cartCount = this.cart.count;
   cartSubtotal = this.cart.subtotal;
-  cartIsEmpty  = this.cart.isEmpty;
+  cartIsEmpty = this.cart.isEmpty;
 
   // ── Order options ─────────────────────────────────────────────────────────
-  orderType    = signal<PosOrderType>('DINE_IN');
-  paymentType  = signal<PosPaymentType>('cash');
-  orderNotes   = signal('');
-  submitting   = signal(false);
-  submitError  = signal<string | null>(null);
+  orderType = signal<PosOrderType>('DINE_IN');
+  paymentType = signal<PosPaymentType>('cash');
+  orderNotes = signal('');
+  submitting = signal(false);
+  submitError = signal<string | null>(null);
 
   // ── Payment modal state ───────────────────────────────────────────────────
   // Shown after order is created — records the actual payment
-  pendingOrderId  = signal<string | null>(null);
+  pendingOrderId = signal<string | null>(null);
   pendingOrderRef = signal<string | null>(null);
-  pendingTotal    = signal<number>(0);
-  tenderedInput   = signal('');
-  tipInput        = signal('0.000');
-  paymentError    = signal<string | null>(null);
-  paymentLoading  = signal(false);
+  pendingTotal = signal<number>(0);
+  tenderedInput = signal('');
+  tipInput = signal('0.000');
+  paymentError = signal<string | null>(null);
+  paymentLoading = signal(false);
 
   changeAmount = computed(() => {
-    const tendered  = parseFloat(this.tenderedInput()) || 0;
-    const total     = this.pendingTotal();
-    const tip       = parseFloat(this.tipInput()) || 0;
-    const change    = tendered - total - tip;
+    const tendered = parseFloat(this.tenderedInput()) || 0;
+    const total = this.pendingTotal();
+    const tip = parseFloat(this.tipInput()) || 0;
+    const change = tendered - total - tip;
     return Math.max(0, +change.toFixed(3));
   });
 
   isTenderedSufficient = computed(() => {
     const tendered = parseFloat(this.tenderedInput()) || 0;
-    const total    = this.pendingTotal();
-    const tip      = parseFloat(this.tipInput()) || 0;
+    const total = this.pendingTotal();
+    const tip = parseFloat(this.tipInput()) || 0;
     return tendered >= total + tip;
   });
 
   // ── Receipt / order sent ──────────────────────────────────────────────────
-  view            = signal<PosView>('pos');
-  lastOrderRef    = signal<string | null>(null);
-  receiptLines    = signal<PosCartItem[]>([]);
+  view = signal<PosView>('pos');
+  lastOrderRef = signal<string | null>(null);
+  receiptLines = signal<PosCartItem[]>([]);
   receiptSubtotal = signal<number>(0);
-  receiptTable    = signal<string | null>(null);
-  tenantName      = signal<string>('');
+  receiptTable = signal<string | null>(null);
+  tenantName = signal<string>('');
 
   // ── Modal overlay ─────────────────────────────────────────────────────────
   activeModal = signal<ModalView>('none');
@@ -207,16 +211,16 @@ export class PosComponent implements OnInit, OnDestroy {
 
   // ── Constants ─────────────────────────────────────────────────────────────
   readonly tableStatusMeta = TABLE_STATUS_META;
-  readonly qtyPresets      = [1, 2, 3, 5, 10];
+  readonly qtyPresets = [1, 2, 3, 5, 10];
   readonly orderTypes: { value: PosOrderType; label: string }[] = [
-    { value: 'DINE_IN',   label: 'Sur place' },
-    { value: 'TAKEAWAY',  label: 'À emporter' },
-    { value: 'DELIVERY',  label: 'Livraison' },
+    { value: 'DINE_IN', label: 'Sur place' },
+    { value: 'TAKEAWAY', label: 'À emporter' },
+    { value: 'DELIVERY', label: 'Livraison' },
   ];
 
   private shiftPoll?: Subscription;
 
-  private destroy$   = new Subject<void>();
+  private destroy$ = new Subject<void>();
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void {
@@ -237,28 +241,28 @@ export class PosComponent implements OnInit, OnDestroy {
     });
 
     if (isPlatformBrowser(this.platformId)) {
-          this.orderSvc.connectStream();
-    
-          this.orderSvc.newOrderEvents$
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(event => {
-              if (event.type === 'NEW_ORDER') {
-                setTimeout(()=> {
-                  this.loadTableStatus();
-                },200)
-                
-              }
-            });
-        }
+      this.orderSvc.connectStream();
+
+      this.orderSvc.newOrderEvents$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(event => {
+          if (event.type === 'NEW_ORDER') {
+            setTimeout(() => {
+              this.loadTableStatus();
+            }, 200)
+
+          }
+        });
+    }
 
     // Poll shift totals every 60s (live X-Report)
     this.shiftPoll = interval(60_000)
       .pipe(startWith(0), switchMap(() => this.shiftSvc.loadCurrentShift()))
-      .subscribe({ error: () => {} });
+      .subscribe({ error: () => { } });
   }
 
-  loadTableStatus(){
-    this.posSvc.getTableStatus().pipe(first()).subscribe({ next: t => this.tables.set(t), error: () => {} });
+  loadTableStatus() {
+    this.posSvc.getTableStatus().pipe(first()).subscribe({ next: t => this.tables.set(t), error: () => { } });
   }
 
   ngOnDestroy(): void {
@@ -271,7 +275,7 @@ export class PosComponent implements OnInit, OnDestroy {
   private loadAll(): void {
     this.loading.set(true);
     forkJoin({
-      menu:   this.posSvc.getMenu(),
+      menu: this.posSvc.getMenu(),
       tables: this.posSvc.getTableStatus(),
     }).subscribe({
       next: ({ menu, tables }) => {
@@ -352,11 +356,14 @@ export class PosComponent implements OnInit, OnDestroy {
     this.orderType.set(key === 'no-table' ? 'TAKEAWAY' : 'DINE_IN');
     this.submitError.set(null);
 
-    // Reset any previously loaded table order
     this.tableActiveOrder.set(null);
     this.addingToOrderId.set(null);
 
-    // If this table has an active order, load its full details
+    // Reset receipt state when switching tables
+    this.receiptLines.set([]);
+    this.receiptSubtotal.set(0);
+    this.lastOrderRef.set(null);
+
     if (key !== 'no-table') {
       const table = this.tables().find(t => String(t.number) === key);
       if (table?.orderId) {
@@ -364,7 +371,10 @@ export class PosComponent implements OnInit, OnDestroy {
         this.posOrderSvc.getOrder(table.orderId).subscribe({
           next: res => {
             this.tableActiveOrderLoading.set(false);
-            if (res.success) this.tableActiveOrder.set(res.data);
+            if (res.success) {
+              this.tableActiveOrder.set(res.data);
+              this.syncReceiptFromOrder(res.data);  // ← populate receipt immediately
+            }
           },
           error: () => this.tableActiveOrderLoading.set(false)
         });
@@ -372,22 +382,25 @@ export class PosComponent implements OnInit, OnDestroy {
     }
   }
 
+
   tableKey(t: TableStatusResponse): string { return String(t.number); }
 
   tableCardClass(t: TableStatusResponse): string {
-    const key      = String(t.number);
+    const key = String(t.number);
     const selected = this.selectedTableKey() === key;
     if (selected) return 'tbl-card tbl-card--selected';
     return `tbl-card tbl-card--${t.status.toLowerCase()}`;
   }
 
   tableStatusLabel(t: TableStatusResponse): string { return TABLE_STATUS_META[t.status].label; }
-  tableStatusDot(t: TableStatusResponse): string   { return TABLE_STATUS_META[t.status].dot; }
+  tableStatusDot(t: TableStatusResponse): string { return TABLE_STATUS_META[t.status].dot; }
 
   /** Called when the cashier clicks "Encaisser" on a loaded table order */
   payTableOrder(): void {
     const order = this.tableActiveOrder();
     if (!order) return;
+    this.syncReceiptFromOrder(order);
+
     this.pendingOrderId.set(order.id);
     this.pendingOrderRef.set(order.reference);
     this.pendingTotal.set(order.amountDue ?? order.total);
@@ -400,6 +413,7 @@ export class PosComponent implements OnInit, OnDestroy {
     this.view.set('payment');
   }
 
+
   // ── Adding items to an existing table order ───────────────────────────────
 
   /**
@@ -408,8 +422,8 @@ export class PosComponent implements OnInit, OnDestroy {
    * PATCHed onto the existing order via PATCH /api/pos/orders/{id}/lines.
    */
   addingToExistingOrder = signal(false);
-  addingToOrderLoading  = signal(false);
-  addingToOrderError    = signal<string | null>(null);
+  addingToOrderLoading = signal(false);
+  addingToOrderError = signal<string | null>(null);
 
   /** Enter "add items" mode — keep showing the existing order above, enable cart below */
   enterAddItemsMode(): void {
@@ -434,10 +448,10 @@ export class PosComponent implements OnInit, OnDestroy {
     this.addingToOrderError.set(null);
 
     const lines = this.cartItems().map(c => ({
-      itemId:      c.itemId,
-      variantId:   c.variant?.id,
-      quantity:    c.quantity,
-      notes:       c.note,
+      itemId: c.itemId,
+      variantId: c.variant?.id,
+      quantity: c.quantity,
+      notes: c.note,
       modifierIds: c.modifiers.map(m => m.id),
     }));
 
@@ -494,7 +508,7 @@ export class PosComponent implements OnInit, OnDestroy {
   // ── Item tapping & modal ──────────────────────────────────────────────────
 
   tapItem(item: PublicItemResponse & { _accent: string }): void {
-    const hasVariants  = item.variantGroups.length > 0;
+    const hasVariants = item.variantGroups.length > 0;
     const hasModifiers = item.modifierGroups.length > 0;
 
     if (!hasVariants && !hasModifiers) {
@@ -505,7 +519,7 @@ export class PosComponent implements OnInit, OnDestroy {
 
     this.modalItem.set(item);
     const allVariants = item.variantGroups.flatMap(g => g.variants);
-    const def         = allVariants.find(v => v.isDefault) ?? allVariants[0] ?? null;
+    const def = allVariants.find(v => v.isDefault) ?? allVariants[0] ?? null;
     this.modalVariant.set(def);
 
     const defaultMods = new Set<string>();
@@ -581,17 +595,17 @@ export class PosComponent implements OnInit, OnDestroy {
   // ── Cart actions ──────────────────────────────────────────────────────────
 
   updateQty(cartId: string, qty: number): void { this.cart.updateQuantity(cartId, qty); }
-  removeItem(cartId: string): void             { this.cart.removeItem(cartId); }
-  setOrderType(t: PosOrderType): void          { this.orderType.set(t); }
-  setPaymentType(p: PosPaymentType): void      { this.paymentType.set(p); }
-  setOrderNotes(v: string): void               { this.orderNotes.set(v); }
+  removeItem(cartId: string): void { this.cart.removeItem(cartId); }
+  setOrderType(t: PosOrderType): void { this.orderType.set(t); }
+  setPaymentType(p: PosPaymentType): void { this.paymentType.set(p); }
+  setOrderNotes(v: string): void { this.orderNotes.set(v); }
 
   // ── Place order → shows payment modal ────────────────────────────────────
 
   placeOrder(): void {
     if (this.cartIsEmpty() || this.submitting() || !this.isShiftOpen) return;
 
-    const tableKey      = this.selectedTableKey();
+    const tableKey = this.selectedTableKey();
     const appendOrderId = this.addingToOrderId();
 
     this.submitting.set(true);
@@ -599,13 +613,13 @@ export class PosComponent implements OnInit, OnDestroy {
 
     // ── APPEND MODE: add lines to an existing order ──────────────────────────
     if (appendOrderId) {
-      let linesPayload: AddOrderLinesRequest = {lines: []} ;
+      let linesPayload: AddOrderLinesRequest = { lines: [] };
 
       linesPayload.lines = this.cartItems().map(c => ({
-        itemId:      c.itemId,
-        variantId:   c.variant?.id,
-        quantity:    c.quantity,
-        notes:       c.note,
+        itemId: c.itemId,
+        variantId: c.variant?.id,
+        quantity: c.quantity,
+        notes: c.note,
         modifierIds: c.modifiers.map(m => m.id),
       }));
 
@@ -628,17 +642,17 @@ export class PosComponent implements OnInit, OnDestroy {
 
     // ── CREATE MODE: place a brand new order ─────────────────────────────────
     const payload = {
-      orderType:   this.orderType(),
+      orderType: this.orderType(),
       tableNumber: tableKey === 'no-table' ? null : tableKey,
       customerName: null,
-      notes:       this.orderNotes() || null,
-      source:      'POS' as const,
+      notes: this.orderNotes() || null,
+      source: 'POS' as const,
       paymentType: this.paymentType(),
       lines: this.cartItems().map(c => ({
-        itemId:              c.itemId,
-        variantId:           c.variant?.id ?? null,
-        quantity:            c.quantity,
-        modifierIds:         c.modifiers.map(m => m.id),
+        itemId: c.itemId,
+        variantId: c.variant?.id ?? null,
+        quantity: c.quantity,
+        modifierIds: c.modifiers.map(m => m.id),
         specialInstructions: c.note || null,
       })),
     };
@@ -679,9 +693,9 @@ export class PosComponent implements OnInit, OnDestroy {
     const orderId = this.pendingOrderId();
     if (!orderId || this.paymentLoading()) return;
 
-    const method  = this.paymentType();
-    const total   = this.pendingTotal();
-    const tip     = parseFloat(this.tipInput()) || 0;
+    const method = this.paymentType();
+    const total = this.pendingTotal();
+    const tip = parseFloat(this.tipInput()) || 0;
 
     // Cash validation
     if (method === 'cash' && !this.isTenderedSufficient()) {
@@ -693,17 +707,17 @@ export class PosComponent implements OnInit, OnDestroy {
     this.paymentError.set(null);
 
     const methodMap: Record<PosPaymentType, PaymentMethod> = {
-      cash:  'CASH',
-      card:  'CARD',
+      cash: 'CASH',
+      card: 'CARD',
       mixed: 'MIXED',
     };
 
     const req = {
       orderId,
-      method:         methodMap[method],
-      amountPaid:     total,
+      method: methodMap[method],
+      amountPaid: total,
       amountTendered: method === 'cash' ? parseFloat(this.tenderedInput()) : undefined,
-      tip:            tip > 0 ? tip : undefined,
+      tip: tip > 0 ? tip : undefined,
     };
 
     this.paymentSvc.recordPayment(req).subscribe({
@@ -728,7 +742,26 @@ export class PosComponent implements OnInit, OnDestroy {
 
   // ── Post-payment ──────────────────────────────────────────────────────────
 
-  printReceipt(): void { window.print(); }
+  printReceipt(): void {
+    const receipt = buildReceiptFromPos({
+      restaurantName: this.tenantName(),
+      orderRef: this.lastOrderRef() ?? '',
+      tableNumber: this.receiptTable(),
+      lines: this.receiptLines(),
+      subtotal: this.receiptSubtotal(),
+      discount: this.discountAmount(),
+      tip: parseFloat(this.tipInput()) || 0,
+      total: this.pendingTotal(),
+      amountTendered: parseFloat(this.tenderedInput()) || undefined,
+      change: this.changeAmount() > 0 ? this.changeAmount() : undefined,
+      paymentMethod: ({ cash: 'CASH', card: 'CARD', mixed: 'MIXED' } as const)[this.paymentType()],
+      footerMessage: 'Merci pour votre visite ! À bientôt.',
+      // logoBase64  : '<base64 PNG of your logo>',  // wire in from tenant config when ready
+      // qrCodeBase64: '<base64 QR>',               // wire in from angularx-qrcode when ready
+    });
+
+    this.receiptPdf.printReceipt(receipt);   // async — no await needed in void context
+  }
 
   newOrder(): void {
     this.view.set('pos');
@@ -738,6 +771,7 @@ export class PosComponent implements OnInit, OnDestroy {
     this.receiptLines.set([]);
     this.receiptSubtotal.set(0);
     this.receiptTable.set(null);
+    this.tableActiveOrder.set(null);
   }
 
   // ── Auth ──────────────────────────────────────────────────────────────────
@@ -754,9 +788,9 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   // ── Cash In / Out ─────────────────────────────────────────────────────────
-  cashMovementAmount  = signal('');
-  cashMovementReason  = signal('');
-  cashMovementError   = signal<string | null>(null);
+  cashMovementAmount = signal('');
+  cashMovementReason = signal('');
+  cashMovementError = signal<string | null>(null);
   cashMovementLoading = signal(false);
 
   openCashIn(): void {
@@ -802,7 +836,7 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   // ── Discount ───────────────────────────────────────────────────────────────
-  discountMode  = signal<'fixed' | 'percent'>('fixed');
+  discountMode = signal<'fixed' | 'percent'>('fixed');
   discountInput = signal('');
   // Applied discount — shown on totals and passed to order
   discountAmount = signal(0);
@@ -815,7 +849,7 @@ export class PosComponent implements OnInit, OnDestroy {
   applyDiscount(): void {
     const val = parseFloat(this.discountInput());
     if (isNaN(val) || val < 0) return;
-    const sub  = this.cartSubtotal();
+    const sub = this.cartSubtotal();
     const disc = this.discountMode() === 'percent'
       ? +(sub * val / 100).toFixed(3)
       : +val.toFixed(3);
@@ -836,15 +870,15 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   // ── Refund ─────────────────────────────────────────────────────────────────
-  refundOrders        = signal<PosOrder[]>([]);
-  refundLoading       = signal(false);
+  refundOrders = signal<PosOrder[]>([]);
+  refundLoading = signal(false);
   selectedRefundOrder = signal<PosOrder | null>(null);
-  refundAmount        = signal('');
-  refundReason        = signal('');
-  refundError         = signal<string | null>(null);
-  refundSubmitting    = signal(false);
-  refundPayments      = signal<any[]>([]);
-  selectedPaymentId   = signal<string | null>(null);
+  refundAmount = signal('');
+  refundReason = signal('');
+  refundError = signal<string | null>(null);
+  refundSubmitting = signal(false);
+  refundPayments = signal<any[]>([]);
+  selectedPaymentId = signal<string | null>(null);
 
   openRefund(): void {
     this.refundLoading.set(true);
@@ -873,15 +907,15 @@ export class PosComponent implements OnInit, OnDestroy {
           this.selectedPaymentId.set(res.data.payments[0]?.id ?? null);
         }
       },
-      error: () => {}
+      error: () => { }
     });
     this.activeModal.set('refundDetail');
   }
 
   confirmRefund(): void {
     const paymentId = this.selectedPaymentId();
-    const amount    = parseFloat(this.refundAmount());
-    const reason    = this.refundReason().trim();
+    const amount = parseFloat(this.refundAmount());
+    const reason = this.refundReason().trim();
     if (!paymentId) { this.refundError.set('Aucun paiement trouvé pour cette commande.'); return; }
     if (!amount || amount <= 0) { this.refundError.set('Montant invalide.'); return; }
     if (!reason) { this.refundError.set('Motif obligatoire.'); return; }
@@ -902,7 +936,7 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   // ── Z-Report ───────────────────────────────────────────────────────────────
-  zReport        = signal<ZReportResponse | null>(null);
+  zReport = signal<ZReportResponse | null>(null);
   zReportLoading = signal(false);
 
   openZReport(): void {
@@ -943,6 +977,27 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  private syncReceiptFromOrder(order: PosOrder): void {
+    this.receiptLines.set(
+      (order.lines ?? []).map(l => ({
+        cartId: l.id,
+        itemId: l.itemId,
+        itemName: l.itemName,
+        variant: l.variantName ? { id: '', name: l.variantName, price: 0 } : null,
+        modifiers: (l.modifierNames ?? []).map(n => ({ id: '', name: n, priceDelta: 0 })),
+        note: l.notes ?? '',
+        quantity: l.quantity,
+        unitPrice: l.unitPrice,
+        lineTotal: l.lineTotal,
+      }))
+    );
+    this.receiptSubtotal.set(order.amountDue ?? order.total);
+    this.receiptTable.set(
+      this.selectedTableKey() !== 'no-table' ? this.selectedTableKey() : null
+    );
+    this.lastOrderRef.set(order.reference);
+  }
 
   get now(): Date { return new Date(); }
 
