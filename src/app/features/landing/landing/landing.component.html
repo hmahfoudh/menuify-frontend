@@ -169,7 +169,7 @@
           <div class="resto-card__logo">
             @if (tenant.logoUrl) {
             <img [src]="tenant.logoUrl"
-              [alt]="tenant.name + ' — menu digital restaurant Tunisie'"
+              [alt]="tenant.name + ' — menu digital restaurant et café Tunisie'"
               class="resto-card__logo-img"
               loading="lazy"
               width="48"
@@ -309,13 +309,6 @@
     </div>
   </section>
 
-  <!-- ═══════════════════════════════════════════════════════════════════════
-       FAQ
-       SEO: FAQPage JSON-LD in index.html mirrors this content exactly.
-            Google validates schema by matching rendered text to LD+JSON.
-            Native <details>/<summary> = no JS needed, SSR-safe, fully
-            crawlable (Google reads <details> content even when closed).
-  ═══════════════════════════════════════════════════════════════════════ -->
   <section class="section" id="faq" aria-labelledby="faq-title">
     <div class="container">
       <div class="section-head">
