@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter, signal, HostListener, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, signal, HostListener, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -12,6 +12,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 export class MenuHeaderComponent {
 
   private translate = inject(TranslateService);
+  private isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   @Input({ required: true }) tenant!: any;
 
@@ -34,8 +35,10 @@ export class MenuHeaderComponent {
     this.currentLang.set(lang);
     this.translate.use(code);
     this.langMenuOpen.set(false);
-    localStorage.setItem('lang', code);
-    document.documentElement.dir = lang.code === 'ar' ? 'rtl' : 'ltr';
+    if (this.isBrowser) {
+      localStorage.setItem('lang', code);
+      document.documentElement.dir = lang.code === 'ar' ? 'rtl' : 'ltr';
+    }
   }
 
   @HostListener('document:click')

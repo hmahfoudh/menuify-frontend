@@ -84,3 +84,38 @@ img {
   text-align: center;
   font-size: 0.9rem;
 }
+
+.mp-item-img,
+.menu-item__img,
+.item-card__img,
+.item-card img,
+.menu-item img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  // Prevent the browser ignoring the aspect-ratio hint
+  height: auto;
+}
+ 
+// Category banner/header images — wider ratio
+.mp-cat-img,
+.category-img,
+.category-header img {
+  width: 100%;
+  aspect-ratio: 16 / 6;
+  object-fit: cover;
+  display: block;
+  height: auto;
+}
+ 
+// Tenant logo in menu header
+.mp-logo,
+.menu-header__logo,
+.menu-header img {
+  display: block;
+  // Don't force aspect-ratio here — logos vary. Just prevent height collapse.
+  height: auto;
+  max-height: 56px;
+  width: auto;
+}

@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter,
-  OnInit, OnDestroy, AfterViewInit, ElementRef
+  OnDestroy, AfterViewInit, OnChanges, SimpleChanges, ElementRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ItemCardComponent } from '../item-card/item-card.component';
@@ -13,7 +13,7 @@ import { PublicItemResponse } from '../../models/public-menu.models';
   templateUrl: './menu-grid.component.html',
   styleUrl: './menu-grid.component.scss',
 })
-export class MenuGridComponent implements AfterViewInit, OnDestroy {
+export class MenuGridComponent implements OnChanges, AfterViewInit, OnDestroy {
   @Input({ required: true }) categories!: any[];
   @Input({ required: true }) currency!: string;
   @Input({ required: true }) likedItems!: Set<string>;
@@ -23,6 +23,37 @@ export class MenuGridComponent implements AfterViewInit, OnDestroy {
   @Output() toggleLike = new EventEmitter<{ domEvent: Event; itemId: string }>();
   /** Emits the section id (category or subcategory) currently in view */
   @Output() activeSectionChange = new EventEmitter<{ catId: string; subId: string | null }>();
+
+  // ── LCP priority item ──────────────────────────────────────────────────────
+  // Resolved ONCE in ngOnChanges from stable data.
+  // The template uses: [isPriority]="priorityItemId === item.id"
+  // This is a pure, side-effect-free expression — same value every CD cycle.
+  priorityItemId: string | null = null;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['categories'] && this.categories?.length) {
+      this.priorityItemId = this.resolvePriorityItemId();
+    }
+  }
+
+  /**
+   * Walks the categories tree once and returns the id of the very first
+   * renderable item — the LCP candidate. Returns null if there are no items.
+   */
+  private resolvePriorityItemId(): string | null {
+    for (const cat of this.categories) {
+      if (cat.subcategories?.length > 0) {
+        for (const sub of cat.subcategories) {
+          if (sub.items?.length > 0) return sub.items[0].id;
+        }
+      } else {
+        if (cat.items?.length > 0) return cat.items[0].id;
+      }
+    }
+    return null;
+  }
+
+  // ── Scroll-spy observer ────────────────────────────────────────────────────
 
   private observer: IntersectionObserver | null = null;
   /** Maps section element → { catId, subId } so we know what each element represents */
@@ -84,7 +115,6 @@ export class MenuGridComponent implements AfterViewInit, OnDestroy {
 
   private handleIntersections(entries: IntersectionObserverEntry[]): void {
     // Among all currently-intersecting sections, pick the one closest to the top
-    // Build a fresh snapshot of all intersecting elements
     const intersecting = entries
       .filter((e) => e.isIntersecting)
       .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);

@@ -1,7 +1,13 @@
 <header class="mp-header">
   <div class="mp-header__inner">
     @if (tenant?.logoUrl) {
-    <img [src]="tenant?.logoUrl" [alt]="tenant.name" class="mp-header__logo">
+    <img [src]="tenant?.logoUrl"
+         [alt]="tenant.name + ' — menu digital'"
+         class="mp-header__logo"
+         width="52"
+         height="52"
+         loading="eager"
+         fetchpriority="high">
     }
     <div class="mp-header__text">
       <h1 class="mp-header__name">{{ tenant?.name }}</h1>
