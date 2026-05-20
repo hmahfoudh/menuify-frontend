@@ -61,6 +61,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;   // prevent any child from causing horizontal bleed
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -72,6 +73,7 @@
 .mp-modal__img {
   height: 260px;
   overflow: hidden;
+  width: 100%;          // clamp to modal width, never wider
 
   img {
     width: 100%;
@@ -272,6 +274,8 @@
   flex: 1;
   font-size: 0.82rem;
   color: var(--menuify-text);
+  min-width: 0;         // flex children need this to shrink below content size
+  word-break: break-word;
 }
 
 .mp-mod__price {
@@ -311,6 +315,7 @@
 
 .mp-note__input {
   width: 100%;
+  box-sizing: border-box; // padding must not add to width:100%
   background: var(--menuify-surface2);
   border: 1.5px solid var(--menuify-border);
   border-radius: var(--menuify-r-btn);
@@ -377,6 +382,7 @@
 
 .mp-add-btn {
   flex: 1;
+  min-width: 0;         // prevent flex child from pushing footer wider than viewport
   display: flex;
   align-items: center;
   justify-content: space-between;
