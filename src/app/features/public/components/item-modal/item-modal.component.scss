@@ -3,6 +3,7 @@
 @include shared.keyframe-fade;
 @include shared.keyframe-sheet-up;
 @include shared.backdrop;
+@include shared.close-button;
 @include shared.required-badge;
 @include shared.optional-label;
 
@@ -10,87 +11,37 @@
   display: contents;
 }
 
-// ── Modal shell ────────────────────────────────────────────────────────────────
 .mp-modal {
   width: 100%;
   max-width: 480px;
-  max-height: 92vh;
+  max-height: 90vh;
   background: var(--menuify-surface);
   border-radius: 20px 20px 0 0;
-  overflow: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
   position: relative;
-  display: flex;
-  flex-direction: column;
   animation: mp-sheet-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 
   @media (min-width: 600px) {
     border-radius: 16px;
     margin: auto;
-    max-height: 88vh;
+    max-height: 85vh;
   }
 }
 
-// ── Close button — floats above everything ─────────────────────────────────────
-// Override the shared mixin's position so it sits above the image
-.mp-modal__close {
-  position: absolute;
-  top: 0.75rem;
-  inset-inline-end: 0.75rem;
-  z-index: 10;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: color-mix(in srgb, var(--menuify-bg) 80%, transparent);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: var(--menuify-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background var(--menuify-tr);
-
-  &:hover {
-    background: var(--menuify-surface2);
-  }
-}
-
-// ── Single scrollable region ───────────────────────────────────────────────────
-.mp-modal__scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;   // prevent any child from causing horizontal bleed
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-// ── Hero image — scrolls away naturally ───────────────────────────────────────
 .mp-modal__img {
-  height: 260px;
+  height: 220px;
   overflow: hidden;
-  width: 100%;          // clamp to modal width, never wider
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
   }
 }
 
-// ── Body content ──────────────────────────────────────────────────────────────
 .mp-modal__body {
   padding: 1.25rem;
-  // slight top pull-up so body peeks above fold even with an image
-  border-radius: 16px 16px 0 0;
-  margin-top: -16px;
-  background: var(--menuify-surface);
-  position: relative;
 }
 
 .mp-modal__name {
@@ -100,7 +51,6 @@
   color: var(--menuify-text);
   letter-spacing: -0.02em;
   margin-bottom: 0.4rem;
-  padding-inline-end: 1rem; // clear of close btn when no image
 }
 
 .mp-modal__desc {
@@ -125,23 +75,18 @@
   color: var(--menuify-muted);
 }
 
-// ── Option groups ──────────────────────────────────────────────────────────────
+// ── Option groups ─────────────────────────────────────────────────
 .mp-option-group {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--menuify-border);
 }
 
-// Sticky group header — key UX: consumer always sees which group they're in
 .mp-option-group__head {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--menuify-surface);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.75rem 0 0.6rem;
-  border-bottom: 1px solid var(--menuify-border);
   margin-bottom: 0.65rem;
   flex-wrap: wrap;
 }
@@ -162,12 +107,11 @@
   color: var(--menuify-muted);
 }
 
-// ── Variants ──────────────────────────────────────────────────────────────────
+// Variants
 .mp-variants {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding-bottom: 0.75rem;
 
   &--cards {
     display: grid;
@@ -223,19 +167,18 @@
   opacity: 0.8;
 }
 
-// ── Modifiers ─────────────────────────────────────────────────────────────────
+// Modifiers
 .mp-modifiers {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  padding-bottom: 0.75rem;
 }
 
 .mp-mod {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0.65rem 0.75rem;
+  padding: 0.55rem 0.75rem;
   border-radius: var(--menuify-r-btn);
   border: 1.5px solid var(--menuify-border);
   background: var(--menuify-surface2);
@@ -244,14 +187,14 @@
 
   &--active {
     border-color: var(--menuify-accent);
-    background: color-mix(in srgb, var(--menuify-accent) 8%, transparent);
+    background: rgba(201, 169, 110, 0.08);
   }
 }
 
 .mp-mod__check {
-  width: 20px;
-  height: 20px;
-  border-radius: 5px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
   border: 1.5px solid var(--menuify-border);
   display: flex;
   align-items: center;
@@ -272,10 +215,8 @@
 
 .mp-mod__name {
   flex: 1;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--menuify-text);
-  min-width: 0;         // flex children need this to shrink below content size
-  word-break: break-word;
 }
 
 .mp-mod__price {
@@ -284,25 +225,9 @@
   flex-shrink: 0;
 }
 
-.mp-mod__img {
-  width: 44px;
-  height: 44px;
-  object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-.mp-mod--has-img {
-  padding-block: 6px;
-  align-items: center;
-}
-
-// ── Special note ──────────────────────────────────────────────────────────────
+// Special note
 .mp-note {
-  margin-top: 0.5rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--menuify-border);
-  padding-bottom: 0.5rem;
+  margin-top: 1rem;
 }
 
 .mp-note__label {
@@ -315,7 +240,6 @@
 
 .mp-note__input {
   width: 100%;
-  box-sizing: border-box; // padding must not add to width:100%
   background: var(--menuify-surface2);
   border: 1.5px solid var(--menuify-border);
   border-radius: var(--menuify-r-btn);
@@ -337,15 +261,14 @@
   }
 }
 
-// ── Docked footer ─────────────────────────────────────────────────────────────
+// Modal footer
 .mp-modal__footer {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  padding: 0.85rem 1.25rem;
+  padding-top: 1rem;
   border-top: 1px solid var(--menuify-border);
-  flex-shrink: 0;
-  background: var(--menuify-surface);
+  margin-top: 1rem;
 }
 
 .mp-stepper {
@@ -359,8 +282,8 @@
 }
 
 .mp-stepper__btn {
-  width: 38px;
-  height: 44px;
+  width: 36px;
+  height: 42px;
   border: none;
   background: transparent;
   color: var(--menuify-text);
@@ -368,7 +291,7 @@
   transition: background var(--menuify-tr);
 
   &:hover {
-    background: var(--menuify-border);
+    background: var(--menuify-surface2);
   }
 }
 
@@ -382,12 +305,11 @@
 
 .mp-add-btn {
   flex: 1;
-  min-width: 0;         // prevent flex child from pushing footer wider than viewport
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.85rem 1rem;
+  padding: 0.8rem 1rem;
   border-radius: var(--menuify-r-btn);
   border: none;
   background: var(--menuify-accent);
@@ -409,4 +331,19 @@
 .mp-add-btn__price {
   opacity: 0.82;
   font-size: 0.82rem;
+}
+
+// ── Modifier image ─────────────────────────────────────────────────────────
+.mp-mod__img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.mp-mod--has-img {
+  // Give the row a bit more breathing room when an image is present
+  padding-block: 6px;
+  align-items: center;
 }

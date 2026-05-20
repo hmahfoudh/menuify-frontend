@@ -5,64 +5,53 @@
     "contact": "Contact",
     "about": "About",
     "signin": "Sign in",
-    "signup": "Free trial"
+    "signup": "Start free"
   },
   "hero": {
-    "tag": "The digital menu QR code platform for restaurants and cafés in Tunisia",
+    "tag": "The digital menu platform for Tunisian restaurants",
     "title1": "Your menu,",
     "title2": "digital in minutes.",
-    "sub": "Create an elegant digital menu, receive orders in real time and manage your restaurant — all from one platform.",
-    "cta1": "Get started for free",
-    "cta2": "Browse restaurants",
-    "trust": "Joined by {{count}}+ restaurants",
-    "badgeOrder":"Order received",
-    "badgeRealtime": "In real time"
+    "sub": "Create an elegant digital menu, receive real-time orders and manage your restaurant — all from one platform.",
+    "cta1": "Start for free",
+    "cta2": "Watch a demo",
+    "trust": "Joined by {{count}}+ restaurants"
   },
   "stats": {
     "restaurants": "Restaurants",
-    "orders": "Orders processed",
-    "satisfaction": "Customer satisfaction"
+    "orders": "Orders",
+    "satisfaction": "Satisfaction"
   },
   "directory": {
-    "title": "Restaurants & cafés on Menuify",
-    "sub": "Discover Tunisian establishments that digitized their menu with Menuify",
-    "search": "Search for a restaurant or city…",
-    "empty": "No restaurant found",
+    "title": "Our restaurants",
+    "sub": "Browse restaurants that trust Menuify",
+    "search": "Search by restaurant name or city…",
+    "empty": "No restaurants found",
     "visit": "View menu",
     "showAll": "View all restaurants ({{count}})"
   },
   "features": {
     "title": "Everything you need",
-    "sub": "A complete platform to digitize your restaurant in Tunisia — QR code menu, real-time orders, POS cash register, reservations and advanced analytics.",
+    "sub": "A complete platform to digitalise your restaurant",
     "menu": "Digital menu",
     "realtime": "Real-time orders",
-    "pos": "Integrated POS",
+    "pos": "Built-in POS",
     "analytics": "Advanced analytics",
-    "qr": "Per-table QR codes",
-    "theme": "Custom branding"
-  },
-  "featureDetails": {
-    "menu": "Create and update your menu in a few clicks. Categories, variants, modifiers and photos included.",
-    "realtime": "Orders arrive instantly on your dashboard. Kitchen teams are notified in real time.",
-    "pos": "Full POS system with table management, X/Z reports, payments, refunds and shift management.",
-    "analytics": "Track your most-ordered dishes, revenue and restaurant activity.",
-    "qr": "Generate a unique QR code per table. Customers scan and order without downloading an app.",
-    "theme": "Customize colors, typography and your menu's visual identity to match your brand."
+    "qr": "QR codes",
+    "theme": "Custom theme"
   },
   "how": {
-    "title": "How to digitize your restaurant with Menuify",
-    "sub": "In less than 5 minutes, your QR code menu is online and your customers can order from their table.",
+    "title": "How it works",
     "step1": {
       "title": "Create your account",
-      "desc": "Sign up in 2 minutes, set up your restaurant and import your menu. No credit card required."
+      "desc": "Sign up in 2 minutes, set up your restaurant and upload your menu."
     },
     "step2": {
       "title": "Generate your QR code",
-      "desc": "Print the QR code and place it on your tables. Customers scan and order from their smartphone."
+      "desc": "Print the QR code and place it on your tables. Customers scan and order."
     },
     "step3": {
       "title": "Manage in real time",
-      "desc": "Receive orders, track them from your dashboard and manage your cash register with the integrated POS."
+      "desc": "Receive orders, track them from your dashboard and manage your POS."
     }
   },
   "pricing": {
@@ -70,34 +59,29 @@
     "sub": "Start free for 14 days. No credit card required.",
     "popular": "Most popular",
     "cta": "Get started",
-    "perMonth": "/month",
-    "trialNote": "14-day free trial included",
     "starter": {
-      "name": "Starter",
-      "price": "29",
+      "price": "29 DT/month",
       "features": [
         "Digital menu up to 30 items",
         "5 categories",
         "Basic QR code",
-        "WhatsApp orders",
+        "WhatsApp ordering",
         "14-day free trial"
       ]
     },
     "standard": {
-      "name": "Standard",
-      "price": "39",
+      "price": "39 DT/month",
       "features": [
-        "Unlimited items and categories",
-        "Custom colors",
+        "Unlimited items & categories",
+        "Custom colours",
         "Basic analytics",
         "2 staff members",
-        "Integrated POS",
+        "Built-in POS",
         "Real-time orders"
       ]
     },
     "premium": {
-      "name": "Premium",
-      "price": "99",
+      "price": "99 DT/month",
       "features": [
         "Everything in Standard",
         "Custom domain",
@@ -108,60 +92,23 @@
       ]
     }
   },
-  "faq": {
-    "title": "Frequently asked questions",
-    "sub": "Everything you need to know about Menuify and digitizing your restaurant in Tunisia.",
-    "items": [
-      {
-        "q": "What is a QR code digital menu?",
-        "a": "A QR code digital menu lets your customers scan a code with their smartphone to instantly access your menu. With Menuify, you create and update your menu online without printing costs. Customers can place orders directly from their phone, with no app to download."
-      },
-      {
-        "q": "How much does Menuify cost in Tunisia?",
-        "a": "Menuify offers plans starting from 29 TND/month with a 14-day free trial, no credit card required. The Standard plan at 39 TND includes the integrated POS and real-time orders. The Premium plan at 99 TND adds a custom domain and advanced analytics."
-      },
-      {
-        "q": "Does Menuify work for cafés and hotels?",
-        "a": "Yes. Menuify is designed for all food service establishments in Tunisia: restaurants, cafés, snack bars, pizzerias and hotels. The platform supports French, Arabic and English with RTL display for Arabic."
-      },
-      {
-        "q": "How do customers order via QR code?",
-        "a": "Customers scan the QR code displayed on their table, browse your menu and place an order directly from their smartphone. The order appears instantly on your dashboard in real time — no app to install."
-      },
-      {
-        "q": "Does Menuify include a POS (cash register) system?",
-        "a": "Yes. Menuify includes a full POS system with table management, X and Z reports, payments, refunds and shift management — a unique feature among digital menu solutions in Tunisia."
-      }
-    ]
-  },
   "contact": {
-    "title": "Ready to digitize your restaurant?",
-    "sub": "Have a question? Our team gets back to you within 24 hours.",
+    "title": "Ready to go digital?",
+    "sub": "Have a question? Our team replies within 24h.",
     "name": "Your name",
     "email": "Your email",
     "resto": "Restaurant name (optional)",
     "message": "Your message",
-    "send": "Send",
-    "sent": "Message sent! We'll get back to you within 24 hours.",
-    "error": "Failed to send. Please try again.",
-    "address": "Tunis, Tunisia"
-  },
-  "footer": {
-    "tagline": "The digital menu solution for Tunisian restaurants and cafés.",
-    "links": "Quick links",
-    "legal": "Legal notice",
-    "privacy": "Privacy",
-    "terms": "Terms",
-    "rights": "© 2026 Menuify. All rights reserved.",
-    "about": "About Menuify",
-    "blog": "Our blog",
-    "contact": "Contact us"
+    "send": "Send message",
+    "sent": "Message sent! We'll reply within 24h.",
+    "error": "Send error. Please try again.",
+    "address": "Tunisia"
   },
   "seo": {
-    "title": "Menuify — Digital Menu & QR Code for Restaurants in Tunisia | POS & Orders",
-    "description": "Menuify: create a QR code digital menu, receive table orders in real time and manage your restaurant with an integrated POS. Complete solution for restaurants and cafés in Tunisia. 14-day free trial.",
-    "ogTitle": "Menuify — Digital Menu QR Code for Restaurants in Tunisia",
-    "ogDescription": "Create an elegant digital menu, receive orders in real time and manage your restaurant from one platform. For restaurants and cafés in Tunisia."
+    "title": "Menuify - Digital Menu Platform for Restaurants & Coffeeshops",
+    "description": "Manage your restaurant & coffeeshop menu with QR codes and real-time order tracking",
+    "ogTitle": "Menuify - Digital Menu Platform",
+    "ogDescription": "Modern digital menu solution for restaurants and coffeeshops"
   },
   "menu": {
     "badge": {
@@ -178,24 +125,31 @@
       "vegan": "Vegan",
       "gluten_free": "Gluten free",
       "spicy": "Spicy"
-    },
-    "footer": {
-      "find_us": "Find us",
-      "open_in_maps": "Open in Maps",
-      "contact_us": "Contact us",
-      "whatsapp": "WhatsApp",
-      "call": "Call",
-      "free_wifi": "Free WiFi",
-      "wifi_network": "Network",
-      "wifi_password": "Password",
-      "wifi_copy_aria": "Copy password",
-      "wifi_copied_aria": "Copied!",
-      "wifi_scan": "Scan to connect",
-      "follow_us": "Follow us"
     }
   },
   "header": {
     "language": "Select language"
+  },
+  "footer": {
+    "find_us": "Find us",
+    "open_in_maps": "Open in Maps",
+    "contact_us": "Contact us",
+    "whatsapp": "WhatsApp",
+    "call": "Call",
+    "free_wifi": "Free WiFi",
+    "wifi_network": "Network",
+    "wifi_password": "Password",
+    "wifi_copy_aria": "Copy password",
+    "wifi_copied_aria": "Copied!",
+    "wifi_scan": "Scan to connect",
+    "follow_us": "Follow us",
+    "tagline": "An elegant digital menu, real-time ordering and simplified management for your restaurant.",
+    "about": "About Menuify",
+    "contact": "Contact us",
+    "privacy": "Privacy policy",
+    "terms": "Terms of service",
+    "rights": "© 2026 Menuify. All rights reserved.",
+    "blog": "Our blog"
   },
   "closed_banner": {
     "title": "We're closed right now"

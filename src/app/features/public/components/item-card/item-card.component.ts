@@ -17,7 +17,6 @@ export class ItemCardComponent {
   @Input({ required: true }) currency!: string;
   @Input({ required: true }) isLiked!: boolean;
   @Input({ required: true }) likeCount!: number;
-  @Input() isPriority = false;
   @Output() cardClick = new EventEmitter<void>();
   @Output() likeClick = new EventEmitter<{ domEvent: Event; itemId: string }>();
 

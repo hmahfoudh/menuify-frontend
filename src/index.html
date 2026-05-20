@@ -1,181 +1,117 @@
 <!doctype html>
 <html lang="fr">
+
 <head>
   <meta charset="utf-8">
-
-  <!-- Primary SEO — keyword-first title -->
-  <title>Menuify — Menu Digital & QR Code pour Restaurants en Tunisie | POS & Commandes</title>
+  <title>Menuify - Plateforme de menus numériques pour les restaurants et cafés</title>
   <base href="/">
 
-  <!-- Viewport & Core -->
+  <!-- Viewport & Basic Meta Tags -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gérez votre menu de restaurant & café avec des codes QR, recevez les commandes en temps réel et suivez les commandes des clients. Solution de menu numérique gratuite pour les restaurants modernes.">
   <meta name="theme-color" content="#ffffff">
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-
-  <!-- SEO Meta -->
-  <meta name="description" content="Menuify : créez un menu digital QR code, recevez des commandes à table en temps réel et gérez votre restaurant avec un POS intégré. Solution complète pour restaurants et cafés en Tunisie. Essai gratuit 14 jours.">
-  <meta name="keywords" content="menu digital Tunisie, menu QR code restaurant Tunisie, commande en ligne restaurant, logiciel POS restaurant Tunisie, caisse restaurant, réservation restaurant Tunisie, menu numérique café Tunisie, digitalisation restaurant">
-  <meta name="author" content="ED Solutions">
-  <meta name="application-name" content="Menuify">
+  <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="language" content="fr">
+  <meta name="keywords" content="menu restaurant, menu digital, code QR, menu café, gestion de restaurant">
+  <meta name="author" content="EDSolutions">
+  <meta name="application-name" content="Menuify">
 
-  <!-- Geo signals — currently missing, competitors have them -->
-  <meta name="geo.region" content="TN">
-  <meta name="geo.placename" content="Tunis, Tunisie">
-  <meta name="geo.position" content="36.8065;10.1815">
-  <meta name="ICBM" content="36.8065, 10.1815">
-
-  <!-- Canonical -->
+  <!-- Canonical URL (update for each page) -->
   <link rel="canonical" href="https://menuify.tn/">
 
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Menuify">
-  <meta property="og:locale" content="fr_TN">
+  <!-- Open Graph Tags (for social media) -->
+  <meta property="og:title" content="Menuify - Plateforme de menus numériques pour les restaurants et cafés">
+  <meta property="og:description" content="Gérez votre menu de restaurant & café avec des codes QR, recevez les commandes en temps réel et suivez les commandes des clients. Solution de menu numérique gratuite pour les restaurants modernes.">
   <meta property="og:url" content="https://menuify.tn/">
-  <meta property="og:title" content="Menuify — Menu Digital QR Code pour Restaurants en Tunisie">
-  <meta property="og:description" content="Créez un menu digital élégant, recevez des commandes en temps réel et gérez votre restaurant depuis une seule plateforme. Pour restaurants et cafés en Tunisie.">
+  <meta property="og:type" content="website">
   <meta property="og:image" content="https://menuify.tn/assets/brand/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Menuify — Plateforme de menu digital QR code pour restaurants en Tunisie">
 
-  <!-- Twitter Card -->
+  <!-- Twitter Card Tags -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@menuifytn">
-  <meta name="twitter:title" content="Menuify — Menu Digital QR Code pour Restaurants en Tunisie">
-  <meta name="twitter:description" content="Créez un menu digital élégant, recevez des commandes en temps réel et gérez votre restaurant depuis une seule plateforme.">
+  <meta name="twitter:title" content="Menuify - Plateforme de menus numériques pour les restaurants et cafés">
+  <meta name="twitter:description" content="Gérez votre menu de restaurant & café avec des codes QR, recevez les commandes en temps réel et suivez les commandes des clients. Solution de menu numérique gratuite pour les restaurants modernes.">
   <meta name="twitter:image" content="https://menuify.tn/assets/brand/og-image.png">
-  <meta name="twitter:image:alt" content="Menuify dashboard — menu digital restaurant Tunisie">
 
-  <!-- Favicons -->
+  <!-- Favicon (SVG primary, PNG fallbacks for compatibility) -->
   <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg" sizes="32x32">
+  <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg" sizes="16x16">
+  <!-- Fallback for older browsers -->
   <link rel="icon" type="image/x-icon" href="/assets/brand/favicon.ico">
   <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+  <link rel="preload" as="image" href="https://menuify.tn/assets/brand/og-image.png">
 
-  <!-- Fonts -->
+  <!-- Font Preconnect & Loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap">
 
-  <!-- DNS Prefetch -->
-  <link rel="dns-prefetch" href="//api.menuify.tn">
+  <!-- DNS Prefetch for API -->
+  <link rel="dns-prefetch" href="https://api.menuify.tn/api/public/tenants">
 
-  <!-- JSON-LD: Organization -->
+  <!-- JSON-LD Structured Data (Organization) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Menuify",
-    "alternateName": "menuify.tn",
     "url": "https://menuify.tn",
-    "logo": "https://menuify.tn/assets/brand/logo.png",
-    "description": "Plateforme de menu digital QR code pour restaurants et cafés en Tunisie. Commande à table en temps réel, POS intégré, analytics.",
-    "areaServed": {
-      "@type": "Country",
-      "name": "Tunisie"
-    },
+    "logo": "https://menuify.tn/assets/logo.png",
+    "description": "Plateforme de menus numériques pour les restaurants et cafés avec des codes QR et un suivi en temps réel des commandes",
+    "sameAs": [
+      "https://twitter.com/menuify",
+      "https://facebook.com/menuify"
+    ],
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "Customer Service",
-      "email": "support@menuify.tn",
-      "availableLanguage": ["French", "Arabic", "English"]
-    },
-    "sameAs": [
-      "https://www.facebook.com/menuify",
-      "https://www.linkedin.com/company/menuify"
-    ]
-  }
-  </script>
-
-  <!-- JSON-LD: SoftwareApplication -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Menuify",
-    "url": "https://menuify.tn",
-    "description": "Plateforme complète de menu digital QR code pour restaurants et cafés en Tunisie. Commandes en temps réel, POS intégré, gestion des tables, réservations et analytics avancés.",
-    "applicationCategory": "BusinessApplication",
-    "operatingSystem": "Web, iOS, Android",
-    "inLanguage": ["fr", "ar", "en"],
-    "availableOnDevice": "Desktop, Tablet, Mobile",
-    "offers": {
-      "@type": "AggregateOffer",
-      "lowPrice": "29",
-      "highPrice": "99",
-      "priceCurrency": "TND",
-      "offerCount": "3"
-    },
-    "featureList": [
-      "Menu digital QR code pour restaurants",
-      "Commande à table en temps réel",
-      "Caisse POS intégrée avec rapports X/Z",
-      "Gestion des réservations",
-      "Analytics avancés",
-      "Thème personnalisable",
-      "Support multilingue FR/AR/EN",
-      "QR codes par table"
-    ],
-    "provider": {
-      "@type": "Organization",
-      "name": "ED Solutions",
-      "url": "https://edsolutions.tn"
+      "email": "support@menuify.tn"
     }
   }
   </script>
 
-  <!-- JSON-LD: FAQPage — triggers accordion rich results in Google -->
+  <!-- JSON-LD Structured Data (SoftwareApplication) -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Qu'est-ce qu'un menu digital QR code pour restaurant ?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Un menu digital QR code permet à vos clients de scanner un code avec leur smartphone pour accéder instantanément à votre carte. Avec Menuify, vous créez et mettez à jour votre menu en ligne sans frais d'impression. Vos clients peuvent passer commande directement depuis leur téléphone."
-        }
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Menuify",
+      "url": "https://menuify.tn",
+      "description": "Plateforme de menus numériques pour les restaurants et cafés avec des codes QR et un suivi en temps réel des commandes",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "browserRequirements": "Requires JavaScript. Works on Chrome, Firefox, Safari, Edge",
+      "screenshot": "https://menuify.tn/assets/brand/screenshot.png",
+
+      "image": "https://menuify.tn/assets/brand/screenshot.png",
+
+      "inLanguage": ["en", "fr", "ar"],
+      "availableOnDevice": "Desktop, Tablet, Mobile",
+
+      "offers": {
+        "@type": "Offer",
+        "price": "25",
+        "priceCurrency": "TND",
+        "availability": "https://schema.org/InStock"
       },
-      {
-        "@type": "Question",
-        "name": "Combien coûte Menuify en Tunisie ?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Menuify propose des plans à partir de 29 DT/mois avec 14 jours d'essai gratuit, sans carte bancaire requise. Le plan Standard à 39 DT/mois inclut le POS intégré et les commandes en temps réel. Le plan Premium à 99 DT/mois ajoute un domaine personnalisé et les analytics avancés."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Menuify fonctionne-t-il pour les cafés en plus des restaurants ?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Oui. Menuify est conçu pour tous les établissements de restauration en Tunisie : restaurants, cafés, snacks, pizzerias et hôtels. La plateforme supporte le français, l'arabe et l'anglais avec un affichage RTL pour l'arabe."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Comment mes clients passent-ils commande via QR code ?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Vos clients scannent le QR code affiché sur leur table, consultent votre menu et passent commande directement depuis leur smartphone. La commande arrive immédiatement sur votre tableau de bord en temps réel, sans application à télécharger."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Menuify propose-t-il un système de caisse (POS) ?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Oui. Menuify inclut un POS intégré complet avec gestion des tables, rapports X et Z, encaissements, remboursements et gestion des shifts — une fonctionnalité unique parmi les solutions de menu digital en Tunisie."
-        }
+
+      "featureList": [
+        "Accès au menu par code QR",
+        "Suivi en temps réel des commandes",
+        "Tableau de bord de gestion du restaurant"
+      ],
+
+      "provider": {
+        "@type": "Organization",
+        "name": "EDSolutions",
+        "url": "https://edsolutions.tn"
       }
-    ]
-  }
+    }
   </script>
 
-  <!-- Google Analytics -->
+  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FWBPPM0GTR"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -183,8 +119,11 @@
     gtag('js', new Date());
     gtag('config', 'G-FWBPPM0GTR');
   </script>
+
 </head>
+
 <body>
   <app-root></app-root>
 </body>
+
 </html>
