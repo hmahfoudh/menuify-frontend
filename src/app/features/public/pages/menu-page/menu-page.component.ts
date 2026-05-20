@@ -149,13 +149,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   readonly trackingSteps = TRACKING_STEPS;
   readonly trackingMetaMap = TRACKING_STATUS_META;
 
-  // ── Scroll-spy guard — suppresses observer while programmatic scroll runs ──
-  private _scrollingProgrammatically = false;
-  private _scrollGuardTimer?: ReturnType<typeof setTimeout>;
-
-  // ── Back-button (popstate) handler — bound so we can removeEventListener ──
-  private _onPopState = () => this.onBackButton();
-
   // ── WiFi password copy state ───────────────────────────────────────────────
   wifiCopied = signal(false);
 
@@ -263,7 +256,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (table) this.tableNumber.set(table);
 
     if (this.isBrowser) {
-      window.addEventListener('popstate', this._onPopState);
       const ref = new URLSearchParams(window.location.search).get('track');
       if (ref) {
         this.trackingRef.set(ref);
@@ -282,7 +274,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         this.localStorage.setJson('tenant', menu.tenant);
         this.menu.set(menu);
         this.themeSvc.applyTheme(theme);
-        this.applyContrastSafeAccentText(theme);
         this.loading.set(false);
 
         if (menu.categories.length > 0) {
@@ -343,67 +334,67 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   private injectTenantMeta(menu: PublicMenuResponse): void {
     const t = menu.tenant;
 
-    // Canonical URL — on SSR `window` is unavailable so we always build
-    // from the tenant subdomain. The browser will overwrite with its own
-    // host, but SSR output (what Googlebot reads) is always correct.
+    // Derive the canonical URL for this tenant's menu page.
+    // Works for both *.menuify.tn subdomains and custom domains.
     const canonicalBase = this.isBrowser
       ? `${window.location.protocol}//${window.location.host}`
       : `https://${t.subdomain}.menuify.tn`;
     const canonicalUrl = `${canonicalBase}/menu`;
 
-    // ── Keyword-rich title & description ──────────────────────────────────────
-    // Format: "Restaurant Name — Menu Digital | City, Tunisie"
-    // This gives Google: brand name, category keyword, and geo signal in one tag.
-    const cityPart = t.city ? ` | ${t.city}, Tunisie` : ' | Tunisie';
-    const seoTitle = `${t.name} — Menu Digital QR Code${cityPart}`;
-
-    const seoDescription = t.tagline
-      ? `${t.tagline} — Consultez le menu digital de ${t.name}, commandez à table via QR code et suivez votre commande en temps réel.`
-      : `Consultez le menu digital de ${t.name}${t.city ? ' à ' + t.city : ''} et commandez à table via QR code. Livraison en temps réel.`;
-
-    // ── Restaurant JSON-LD ─────────────────────────────────────────────────────
-    // Only populated fields are included to keep the schema clean.
-    const sameAs: string[] = [
-      t.instagramUrl, t.facebookUrl, t.tiktokUrl,
-      t.twitterUrl, t.youtubeUrl, t.linkedInUrl,
-    ].filter((u): u is string => !!u);
-
+    // Build the Restaurant structured data object.
+    // Only include fields that are actually set on the tenant to keep
+    // the schema clean — empty fields can confuse validators.
     const restaurantSchema: Record<string, any> = {
       '@context': 'https://schema.org',
       '@type': 'Restaurant',
       'name': t.name,
       'description': t.tagline ?? `Menu digital de ${t.name}`,
       'url': canonicalUrl,
-      'servesCuisine': 'Tunisian',
-      'priceRange': '$$',
-      'hasMenu': { '@type': 'Menu', 'url': canonicalUrl },
+      'hasMenu': {
+        '@type': 'Menu',
+        'url': canonicalUrl,
+      },
     };
 
-    if (t.logoUrl)       restaurantSchema['image']     = t.logoUrl;
-    if (t.whatsappNumber) restaurantSchema['telephone'] = t.whatsappNumber;
-    if (t.googleMapsUrl) restaurantSchema['hasMap']    = t.googleMapsUrl;
-    if (sameAs.length)   restaurantSchema['sameAs']    = sameAs;
+    if (t.logoUrl) {
+      restaurantSchema['image'] = t.logoUrl;
+    }
 
     if (t.address || t.city || t.country) {
       restaurantSchema['address'] = {
         '@type': 'PostalAddress',
-        ...(t.address  && { 'streetAddress':   t.address }),
-        ...(t.city     && { 'addressLocality': t.city }),
-        ...(t.country  && { 'addressCountry':  t.country }),
+        ...(t.address && { 'streetAddress': t.address }),
+        ...(t.city && { 'addressLocality': t.city }),
+        ...(t.country && { 'addressCountry': t.country }),
       };
     }
 
-    // ── Push into <head> ───────────────────────────────────────────────────────
+    if (t.whatsappNumber) {
+      restaurantSchema['telephone'] = t.whatsappNumber;
+    }
+
+    if (t.googleMapsUrl) {
+      restaurantSchema['hasMap'] = t.googleMapsUrl;
+    }
+
+    if (t.instagramUrl) {
+      restaurantSchema['sameAs'] = [t.instagramUrl];
+      if (t.facebookUrl) (restaurantSchema['sameAs'] as string[]).push(t.facebookUrl);
+    }
+
+    // Push everything into <head> via MetaTagsService
     this.metaTags.setCustomMetaTags({
-      title:         seoTitle,
-      description:   seoDescription,
-      canonical:     canonicalUrl,
-      ogType:        'business.business',
-      ogUrl:         canonicalUrl,
-      ogTitle:       `${t.name} — Menu Digital`,
-      ogDescription: t.tagline ?? `Découvrez le menu de ${t.name} et commandez en ligne`,
+      title: `${t.name} - Menu`,
+      description: t.tagline
+        ? `${t.tagline} — Consultez le menu de ${t.name} et commandez en ligne.`
+        : `Consultez le menu de ${t.name} et commandez en ligne.`,
+      canonical: canonicalUrl,
+      ogType: 'website',
+      ogUrl: canonicalUrl,
+      ogTitle: `${t.name} - Menu digital`,
+      ogDescription: t.tagline ?? `Découvrez le menu de ${t.name}`,
       ...(t.logoUrl && { ogImage: t.logoUrl }),
-      robots:        'index,follow',
+      robots: 'index,follow',
       structuredData: restaurantSchema,
     });
   }
@@ -415,37 +406,51 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     const cat = this.categories().find(c => c.id === id);
     const firstSub = cat?.subcategories?.[0];
     this.activeSubcategory.set(firstSub?.id ?? '');
-    this.scrollToSection(firstSub?.id ?? id);
+    if (!firstSub) {
+      if (this.isBrowser) {
+        setTimeout(() => {
+          document.getElementById(`section-${id}`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+      }
+    } else {
+      if (this.isBrowser) {
+        setTimeout(() => {
+          const el = document.getElementById(`section-${id}`);
+
+          if (!el) return;
+
+          const yOffset = -100; // your offset
+          const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+          window.scrollTo({
+            top: y,
+            behavior: 'smooth',
+          });
+        }, 50);
+      }
+    }
+
   }
 
   selectSubcategory(subId: string): void {
     this.activeSubcategory.set(subId);
-    this.scrollToSection(subId);
-  }
 
-  /** Scroll to a section by id, suppressing the IntersectionObserver during animation */
-  private scrollToSection(id: string): void {
-    if (!this.isBrowser) return;
-    this._scrollingProgrammatically = true;
-    clearTimeout(this._scrollGuardTimer);
-    setTimeout(() => {
-      const el = document.getElementById(`section-${id}`);
-      if (!el) return;
-      const yOffset = -100;
-      const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }, 50);
-    // Re-enable after smooth scroll animation completes (~700 ms)
-    this._scrollGuardTimer = setTimeout(() => {
-      this._scrollingProgrammatically = false;
-    }, 750);
-  }
+    if (this.isBrowser) {
+      setTimeout(() => {
+        const el = document.getElementById(`section-${subId}`);
 
-  /** Called by MenuGridComponent when the user scrolls to a new section */
-  onActiveSectionChange(event: { catId: string; subId: string | null }): void {
-    if (this._scrollingProgrammatically) return;
-    this.activeCategory.set(event.catId);
-    this.activeSubcategory.set(event.subId ?? '');
+        if (!el) return;
+
+        const yOffset = -100; // your offset
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+        window.scrollTo({
+          top: y,
+          behavior: 'smooth',
+        });
+      }, 50);
+    }
   }
 
   // ── Item modal ────────────────────────────────────────────────────────────
@@ -468,7 +473,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.selectedMods.set(defaults);
 
     this.menuSvc.trackItemView(item.id, catId, this.session.getSessionId());
-    this.pushModalState();
   }
 
   closeModal(): void { this.modalItem.set(null); }
@@ -534,7 +538,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       this.cart.isEmpty() && this.hasActiveOrders() ? 'orders' : 'cart'
     );
     this.cart.open();
-    this.pushModalState();
   }
 
   closeCart(): void { this.cart.close(); }
@@ -559,7 +562,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.cart.close();
     this.orderStep.set('checkout');
     this.orderError.set(null);
-    this.pushModalState();
   }
 
   backToCart(): void {
@@ -620,7 +622,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     this.trackingError.set(null);
     this.trackingView.set(true);
     if (ref) this.expandedRef.set(ref);
-    this.pushModalState();
   }
 
   closeTracking(): void {
@@ -917,45 +918,12 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     return link.platform;
   }
 
-  // ── Contrast-safe accent text ─────────────────────────────────────────────
-  //
-  // Some tenants configure a light accent color (e.g. yellow). Text placed
-  // directly on that background (add-to-cart buttons, active tabs) would fail
-  // WCAG AA contrast (4.5:1). We compute whether to use black or white text
-  // and expose it as --mp-accent-text so all components can use it.
-
-  private applyContrastSafeAccentText(theme: any): void {
-    if (!this.isBrowser) return;
-    // theme.accentColor is the hex value set by the tenant
-    const accent: string | undefined = theme?.accentColor ?? theme?.accent;
-    if (!accent || !/^#[0-9A-Fa-f]{6}$/.test(accent)) return;
-
-    const contrastColor = this.getContrastTextColor(accent);
-    document.documentElement.style.setProperty('--mp-accent-text', contrastColor);
-  }
-
-  /**
-   * Returns '#111111' for light backgrounds, '#FFFFFF' for dark ones.
-   * Based on WCAG 2.1 relative luminance formula.
-   */
-  private getContrastTextColor(hex: string): string {
-    const r = parseInt(hex.slice(1, 3), 16) / 255;
-    const g = parseInt(hex.slice(3, 5), 16) / 255;
-    const b = parseInt(hex.slice(5, 7), 16) / 255;
-    const toLinear = (c: number) =>
-      c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    const L = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
-    return L > 0.179 ? '#111111' : '#FFFFFF';
-  }
-
   // ── Cleanup ───────────────────────────────────────────────────────────────
 
   ngOnDestroy(): void {
     this.trackPoll?.unsubscribe();
     clearInterval(this.hoursCheckInterval);
     clearTimeout(this.toastTimer);
-    clearTimeout(this._scrollGuardTimer);
-    if (this.isBrowser) window.removeEventListener('popstate', this._onPopState);
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -966,25 +934,5 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     if (this.trackingView()) { this.closeTracking(); return; }
     if (this.cartOpen()) { this.cart.close(); return; }
     if (this.orderStep() === 'checkout') { this.backToCart(); }
-  }
-
-  // ── Back-button (Android / browser back) ─────────────────────────────────
-  //
-  // Strategy: whenever a panel opens we push a dummy history entry so the
-  // back button pops it instead of leaving the page. onBackButton mirrors
-  // the same priority order as onEscape and calls pushModalState() again
-  // for any panel that is still open underneath (so the back button keeps
-  // working if multiple panels are stacked).
-
-  pushModalState(): void {
-    if (this.isBrowser) window.history.pushState({ modal: true }, '');
-  }
-
-  onBackButton(): void {
-    if (this.modalItem()) { this.closeModal(); this.pushModalState(); return; }
-    if (this.orderStep() === 'checkout') { this.backToCart(); this.pushModalState(); return; }
-    if (this.trackingView()) { this.closeTracking(); this.pushModalState(); return; }
-    if (this.cartOpen()) { this.cart.close(); this.pushModalState(); return; }
-    // Nothing open — let the browser navigate back normally (already popped)
   }
 }

@@ -3,15 +3,8 @@
   <!-- IMAGE SECTION WITH HEART OVERLAY -->
   <div class="mp-card__img">
     @if (item.imageUrl) {
-    <img
-      [src]="item.imageUrl"
-      [alt]="item.name"
-      class="item-card__img"
-      width="400"
-      height="300"
-      [loading]="isPriority ? 'eager' : 'lazy'"
-      [attr.fetchpriority]="isPriority ? 'high' : 'low'">
-  } @else {
+    <img [src]="item.imageUrl" [alt]="item.name" loading="lazy">
+    } @else {
     <div class="mp-card__img-placeholder">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
         stroke-linecap="round">

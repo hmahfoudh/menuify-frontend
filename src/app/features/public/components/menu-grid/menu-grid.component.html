@@ -3,15 +3,7 @@
   <section [id]="'section-' + cat.id" class="mp-section">
 
     @if (cat.subcategories && cat.subcategories.length > 0) {
-      <!--
-        Parent category with subcategories.
-        SEO: h2 for the parent category, h3 for each subcategory.
-        Previously the h2 was missing — Google flagged "headings not sequential".
-      -->
-      <h2 class="mp-section__title">
-        @if (cat.icon) { {{ cat.icon }}&nbsp; }{{ cat.name }}
-      </h2>
-
+      <!-- Parent category: render a sub-section per subcategory -->
       @for (sub of cat.subcategories; track sub.id) {
       <div [id]="'section-' + sub.id" class="mp-subsection">
         <h3 class="mp-subsection__title">
@@ -26,7 +18,6 @@
               [currency]="currency"
               [isLiked]="isItemLiked(item.id)"
               [likeCount]="getItemLikeCount(item.id)"
-              [isPriority]="priorityItemId === item.id"
               (cardClick)="openItem.emit({ item: item, catId: sub.id })"
               (likeClick)="toggleLike.emit($event)">
             </app-item-card>
@@ -35,7 +26,7 @@
       </div>
       }
     } @else {
-      <!-- Leaf category: items directly under the h2 -->
+      <!-- Leaf category: items directly -->
       <h2 class="mp-section__title">
         @if (cat.icon) { {{ cat.icon }}&nbsp; }{{ cat.name }}
       </h2>
@@ -47,7 +38,6 @@
             [currency]="currency"
             [isLiked]="isItemLiked(item.id)"
             [likeCount]="getItemLikeCount(item.id)"
-            [isPriority]="priorityItemId === item.id"
             (cardClick)="openItem.emit({ item: item, catId: cat.id })"
             (likeClick)="toggleLike.emit($event)">
           </app-item-card>

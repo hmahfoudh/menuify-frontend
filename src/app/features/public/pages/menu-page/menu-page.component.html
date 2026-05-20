@@ -53,8 +53,7 @@
     [likedItems]="likedItems()"
     [itemLikeCounts]="itemLikeCounts()"
     (openItem)="openItem($event)"
-    (toggleLike)="toggleItemLike($event)"
-    (activeSectionChange)="onActiveSectionChange($event)">
+    (toggleLike)="toggleItemLike($event)">
   </app-menu-grid>
 
   <!-- FOOTER -->
@@ -89,104 +88,101 @@
     (openTracking)="openTracking()">
   </app-bottom-bar>
 
-  @defer (when modalItem() !== null) {
-    @if (modalItem(); as item) {
-      <app-item-modal
-        [item]="item"
-        [currency]="currency()"
-        [selectedVariant]="selectedVariant()"
-        [selectedMods]="selectedMods()"
-        [modalQty]="modalQty()"
-        [specialNote]="specialNote()"
-        [canAddToCart]="canAddToCart()"
-        [modalTotal]="modalTotal()"
-        (close)="closeModal()"
-        (selectVariant)="selectVariant($event)"
-        (toggleMod)="toggleMod($event)"
-        (decQty)="decModalQty()"
-        (incQty)="incModalQty()"
-        (setSpecialNote)="setSpecialNote($event)"
-        (addToCart)="addToCart()">
-      </app-item-modal>
-    }
+  <!-- ITEM MODAL -->
+  @if (modalItem(); as item) {
+    <app-item-modal
+      [item]="item"
+      [currency]="currency()"
+      [selectedVariant]="selectedVariant()"
+      [selectedMods]="selectedMods()"
+      [modalQty]="modalQty()"
+      [specialNote]="specialNote()"
+      [canAddToCart]="canAddToCart()"
+      [modalTotal]="modalTotal()"
+      (close)="closeModal()"
+      (selectVariant)="selectVariant($event)"
+      (toggleMod)="toggleMod($event)"
+      (decQty)="decModalQty()"
+      (incQty)="incModalQty()"
+      (setSpecialNote)="setSpecialNote($event)"
+      (addToCart)="addToCart()">
+    </app-item-modal>
   }
 
-  @defer (when cartOpen()) {
-    @if (cartOpen()) {
-      <app-cart-drawer
-        [tenant]="m.tenant"
-        [cartMode]="cartMode()"
-        [cartItems]="cartItems()"
-        [cartEmpty]="cartEmpty()"
-        [cartCount]="cartCount()"
-        [cartSubtotal]="cartSubtotal()"
-        [currency]="currency()"
-        [hasActiveOrders]="hasActiveOrders()"
-        [activeOrders]="activeOrders()"
-        [isOpen]="isOpen()"
-        [trackingSteps]="trackingSteps"
-        [trackingMetaMap]="trackingMetaMap"
-        (close)="closeCart()"
-        (setCartMode)="setCartMode($event)"
-        (updateQty)="updateQty($event.cartId, $event.qty)"
-        (openCheckout)="openCheckout()"
-        (openTracking)="openTracking($event); closeCart()"
-        (endTracking)="endTracking($event)">
-      </app-cart-drawer>
-    }
+  <!-- CART DRAWER -->
+  @if (cartOpen()) {
+    <app-cart-drawer
+      [tenant]="m.tenant"
+      [cartMode]="cartMode()"
+      [cartItems]="cartItems()"
+      [cartEmpty]="cartEmpty()"
+      [cartCount]="cartCount()"
+      [cartSubtotal]="cartSubtotal()"
+      [currency]="currency()"
+      [hasActiveOrders]="hasActiveOrders()"
+      [activeOrders]="activeOrders()"
+      [isOpen]="isOpen()"
+      [trackingSteps]="trackingSteps"
+      [trackingMetaMap]="trackingMetaMap"
+      (close)="closeCart()"
+      (setCartMode)="setCartMode($event)"
+      (updateQty)="updateQty($event.cartId, $event.qty)"
+      (openCheckout)="openCheckout()"
+      (openTracking)="openTracking($event); closeCart()"
+      (endTracking)="endTracking($event)">
+    </app-cart-drawer>
   }
 
-  @defer (when orderStep() !== 'idle') {
-    @if (orderStep() === 'checkout') {
-      <app-checkout-modal
-        [orderType]="orderType()"
-        [tableNumber]="tableNumber()"
-        [customerName]="customerName()"
-        [customerPhone]="customerPhone()"
-        [orderNotes]="orderNotes()"
-        [orderError]="orderError()"
-        [submitting]="submitting()"
-        [cartCount]="cartCount()"
-        [cartSubtotal]="cartSubtotal()"
-        [currency]="currency()"
-        (back)="backToCart()"
-        (setOrderTypeDineIn)="setOrderTypeDineIn()"
-        (setOrderTypeTakeaway)="setOrderTypeTakeaway()"
-        (setTableNumber)="setTableNumber($event)"
-        (setCustomerName)="setCustomerName($event)"
-        (setCustomerPhone)="setCustomerPhone($event)"
-        (setOrderNotes)="setOrderNotes($event)"
-        (submitOrder)="submitOrder()">
-      </app-checkout-modal>
-    }
-
-    @if (orderStep() === 'success') {
-      <app-success-screen
-        [latestOrderRef]="latestOrderRef()"
-        (openTracking)="openTracking()"
-        (backToMenu)="backToMenu()">
-      </app-success-screen>
-    }
+  <!-- CHECKOUT FORM -->
+  @if (orderStep() === 'checkout') {
+    <app-checkout-modal
+      [orderType]="orderType()"
+      [tableNumber]="tableNumber()"
+      [customerName]="customerName()"
+      [customerPhone]="customerPhone()"
+      [orderNotes]="orderNotes()"
+      [orderError]="orderError()"
+      [submitting]="submitting()"
+      [cartCount]="cartCount()"
+      [cartSubtotal]="cartSubtotal()"
+      [currency]="currency()"
+      (back)="backToCart()"
+      (setOrderTypeDineIn)="setOrderTypeDineIn()"
+      (setOrderTypeTakeaway)="setOrderTypeTakeaway()"
+      (setTableNumber)="setTableNumber($event)"
+      (setCustomerName)="setCustomerName($event)"
+      (setCustomerPhone)="setCustomerPhone($event)"
+      (setOrderNotes)="setOrderNotes($event)"
+      (submitOrder)="submitOrder()">
+    </app-checkout-modal>
   }
 
-  @defer (when trackingView()) {
-    @if (trackingView()) {
-      <app-tracking-panel
-        [activeOrders]="activeOrders()"
-        [expandedRef]="expandedRef()"
-        [trackingRef]="trackingRef()"
-        [trackingError]="trackingError()"
-        [trackingLoading]="trackingLoading()"
-        [trackingSteps]="trackingSteps"
-        [trackingMetaMap]="trackingMetaMap"
-        [currency]="currency()"
-        (close)="closeTracking()"
-        (expandOrder)="expandOrder($event)"
-        (endTracking)="endTracking($event)"
-        (setTrackingRef)="setTrackingRef($event)"
-        (lookupOrder)="lookupOrder()">
-      </app-tracking-panel>
-    }
+  <!-- SUCCESS SCREEN -->
+  @if (orderStep() === 'success') {
+    <app-success-screen
+      [latestOrderRef]="latestOrderRef()"
+      (openTracking)="openTracking()"
+      (backToMenu)="backToMenu()">
+    </app-success-screen>
+  }
+
+  <!-- ORDER TRACKING PANEL -->
+  @if (trackingView()) {
+    <app-tracking-panel
+      [activeOrders]="activeOrders()"
+      [expandedRef]="expandedRef()"
+      [trackingRef]="trackingRef()"
+      [trackingError]="trackingError()"
+      [trackingLoading]="trackingLoading()"
+      [trackingSteps]="trackingSteps"
+      [trackingMetaMap]="trackingMetaMap"
+      [currency]="currency()"
+      (close)="closeTracking()"
+      (expandOrder)="expandOrder($event)"
+      (endTracking)="endTracking($event)"
+      (setTrackingRef)="setTrackingRef($event)"
+      (lookupOrder)="lookupOrder()">
+    </app-tracking-panel>
   }
 
 }
