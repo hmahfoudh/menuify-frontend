@@ -282,6 +282,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         this.localStorage.setJson('tenant', menu.tenant);
         this.menu.set(menu);
         this.themeSvc.applyTheme(theme);
+        this.applyContrastSafeAccentText(theme);
         this.loading.set(false);
 
         if (menu.categories.length > 0) {
@@ -342,67 +343,67 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   private injectTenantMeta(menu: PublicMenuResponse): void {
     const t = menu.tenant;
 
-    // Derive the canonical URL for this tenant's menu page.
-    // Works for both *.menuify.tn subdomains and custom domains.
+    // Canonical URL — on SSR `window` is unavailable so we always build
+    // from the tenant subdomain. The browser will overwrite with its own
+    // host, but SSR output (what Googlebot reads) is always correct.
     const canonicalBase = this.isBrowser
       ? `${window.location.protocol}//${window.location.host}`
       : `https://${t.subdomain}.menuify.tn`;
     const canonicalUrl = `${canonicalBase}/menu`;
 
-    // Build the Restaurant structured data object.
-    // Only include fields that are actually set on the tenant to keep
-    // the schema clean — empty fields can confuse validators.
+    // ── Keyword-rich title & description ──────────────────────────────────────
+    // Format: "Restaurant Name — Menu Digital | City, Tunisie"
+    // This gives Google: brand name, category keyword, and geo signal in one tag.
+    const cityPart = t.city ? ` | ${t.city}, Tunisie` : ' | Tunisie';
+    const seoTitle = `${t.name} — Menu Digital QR Code${cityPart}`;
+
+    const seoDescription = t.tagline
+      ? `${t.tagline} — Consultez le menu digital de ${t.name}, commandez à table via QR code et suivez votre commande en temps réel.`
+      : `Consultez le menu digital de ${t.name}${t.city ? ' à ' + t.city : ''} et commandez à table via QR code. Livraison en temps réel.`;
+
+    // ── Restaurant JSON-LD ─────────────────────────────────────────────────────
+    // Only populated fields are included to keep the schema clean.
+    const sameAs: string[] = [
+      t.instagramUrl, t.facebookUrl, t.tiktokUrl,
+      t.twitterUrl, t.youtubeUrl, t.linkedInUrl,
+    ].filter((u): u is string => !!u);
+
     const restaurantSchema: Record<string, any> = {
       '@context': 'https://schema.org',
       '@type': 'Restaurant',
       'name': t.name,
       'description': t.tagline ?? `Menu digital de ${t.name}`,
       'url': canonicalUrl,
-      'hasMenu': {
-        '@type': 'Menu',
-        'url': canonicalUrl,
-      },
+      'servesCuisine': 'Tunisian',
+      'priceRange': '$$',
+      'hasMenu': { '@type': 'Menu', 'url': canonicalUrl },
     };
 
-    if (t.logoUrl) {
-      restaurantSchema['image'] = t.logoUrl;
-    }
+    if (t.logoUrl)       restaurantSchema['image']     = t.logoUrl;
+    if (t.whatsappNumber) restaurantSchema['telephone'] = t.whatsappNumber;
+    if (t.googleMapsUrl) restaurantSchema['hasMap']    = t.googleMapsUrl;
+    if (sameAs.length)   restaurantSchema['sameAs']    = sameAs;
 
     if (t.address || t.city || t.country) {
       restaurantSchema['address'] = {
         '@type': 'PostalAddress',
-        ...(t.address && { 'streetAddress': t.address }),
-        ...(t.city && { 'addressLocality': t.city }),
-        ...(t.country && { 'addressCountry': t.country }),
+        ...(t.address  && { 'streetAddress':   t.address }),
+        ...(t.city     && { 'addressLocality': t.city }),
+        ...(t.country  && { 'addressCountry':  t.country }),
       };
     }
 
-    if (t.whatsappNumber) {
-      restaurantSchema['telephone'] = t.whatsappNumber;
-    }
-
-    if (t.googleMapsUrl) {
-      restaurantSchema['hasMap'] = t.googleMapsUrl;
-    }
-
-    if (t.instagramUrl) {
-      restaurantSchema['sameAs'] = [t.instagramUrl];
-      if (t.facebookUrl) (restaurantSchema['sameAs'] as string[]).push(t.facebookUrl);
-    }
-
-    // Push everything into <head> via MetaTagsService
+    // ── Push into <head> ───────────────────────────────────────────────────────
     this.metaTags.setCustomMetaTags({
-      title: `${t.name} - Menu`,
-      description: t.tagline
-        ? `${t.tagline} — Consultez le menu de ${t.name} et commandez en ligne.`
-        : `Consultez le menu de ${t.name} et commandez en ligne.`,
-      canonical: canonicalUrl,
-      ogType: 'website',
-      ogUrl: canonicalUrl,
-      ogTitle: `${t.name} - Menu digital`,
-      ogDescription: t.tagline ?? `Découvrez le menu de ${t.name}`,
+      title:         seoTitle,
+      description:   seoDescription,
+      canonical:     canonicalUrl,
+      ogType:        'business.business',
+      ogUrl:         canonicalUrl,
+      ogTitle:       `${t.name} — Menu Digital`,
+      ogDescription: t.tagline ?? `Découvrez le menu de ${t.name} et commandez en ligne`,
       ...(t.logoUrl && { ogImage: t.logoUrl }),
-      robots: 'index,follow',
+      robots:        'index,follow',
       structuredData: restaurantSchema,
     });
   }
@@ -914,6 +915,37 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   trackByPlatform(_: number, link: SocialLink): string {
     return link.platform;
+  }
+
+  // ── Contrast-safe accent text ─────────────────────────────────────────────
+  //
+  // Some tenants configure a light accent color (e.g. yellow). Text placed
+  // directly on that background (add-to-cart buttons, active tabs) would fail
+  // WCAG AA contrast (4.5:1). We compute whether to use black or white text
+  // and expose it as --mp-accent-text so all components can use it.
+
+  private applyContrastSafeAccentText(theme: any): void {
+    if (!this.isBrowser) return;
+    // theme.accentColor is the hex value set by the tenant
+    const accent: string | undefined = theme?.accentColor ?? theme?.accent;
+    if (!accent || !/^#[0-9A-Fa-f]{6}$/.test(accent)) return;
+
+    const contrastColor = this.getContrastTextColor(accent);
+    document.documentElement.style.setProperty('--mp-accent-text', contrastColor);
+  }
+
+  /**
+   * Returns '#111111' for light backgrounds, '#FFFFFF' for dark ones.
+   * Based on WCAG 2.1 relative luminance formula.
+   */
+  private getContrastTextColor(hex: string): string {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const toLinear = (c: number) =>
+      c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    const L = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+    return L > 0.179 ? '#111111' : '#FFFFFF';
   }
 
   // ── Cleanup ───────────────────────────────────────────────────────────────
