@@ -98,6 +98,12 @@ export function app(): express.Express {
         `  <sitemap>\n` +
         `    <loc>https://baristabistro.menuify.tn/sitemap.xml</loc>\n` +
         `  </sitemap>\n` +
+        `  <sitemap>\n` +
+        `    <loc>https://platocoffee.menuify.tn/sitemap.xml</loc>\n` +
+        `  </sitemap>\n` +
+        `  <sitemap>\n` +
+        `    <loc>https://blackrabbit.menuify.tn/sitemap.xml</loc>\n` +
+        `  </sitemap>\n` +
         `\n` +
         `</sitemapindex>`
       );
