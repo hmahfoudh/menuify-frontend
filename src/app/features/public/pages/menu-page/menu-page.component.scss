@@ -15,6 +15,11 @@
   padding: 0;
 }
 
+html,
+body {
+  overflow-x: hidden; // block the horizontal scroll at the document root level
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -63,6 +68,7 @@ img {
 :host {
   display: block;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .mp-loading {
