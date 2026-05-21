@@ -85,6 +85,11 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   activeCategory = signal<string>('');
   activeSubcategory = signal<string>('');
 
+  // Suppresses observer-driven tab updates while a programmatic scrollIntoView
+  // is in flight — prevents the feedback loop: tap tab → scroll → observer
+  // fires on intermediate sections → tab flickers back and forth.
+  private _suppressScrollObserver = false;
+
   // ── Cart (proxied from CartService) ──────────────────────────────────────
   cartItems = this.cart.items;
   cartCount = this.cart.count;
@@ -248,7 +253,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-  
   ngOnInit(): void {
     this.themeSvc.listenForPreviewUpdates();
     this.loadMenu();
@@ -310,8 +314,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
           this.itemLikeCounts.set(likeCounts);
         }
 
-        // Inject Restaurant JSON-LD + update page meta for this tenant.
-        // Runs on both SSR and browser — on SSR this is what Googlebot reads.
         this.injectTenantMeta(menu);
       },
       error: () => {
@@ -321,29 +323,14 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Inject tenant-specific meta tags and Restaurant schema.
-   *
-   * Called immediately after menu data loads so both SSR and the browser
-   * have the correct title, description, canonical, and JSON-LD in <head>
-   * before the page is painted / crawled.
-   *
-   * Schema.org Restaurant type gives Google enough context to show rich
-   * results (name, cuisine, address) directly in search results.
-   */
   private injectTenantMeta(menu: PublicMenuResponse): void {
     const t = menu.tenant;
 
-    // Derive the canonical URL for this tenant's menu page.
-    // Works for both *.menuify.tn subdomains and custom domains.
     const canonicalBase = this.isBrowser
       ? `${window.location.protocol}//${window.location.host}`
       : `https://${t.subdomain}.menuify.tn`;
     const canonicalUrl = `${canonicalBase}/menu`;
 
-    // Build the Restaurant structured data object.
-    // Only include fields that are actually set on the tenant to keep
-    // the schema clean — empty fields can confuse validators.
     const restaurantSchema: Record<string, any> = {
       '@context': 'https://schema.org',
       '@type': 'Restaurant',
@@ -382,7 +369,6 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       if (t.facebookUrl) (restaurantSchema['sameAs'] as string[]).push(t.facebookUrl);
     }
 
-    // Push everything into <head> via MetaTagsService
     this.metaTags.setCustomMetaTags({
       title: `${t.name} - Menu`,
       description: t.tagline
@@ -406,6 +392,12 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     const cat = this.categories().find(c => c.id === id);
     const firstSub = cat?.subcategories?.[0];
     this.activeSubcategory.set(firstSub?.id ?? '');
+
+    // Suppress the IntersectionObserver while the programmatic scroll is in
+    // flight — otherwise intermediate sections trigger spurious tab updates.
+    this._suppressScrollObserver = true;
+    setTimeout(() => { this._suppressScrollObserver = false; }, 800);
+
     if (!firstSub) {
       if (this.isBrowser) {
         setTimeout(() => {
@@ -417,40 +409,48 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       if (this.isBrowser) {
         setTimeout(() => {
           const el = document.getElementById(`section-${id}`);
-
           if (!el) return;
-
-          const yOffset = -100; // your offset
+          const yOffset = -100;
           const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
-          window.scrollTo({
-            top: y,
-            behavior: 'smooth',
-          });
+          window.scrollTo({ top: y, behavior: 'smooth' });
         }, 50);
       }
     }
-
   }
 
   selectSubcategory(subId: string): void {
     this.activeSubcategory.set(subId);
 
+    // Same suppression — prevent the observer from immediately overwriting
+    // the chip selection as the scroll animates past other subsections.
+    this._suppressScrollObserver = true;
+    setTimeout(() => { this._suppressScrollObserver = false; }, 800);
+
     if (this.isBrowser) {
       setTimeout(() => {
         const el = document.getElementById(`section-${subId}`);
-
         if (!el) return;
-
-        const yOffset = -100; // your offset
+        const yOffset = -100;
         const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
-
-        window.scrollTo({
-          top: y,
-          behavior: 'smooth',
-        });
+        window.scrollTo({ top: y, behavior: 'smooth' });
       }, 50);
     }
+  }
+
+  // ── Scroll-driven active tab/chip update (from MenuGridComponent) ─────────
+
+  onScrollCategoryChange(catId: string): void {
+    if (this._suppressScrollObserver) return;
+    this.activeCategory.set(catId);
+    // Reset chip to first subcategory of the newly visible category
+    const cat = this.categories().find(c => c.id === catId);
+    const firstSub = cat?.subcategories?.[0]?.id ?? '';
+    this.activeSubcategory.set(firstSub);
+  }
+
+  onScrollSubcategoryChange(subId: string): void {
+    if (this._suppressScrollObserver) return;
+    if (subId) this.activeSubcategory.set(subId);
   }
 
   // ── Item modal ────────────────────────────────────────────────────────────

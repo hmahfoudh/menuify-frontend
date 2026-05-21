@@ -16,9 +16,8 @@
 @if (!loading() && menu(); as m) {
 
   <!-- Welcome Popup -->
-   <app-welcome-popup
-    [tenant]="m.tenant"
-  >
+  <app-welcome-popup
+    [tenant]="m.tenant">
   </app-welcome-popup>
 
   <!-- CART TOAST -->
@@ -32,8 +31,7 @@
 
   <!-- HEADER -->
   <app-menu-header
-    [tenant]="m.tenant"
-    >
+    [tenant]="m.tenant">
   </app-menu-header>
 
   <!-- CATEGORY TABS -->
@@ -53,7 +51,9 @@
     [likedItems]="likedItems()"
     [itemLikeCounts]="itemLikeCounts()"
     (openItem)="openItem($event)"
-    (toggleLike)="toggleItemLike($event)">
+    (toggleLike)="toggleItemLike($event)"
+    (activeCategoryChange)="onScrollCategoryChange($event)"
+    (activeSubcategoryChange)="onScrollSubcategoryChange($event)">
   </app-menu-grid>
 
   <!-- FOOTER -->
