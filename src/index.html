@@ -3,115 +3,163 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Menuify - Plateforme de menus numériques pour les restaurants et cafés</title>
+  <title>Menuify — Menu numérique QR pour restaurants et cafés en Tunisie</title>
   <base href="/">
 
-  <!-- Viewport & Basic Meta Tags -->
+  <!-- ── Viewport & Core Meta ─────────────────────────────────────────────── -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Gérez votre menu de restaurant & café avec des codes QR, recevez les commandes en temps réel et suivez les commandes des clients. Solution de menu numérique gratuite pour les restaurants modernes.">
+  <meta name="description" content="Menuify permet aux restaurants et cafés tunisiens de créer un menu numérique accessible par QR code, de recevoir les commandes en temps réel et de gérer leur établissement depuis un tableau de bord simple.">
   <meta name="theme-color" content="#ffffff">
-  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="language" content="fr">
-  <meta name="keywords" content="menu restaurant, menu digital, code QR, menu café, gestion de restaurant">
+  <meta name="keywords" content="menu digital restaurant Tunisie, menu QR code, commande en ligne restaurant, logiciel restaurant Tunisie, menu numérique café">
   <meta name="author" content="EDSolutions">
   <meta name="application-name" content="Menuify">
 
-  <!-- Canonical URL (update for each page) -->
+  <!-- ── Canonical ────────────────────────────────────────────────────────── -->
   <link rel="canonical" href="https://menuify.tn/">
 
-  <!-- Open Graph Tags (for social media) -->
-  <meta property="og:title" content="Menuify - Plateforme de menus numériques pour les restaurants et cafés">
-  <meta property="og:description" content="Gérez votre menu de restaurant & café avec des codes QR, recevez les commandes en temps réel et suivez les commandes des clients. Solution de menu numérique gratuite pour les restaurants modernes.">
+  <!-- ── Alternate language versions ─────────────────────────────────────── -->
+  <link rel="alternate" hreflang="fr" href="https://menuify.tn/">
+  <link rel="alternate" hreflang="ar" href="https://menuify.tn/?lang=ar">
+  <link rel="alternate" hreflang="en" href="https://menuify.tn/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://menuify.tn/">
+
+  <!-- ── Open Graph ───────────────────────────────────────────────────────── -->
+  <meta property="og:site_name" content="Menuify">
+  <meta property="og:title" content="Menuify — Menu numérique QR pour restaurants et cafés en Tunisie">
+  <meta property="og:description" content="Menuify permet aux restaurants et cafés tunisiens de créer un menu numérique accessible par QR code, de recevoir les commandes en temps réel et de gérer leur établissement depuis un tableau de bord simple.">
   <meta property="og:url" content="https://menuify.tn/">
   <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_TN">
+  <meta property="og:locale:alternate" content="ar_TN">
+  <meta property="og:locale:alternate" content="en_US">
   <meta property="og:image" content="https://menuify.tn/assets/brand/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Menuify — Plateforme de menus numériques">
 
-  <!-- Twitter Card Tags -->
+  <!-- ── Twitter Card ─────────────────────────────────────────────────────── -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Menuify - Plateforme de menus numériques pour les restaurants et cafés">
-  <meta name="twitter:description" content="Gérez votre menu de restaurant & café avec des codes QR, recevez les commandes en temps réel et suivez les commandes des clients. Solution de menu numérique gratuite pour les restaurants modernes.">
+  <meta name="twitter:site" content="@menuify_tn">
+  <meta name="twitter:title" content="Menuify — Menu numérique QR pour restaurants et cafés en Tunisie">
+  <meta name="twitter:description" content="Menuify permet aux restaurants et cafés tunisiens de créer un menu numérique accessible par QR code, de recevoir les commandes en temps réel et de gérer leur établissement.">
   <meta name="twitter:image" content="https://menuify.tn/assets/brand/og-image.png">
 
-  <!-- Favicon (SVG primary, PNG fallbacks for compatibility) -->
+  <!-- ── Favicons ─────────────────────────────────────────────────────────── -->
   <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg">
-  <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg" sizes="32x32">
-  <link rel="icon" type="image/svg+xml" href="/assets/brand/favicon.svg" sizes="16x16">
-  <!-- Fallback for older browsers -->
   <link rel="icon" type="image/x-icon" href="/assets/brand/favicon.ico">
   <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
-  <link rel="preload" as="image" href="https://menuify.tn/assets/brand/og-image.png">
 
-  <!-- Font Preconnect & Loading -->
+  <!-- ── Preloads ─────────────────────────────────────────────────────────── -->
+  <link rel="preload" as="image" href="https://menuify.tn/assets/brand/og-image.png" fetchpriority="low">
+
+  <!-- ── Fonts ────────────────────────────────────────────────────────────── -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap">
 
-  <!-- DNS Prefetch for API -->
-  <link rel="dns-prefetch" href="https://api.menuify.tn/api/public/tenants">
+  <!-- ── DNS prefetch ─────────────────────────────────────────────────────── -->
+  <link rel="dns-prefetch" href="https://api.menuify.tn">
 
-  <!-- JSON-LD Structured Data (Organization) -->
+  <!-- ══════════════════════════════════════════════════════════════════════
+       JSON-LD — Organization
+       Note: FAQ rich results deprecated by Google as of May 7 2026.
+             No FAQPage schema included.
+  ═══════════════════════════════════════════════════════════════════════ -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Menuify",
     "url": "https://menuify.tn",
-    "logo": "https://menuify.tn/assets/logo.png",
-    "description": "Plateforme de menus numériques pour les restaurants et cafés avec des codes QR et un suivi en temps réel des commandes",
-    "sameAs": [
-      "https://twitter.com/menuify",
-      "https://facebook.com/menuify"
-    ],
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://menuify.tn/assets/brand/logo.png",
+      "width": 200,
+      "height": 60
+    },
+    "description": "Plateforme SaaS de menus numériques pour restaurants et cafés en Tunisie. QR code, commande en temps réel, tableau de bord de gestion.",
+    "foundingLocation": {
+      "@type": "Place",
+      "name": "Tunis, Tunisie"
+    },
+    "areaServed": {
+      "@type": "Country",
+      "name": "Tunisia"
+    },
     "contactPoint": {
       "@type": "ContactPoint",
-      "contactType": "Customer Service",
-      "email": "support@menuify.tn"
+      "contactType": "customer support",
+      "email": "support.menuify@gmail.com",
+      "telephone": "+216-26-935-040",
+      "availableLanguage": ["French", "Arabic", "English"]
+    },
+    "sameAs": [
+      "https://www.facebook.com/menuify.tn"
+    ]
+  }
+  </script>
+
+  <!-- ── JSON-LD — WebApplication ─────────────────────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Menuify",
+    "url": "https://menuify.tn",
+    "description": "Plateforme SaaS de menus numériques accessibles par QR code pour restaurants et cafés en Tunisie. Commandes en temps réel, gestion des tables, rapports Z.",
+    "applicationCategory": "BusinessApplication",
+    "applicationSubCategory": "Restaurant Management",
+    "operatingSystem": "Web",
+    "browserRequirements": "Requires JavaScript. Works on Chrome, Firefox, Safari, Edge",
+    "screenshot": {
+      "@type": "ImageObject",
+      "url": "https://menuify.tn/assets/brand/screenshot.png"
+    },
+    "inLanguage": ["fr", "ar", "en"],
+    "availableOnDevice": "Desktop, Tablet, Mobile",
+    "offers": {
+      "@type": "AggregateOffer",
+      "lowPrice": "0",
+      "highPrice": "75",
+      "priceCurrency": "TND",
+      "offerCount": "3",
+      "availability": "https://schema.org/InStock"
+    },
+    "featureList": [
+      "Menu numérique accessible par QR code",
+      "Suivi en temps réel des commandes",
+      "Système de caisse (POS)",
+      "Gestion des tables et réservations",
+      "Tableau de bord analytique et rapports Z",
+      "Support multilingue : français, arabe, anglais"
+    ],
+    "provider": {
+      "@type": "Organization",
+      "name": "EDSolutions",
+      "url": "https://edsolutions.tn"
     }
   }
   </script>
 
-  <!-- JSON-LD Structured Data (SoftwareApplication) -->
+  <!-- ── JSON-LD — BreadcrumbList (homepage) ──────────────────────────────── -->
   <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Menuify",
-      "url": "https://menuify.tn",
-      "description": "Plateforme de menus numériques pour les restaurants et cafés avec des codes QR et un suivi en temps réel des commandes",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web",
-      "browserRequirements": "Requires JavaScript. Works on Chrome, Firefox, Safari, Edge",
-      "screenshot": "https://menuify.tn/assets/brand/screenshot.png",
-
-      "image": "https://menuify.tn/assets/brand/screenshot.png",
-
-      "inLanguage": ["en", "fr", "ar"],
-      "availableOnDevice": "Desktop, Tablet, Mobile",
-
-      "offers": {
-        "@type": "Offer",
-        "price": "25",
-        "priceCurrency": "TND",
-        "availability": "https://schema.org/InStock"
-      },
-
-      "featureList": [
-        "Accès au menu par code QR",
-        "Suivi en temps réel des commandes",
-        "Tableau de bord de gestion du restaurant"
-      ],
-
-      "provider": {
-        "@type": "Organization",
-        "name": "EDSolutions",
-        "url": "https://edsolutions.tn"
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Accueil",
+        "item": "https://menuify.tn/"
       }
-    }
+    ]
+  }
   </script>
 
-  <!-- Google tag (gtag.js) -->
+  <!-- ── Google Analytics ─────────────────────────────────────────────────── -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-FWBPPM0GTR"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
