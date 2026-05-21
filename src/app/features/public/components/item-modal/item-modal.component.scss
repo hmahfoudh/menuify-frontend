@@ -17,8 +17,9 @@
   max-height: 90vh;
   background: var(--menuify-surface);
   border-radius: 20px 20px 0 0;
-  overflow-y: auto;
-  scrollbar-width: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   position: relative;
   animation: mp-sheet-up 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 
@@ -32,6 +33,7 @@
 .mp-modal__img {
   height: 220px;
   overflow: hidden;
+  flex-shrink: 0;
 
   img {
     width: 100%;
@@ -42,6 +44,10 @@
 
 .mp-modal__body {
   padding: 1.25rem;
+  padding-bottom: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  flex: 1;
 }
 
 .mp-modal__name {
@@ -228,6 +234,7 @@
 // Special note
 .mp-note {
   margin-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .mp-note__label {
@@ -261,14 +268,15 @@
   }
 }
 
-// Modal footer
+// Modal footer — sticky at the bottom of the modal
 .mp-modal__footer {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  padding-top: 1rem;
+  padding: 1rem 1.25rem;
   border-top: 1px solid var(--menuify-border);
-  margin-top: 1rem;
+  background: var(--menuify-surface);
+  flex-shrink: 0;
 }
 
 .mp-stepper {

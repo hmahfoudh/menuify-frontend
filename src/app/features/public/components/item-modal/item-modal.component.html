@@ -108,22 +108,23 @@
           rows="2"></textarea>
       </div>
 
-      <!-- Footer: qty + add -->
-      <div class="mp-modal__footer">
-        <div class="mp-stepper">
-          <button type="button" class="mp-stepper__btn" (click)="decQty.emit()">−</button>
-          <span class="mp-stepper__val">{{ modalQty }}</span>
-          <button type="button" class="mp-stepper__btn" (click)="incQty.emit()">+</button>
-        </div>
+    </div>
 
-        <button class="mp-add-btn" [disabled]="!canAddToCart" (click)="addToCart.emit()" type="button">
-          {{ 'item_modal.add_to_order' | translate }}
-          <span class="mp-add-btn__price">
-            {{ fmt(modalTotal) }} {{ currency }}
-          </span>
-        </button>
+    <!-- Footer: qty + add — outside .mp-modal__body so it stays fixed at the bottom -->
+    <div class="mp-modal__footer">
+      <div class="mp-stepper">
+        <button type="button" class="mp-stepper__btn" (click)="decQty.emit()">−</button>
+        <span class="mp-stepper__val">{{ modalQty }}</span>
+        <button type="button" class="mp-stepper__btn" (click)="incQty.emit()">+</button>
       </div>
 
+      <button class="mp-add-btn" [disabled]="!canAddToCart" (click)="addToCart.emit()" type="button">
+        {{ 'item_modal.add_to_order' | translate }}
+        <span class="mp-add-btn__price">
+          {{ fmt(modalTotal) }} {{ currency }}
+        </span>
+      </button>
     </div>
+
   </div>
 </div>
