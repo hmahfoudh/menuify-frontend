@@ -84,3 +84,47 @@ img {
   text-align: center;
   font-size: 0.9rem;
 }
+
+// ── Empty filter state ────────────────────────────────────────────────────────
+.mp-empty-filter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 56px 24px;
+  text-align: center;
+  animation: mp-fade 0.2s ease;
+
+  &__icon {
+    font-size: 2rem;
+    line-height: 1;
+    opacity: 0.5;
+  }
+
+  &__text {
+    font-size: 0.9rem;
+    color: var(--menuify-muted);
+    font-family: var(--menuify-font-body), system-ui, sans-serif;
+  }
+
+  &__reset {
+    margin-top: 4px;
+    padding: 7px 18px;
+    border-radius: 999px;
+    border: 1.5px solid var(--menuify-border, #e5e7eb);
+    background: transparent;
+    font-family: var(--menuify-font-body), system-ui, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--menuify-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+
+    &:hover {
+      border-color: var(--menuify-accent);
+      color: var(--menuify-accent);
+      background: color-mix(in srgb, var(--menuify-accent) 8%, transparent);
+    }
+  }
+}

@@ -125,6 +125,18 @@
       "vegan": "Végétalien",
       "gluten_free": "Sans gluten",
       "spicy": "Épicé"
+    },
+    "search": {
+      "placeholder": "Rechercher un plat...",
+      "noResults": "Aucun plat ne correspond à vos filtres."
+    },
+    "filter": {
+      "featured": "Signature",
+      "vegan": "Vegan",
+      "vegetarian": "Végétarien",
+      "glutenFree": "Sans gluten",
+      "spicy": "Épicé",
+      "clear": "Effacer"
     }
   },
   "header": {
