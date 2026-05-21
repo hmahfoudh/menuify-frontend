@@ -1,8 +1,6 @@
 import {
   Component, OnInit, signal, computed,
-  inject, HostListener,
-  PLATFORM_ID,
-  OnDestroy
+  inject, PLATFORM_ID, OnDestroy
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -15,6 +13,32 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { Subject, takeUntil } from 'rxjs';
 
+// ── Testimonial model ─────────────────────────────────────────────────────────
+export interface Testimonial {
+  key: string;     // maps to testimonials.<key>.text / .author / .role in i18n
+  initial: string; // avatar letter
+}
+
+// ── FAQ item model ────────────────────────────────────────────────────────────
+export interface FaqItem {
+  key: string;  // maps to faq.<key>.q / .a in i18n
+}
+
+// ── Static data ───────────────────────────────────────────────────────────────
+export const TESTIMONIALS: Testimonial[] = [
+  { key: 'ridge',  initial: 'R' },
+  { key: 'loft',   initial: 'L' },
+  { key: 'bistro', initial: 'B' },
+];
+
+export const FAQ_ITEMS: FaqItem[] = [
+  { key: 'free'      },  // Est-ce que Menuify est gratuit ?
+  { key: 'qr'        },  // Comment fonctionne le QR code ?
+  { key: 'realtime'  },  // Les commandes arrivent-elles en temps réel ?
+  { key: 'languages' },  // Quelles langues sont supportées ?
+  { key: 'setup'     },  // Combien de temps pour mettre en place mon menu ?
+  { key: 'contract'  },  // Y a-t-il un engagement ou un contrat ?
+];
 
 
 @Component({
@@ -27,57 +51,58 @@ import { Subject, takeUntil } from 'rxjs';
 export class LandingComponent implements OnInit, OnDestroy {
 
   private platformId = inject(PLATFORM_ID);
-  private http = inject(HttpClient);
-  private translate = inject(TranslateService);
-  private metaTags = inject(MetaTagsService);
-  private route = inject(ActivatedRoute);
+  private http        = inject(HttpClient);
+  private translate   = inject(TranslateService);
+  private metaTags    = inject(MetaTagsService);
+  private route       = inject(ActivatedRoute);
 
   // ── Language ─────────────────────────────────────────────────────────────────
   currentLang = signal<Lang>('fr');
   isRtl = computed(() => this.currentLang() === 'ar');
 
-
   // ── Restaurant directory ──────────────────────────────────────────────────────
-  allTenants = signal<PublicTenant[]>([]);
+  allTenants  = signal<PublicTenant[]>([]);
   searchQuery = signal('');
-  loadingDir = signal(true);
-  showAll = signal(false);
+  loadingDir  = signal(true);
+  showAll     = signal(false);
 
   filteredTenants = computed(() => {
-    const q = this.searchQuery().toLowerCase().trim();
+    const q    = this.searchQuery().toLowerCase().trim();
     const list = q
       ? this.allTenants().filter(t =>
-        t.name.toLowerCase().includes(q) ||
-        (t.city ?? '').toLowerCase().includes(q))
+          t.name.toLowerCase().includes(q) ||
+          (t.city ?? '').toLowerCase().includes(q))
       : this.allTenants();
     return this.showAll() ? list : list.slice(0, 8);
   });
 
-  hasMore = computed(() =>
-    !this.showAll() && this.allTenants().length > 8
-  );
+  hasMore = computed(() => !this.showAll() && this.allTenants().length > 8);
 
   // ── Contact form ──────────────────────────────────────────────────────────────
-  cName = signal('');
-  cEmail = signal('');
-  cResto = signal('');
-  cMsg = signal('');
+  cName    = signal('');
+  cEmail   = signal('');
+  cResto   = signal('');
+  cMsg     = signal('');
   cSending = signal(false);
-  cSent = signal(false);
-  cError = signal<string | null>(null);
+  cSent    = signal(false);
+  cError   = signal<string | null>(null);
+
+  // ── FAQ accordion ─────────────────────────────────────────────────────────────
+  openFaqIndex = signal<number | null>(null);
 
   // ── Constants ─────────────────────────────────────────────────────────────────
-  readonly featureKeys = FEATURE_KEYS;
-  readonly featureIcons = FEATURE_ICONS;
-  readonly plans = PLANS;
- 
+  readonly featureKeys   = FEATURE_KEYS;
+  readonly featureIcons  = FEATURE_ICONS;
+  readonly plans         = PLANS;
+  readonly testimonials  = TESTIMONIALS;
+  readonly faqItems      = FAQ_ITEMS;
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────────
   private destroy$ = new Subject<void>();
 
   ngOnInit(): void {
     this.route.fragment.pipe(takeUntil(this.destroy$)).subscribe(fragment => {
       if (fragment && isPlatformBrowser(this.platformId)) {
-        // Small delay to let the page render before scrolling
         setTimeout(() => {
           document.getElementById(fragment)?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
@@ -96,9 +121,8 @@ export class LandingComponent implements OnInit, OnDestroy {
   setLang(lang: Lang): void {
     this.currentLang.set(lang);
     this.translate.use(lang);
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.dir  = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
-    // Keep og:locale and language meta in sync when user switches language at runtime
     this.metaTags.updateLocale(lang);
   }
 
@@ -106,15 +130,17 @@ export class LandingComponent implements OnInit, OnDestroy {
   private loadTenants(): void {
     this.http.get<any>(`${environment.apiUrl}/api/public/tenants`)
       .subscribe({
-        next: res => { this.allTenants.set(res.data ?? []); this.loadingDir.set(false); },
-        error: () => this.loadingDir.set(false),
+        next:  res => { this.allTenants.set(res.data ?? []); this.loadingDir.set(false); },
+        error: ()  => this.loadingDir.set(false),
       });
   }
 
   setSearch(v: string): void { this.searchQuery.set(v); this.showAll.set(false); }
+
   openMenu(subdomain: string): void {
     window.open(`https://${subdomain}.menuify.tn/menu`, '_blank');
   }
+
   tenantInitial(name: string): string { return name.charAt(0).toUpperCase(); }
 
   // ── Smooth scroll ─────────────────────────────────────────────────────────────
@@ -122,6 +148,11 @@ export class LandingComponent implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       document.getElementById(section)?.scrollIntoView({ behavior: 'smooth' });
     }
+  }
+
+  // ── FAQ accordion ─────────────────────────────────────────────────────────────
+  toggleFaq(index: number): void {
+    this.openFaqIndex.update(current => current === index ? null : index);
   }
 
   // ── Contact ───────────────────────────────────────────────────────────────────
@@ -132,12 +163,12 @@ export class LandingComponent implements OnInit, OnDestroy {
     this.cError.set(null);
 
     this.http.post(`${environment.apiUrl}/api/public/contact`, {
-      name: this.cName().trim(),
-      email: this.cEmail().trim(),
+      name:           this.cName().trim(),
+      email:          this.cEmail().trim(),
       restaurantName: this.cResto().trim() || null,
-      message: this.cMsg().trim(),
+      message:        this.cMsg().trim(),
     }).subscribe({
-      next: () => { this.cSending.set(false); this.cSent.set(true); },
+      next:  () => { this.cSending.set(false); this.cSent.set(true); },
       error: () => {
         this.cSending.set(false);
         this.cError.set(this.translate.instant('contact.error'));

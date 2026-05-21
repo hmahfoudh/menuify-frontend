@@ -665,6 +665,53 @@
       "save_group": "Enregistrer le groupe"
     }
   },
+  "testimonials": {
+    "title": "Ce que disent nos clients",
+    "sub": "Des restaurateurs tunisiens qui ont digitalisé leur menu avec Menuify.",
+    "ridge": {
+      "text": "Depuis que nous utilisons Menuify, nos clients scannent le QR code dès qu'ils s'assoient. Le processus de commande est devenu beaucoup plus fluide et notre équipe gagne un temps précieux.",
+      "author": "Équipe The Ridge",
+      "role": "Restaurant — Tunis"
+    },
+    "loft": {
+      "text": "La mise en place a pris moins d'une heure. Le tableau de bord est intuitif et le suivi des commandes en temps réel a complètement changé notre façon de travailler en salle.",
+      "author": "Équipe The Loft",
+      "role": "Café — Tunis"
+    },
+    "bistro": {
+      "text": "Menuify nous a permis de mettre à jour nos prix et nos nouvelles créations instantanément, sans devoir réimprimer de menus papier. Un vrai gain de temps et d'argent.",
+      "author": "Équipe Bistro Coffee Barista",
+      "role": "Café & Bistrot — Tunis"
+    }
+  },
+  "faq": {
+    "title": "Questions fréquentes",
+    "sub": "Tout ce que vous devez savoir avant de démarrer.",
+    "free": {
+      "q": "Est-ce que Menuify est gratuit ?",
+      "a": "Oui, Menuify propose un plan Gratuit qui vous permet de créer votre menu numérique et de partager votre QR code sans aucun frais. Des plans payants (Pro et Premium) sont disponibles pour les établissements qui souhaitent des fonctionnalités avancées comme le POS, les réservations et les rapports détaillés."
+    },
+    "qr": {
+      "q": "Comment fonctionne le QR code ?",
+      "a": "Après avoir créé votre menu, Menuify génère automatiquement un QR code unique lié à votre établissement. Vos clients n'ont qu'à le scanner avec leur smartphone pour accéder à votre menu en ligne, sans téléchargement d'application nécessaire."
+    },
+    "realtime": {
+      "q": "Les commandes arrivent-elles vraiment en temps réel ?",
+      "a": "Absolument. Menuify utilise une technologie de flux en temps réel (Server-Sent Events) : dès qu'un client valide sa commande, elle apparaît instantanément sur votre tableau de bord et votre système de caisse, sans aucun rechargement de page."
+    },
+    "languages": {
+      "q": "Quelles langues sont supportées ?",
+      "a": "Menuify supporte le français, l'arabe (avec affichage RTL automatique) et l'anglais, aussi bien pour l'interface d'administration que pour les menus visibles par vos clients."
+    },
+    "setup": {
+      "q": "Combien de temps faut-il pour mettre en place mon menu ?",
+      "a": "La création d'un compte et la publication d'un premier menu prennent généralement moins d'une heure. Notre équipe peut également vous accompagner dans la digitalisation de votre menu existant si vous en avez besoin."
+    },
+    "contract": {
+      "q": "Y a-t-il un engagement ou un contrat ?",
+      "a": "Non. Les abonnements Menuify sont sans engagement, renouvelés mensuellement. Vous pouvez passer d'un plan à l'autre ou annuler à tout moment depuis votre espace d'administration."
+    }
+  },
   "zr": {
     "header": {
       "title": "Rapports Z",
