@@ -1,7 +1,8 @@
 // menu-grid.component.ts
 import {
   Component, Input, Output, EventEmitter,
-  AfterViewInit, OnDestroy, ElementRef, Inject, PLATFORM_ID,
+  AfterViewInit, OnChanges, OnDestroy,
+  SimpleChanges, ElementRef, Inject, PLATFORM_ID,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
@@ -15,7 +16,7 @@ import { PublicItemResponse } from '../../models/public-menu.models';
   templateUrl: './menu-grid.component.html',
   styleUrl: './menu-grid.component.scss',
 })
-export class MenuGridComponent implements AfterViewInit, OnDestroy {
+export class MenuGridComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input({ required: true }) categories!: any[];
   @Input({ required: true }) currency!: string;
   @Input({ required: true }) likedItems!: Set<string>;
@@ -27,9 +28,16 @@ export class MenuGridComponent implements AfterViewInit, OnDestroy {
   @Output() activeSubcategoryChange = new EventEmitter<string>();
 
   private observer: IntersectionObserver | null = null;
-
-  // Maps section element → { catId, subId? }
   private sectionMeta = new Map<Element, { catId: string; subId?: string }>();
+
+  // Tracks whether the initial AfterViewInit setup has run yet.
+  // ngOnChanges fires before AfterViewInit on first render, so we must
+  // not attempt DOM queries before the view exists.
+  private viewInitialized = false;
+
+  // Pending re-init timer — we cancel any in-flight timer before scheduling
+  // a new one so rapid filter changes don't stack multiple re-inits.
+  private reinitTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private el: ElementRef,
@@ -38,19 +46,45 @@ export class MenuGridComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-
-    // Give the DOM one tick to render all sections
+    this.viewInitialized = true;
     setTimeout(() => this.initObserver(), 0);
   }
 
-  ngOnDestroy(): void {
-    this.observer?.disconnect();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // Only react to categories changes, and only after the view exists.
+    // On first render ngOnChanges fires before ngAfterViewInit — ngAfterViewInit
+    // handles that initial setup, so we skip it here.
+    if (!this.viewInitialized) return;
+    if (!changes['categories']) return;
+
+    // Tear down immediately so stale nodes stop firing intersection events
+    // while Angular is mid-render of the updated DOM.
+    this.teardownObserver();
+
+    // Schedule re-init after Angular has flushed the DOM changes.
+    if (this.reinitTimer !== null) clearTimeout(this.reinitTimer);
+    this.reinitTimer = setTimeout(() => {
+      this.reinitTimer = null;
+      this.initObserver();
+    }, 0);
   }
 
-  // ── IntersectionObserver setup ───────────────────────────────────────────────
+  ngOnDestroy(): void {
+    if (this.reinitTimer !== null) clearTimeout(this.reinitTimer);
+    this.teardownObserver();
+  }
+
+  // ── Observer lifecycle ────────────────────────────────────────────────────────
+
+  private teardownObserver(): void {
+    this.observer?.disconnect();
+    this.observer = null;
+    this.sectionMeta.clear();
+  }
 
   private initObserver(): void {
-    this.sectionMeta.clear();
     const host: HTMLElement = this.el.nativeElement;
 
     // Map every mp-section → its category id
@@ -62,14 +96,13 @@ export class MenuGridComponent implements AfterViewInit, OnDestroy {
     // Map every mp-subsection → its subcategory id + parent category id
     host.querySelectorAll<HTMLElement>('.mp-subsection').forEach((subEl) => {
       const subId = subEl.id.replace('section-', '');
-      // Walk up to the parent mp-section to get catId
       const parentSection = subEl.closest<HTMLElement>('.mp-section');
       const catId = parentSection ? parentSection.id.replace('section-', '') : '';
       this.sectionMeta.set(subEl, { catId, subId });
     });
 
-    // rootMargin: top offset accounts for sticky nav (~90px covers tabs + chips row)
-    // bottom offset pushes the trigger line to roughly the upper third of the viewport
+    if (this.sectionMeta.size === 0) return;
+
     this.observer = new IntersectionObserver(
       (entries) => this.onIntersection(entries),
       {
@@ -83,7 +116,6 @@ export class MenuGridComponent implements AfterViewInit, OnDestroy {
   }
 
   private onIntersection(entries: IntersectionObserverEntry[]): void {
-    // Among all currently intersecting sections, pick the one closest to the top
     const intersecting = entries
       .filter((e) => e.isIntersecting)
       .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
@@ -98,7 +130,7 @@ export class MenuGridComponent implements AfterViewInit, OnDestroy {
     this.activeSubcategoryChange.emit(meta.subId ?? '');
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────────────
 
   fmt(n: number | null): string {
     if (n == null) return '';
