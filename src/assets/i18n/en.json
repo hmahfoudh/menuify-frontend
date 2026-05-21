@@ -125,6 +125,18 @@
       "vegan": "نباتي صرف",
       "gluten_free": "خالٍ من الغلوتين",
       "spicy": "حار"
+    },
+    "search": {
+      "placeholder": "Search a dish...",
+      "noResults": "No dishes match your filters."
+    },
+    "filter": {
+      "featured": "Signature",
+      "vegan": "Vegan",
+      "vegetarian": "Vegetarian",
+      "glutenFree": "Gluten-free",
+      "spicy": "Spicy",
+      "clear": "Clear"
     }
   },
   "header": {
@@ -231,7 +243,7 @@
     "added": "تمت الإضافة إلى السلة",
     "view_cart": "عرض السلة"
   },
-   "rsv": {
+  "rsv": {
     "form": {
       "title": "احجز طاولة",
       "subtitle": "أدخل التفاصيل أدناه وسنؤكد حجزك",

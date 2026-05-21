@@ -1,0 +1,205 @@
+// ── Search + Filter Bar ───────────────────────────────────────────────────────
+// Token prefix: --sfb-
+// Inherits global --menuify-* tokens via ThemeInjectorService
+
+:host {
+  display: block;
+  // Map global tokens → local aliases
+  --sfb-bg:           var(--menuify-card-bg, #fff);
+  --sfb-border:       var(--menuify-border, #e5e7eb);
+  --sfb-text:         var(--menuify-text, #111);
+  --sfb-muted:        var(--menuify-muted, #9ca3af);
+  --sfb-accent:       var(--menuify-accent, #16a34a);
+  --sfb-accent-soft:  color-mix(in srgb, var(--sfb-accent) 12%, transparent);
+  --sfb-radius:       var(--menuify-radius, 12px);
+  --sfb-font:         var(--menuify-font-body, system-ui, sans-serif);
+}
+
+// ── Wrapper ───────────────────────────────────────────────────────────────────
+
+.sfb-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 16px 4px;
+}
+
+// ── Search row ────────────────────────────────────────────────────────────────
+
+.sfb-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sfb-search-field {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: var(--sfb-bg);
+  border: 1.5px solid var(--sfb-border);
+  border-radius: calc(var(--sfb-radius) * 0.8);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus-within {
+    border-color: var(--sfb-accent);
+    box-shadow: 0 0 0 3px var(--sfb-accent-soft);
+  }
+
+  &--filled {
+    border-color: color-mix(in srgb, var(--sfb-accent) 40%, var(--sfb-border));
+  }
+}
+
+.sfb-search-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px 0 12px;
+  color: var(--sfb-muted);
+  pointer-events: none;
+  transition: color 0.15s ease;
+
+  .sfb-search-field:focus-within & {
+    color: var(--sfb-accent);
+  }
+}
+
+.sfb-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--sfb-font);
+  font-size: 0.875rem;
+  color: var(--sfb-text);
+  padding: 10px 0;
+  min-width: 0;
+
+  &::placeholder {
+    color: var(--sfb-muted);
+  }
+
+  // Remove browser default search cancel button
+  &::-webkit-search-cancel-button {
+    display: none;
+  }
+}
+
+.sfb-clear-input {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--sfb-border);
+  color: var(--sfb-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--sfb-accent) 15%, var(--sfb-border));
+    color: var(--sfb-accent);
+  }
+}
+
+// ── Clear-all button ──────────────────────────────────────────────────────────
+
+.sfb-clear-all {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 11px;
+  height: 40px;
+  border-radius: calc(var(--sfb-radius) * 0.8);
+  border: 1.5px solid var(--sfb-border);
+  background: transparent;
+  font-family: var(--sfb-font);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--sfb-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: var(--sfb-accent);
+    color: var(--sfb-accent);
+    background: var(--sfb-accent-soft);
+  }
+}
+
+// ── Chips row ─────────────────────────────────────────────────────────────────
+
+.sfb-chips-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// ── Individual chip ───────────────────────────────────────────────────────────
+
+.sfb-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1.5px solid var(--sfb-border);
+  background: transparent;
+  font-family: var(--sfb-font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--sfb-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease,
+              color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  // Active / toggled state
+  &--active {
+    border-color: var(--sfb-accent);
+    background: var(--sfb-accent-soft);
+    color: var(--sfb-accent);
+
+    .sfb-chip-emoji {
+      filter: none;
+    }
+  }
+
+  &:hover:not(&--active) {
+    border-color: color-mix(in srgb, var(--sfb-accent) 50%, var(--sfb-border));
+    background: color-mix(in srgb, var(--sfb-accent) 5%, transparent);
+  }
+}
+
+.sfb-chip-emoji {
+  font-style: normal;
+  font-size: 0.9em;
+  line-height: 1;
+  // Slightly desaturate when inactive for visual hierarchy
+  filter: saturate(0.7);
+
+  .sfb-chip--active & {
+    filter: saturate(1.2);
+  }
+}

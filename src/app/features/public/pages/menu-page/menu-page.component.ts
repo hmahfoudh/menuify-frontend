@@ -42,6 +42,8 @@ import { CartToastComponent } from '../../components/cart-toast/cart-toast.compo
 import { WelcomePopupComponent } from "../../components/welcome-popup/welcome-popup.component";
 import { LocalStorageService } from '../../../../core/services/local-storage.service';
 import { MetaTagsService } from '../../../../shared/services/meta-tags.service';
+import { FilterKey, SearchFilterBarComponent } from '../../components/search-filter-bar/search-filter-bar.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export type OrderStep = 'idle' | 'checkout' | 'success';
 export type OrderType = 'DINE_IN' | 'TAKEAWAY';
@@ -56,12 +58,12 @@ export interface SocialLink {
   selector: 'app-menu-page',
   standalone: true,
   imports: [
-    CommonModule, FormsModule,
+    CommonModule, FormsModule, TranslatePipe,
     MenuHeaderComponent, CategoryTabsComponent, MenuGridComponent,
     ItemModalComponent, CartDrawerComponent, CheckoutModalComponent,
     SuccessScreenComponent, TrackingPanelComponent, BottomBarComponent,
     MenuFooterComponent, ClosedBannerComponent, CartToastComponent,
-    WelcomePopupComponent
+    WelcomePopupComponent, SearchFilterBarComponent
   ],
   templateUrl: './menu-page.component.html',
   styleUrls: ['./menu-page.component.scss'],
@@ -89,6 +91,10 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   // is in flight — prevents the feedback loop: tap tab → scroll → observer
   // fires on intermediate sections → tab flickers back and forth.
   private _suppressScrollObserver = false;
+
+  // ── Search & filter ──────────────────────────────────────────────────────
+  searchQuery    = signal<string>('');
+  activeFilters  = signal<Set<FilterKey>>(new Set());
 
   // ── Cart (proxied from CartService) ──────────────────────────────────────
   cartItems = this.cart.items;
@@ -169,6 +175,91 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   activeSubcategories = computed(() =>
     this.categories().find(c => c.id === this.activeCategory())?.subcategories ?? []
   );
+
+  /**
+   * Flags that exist on ≥1 item across the whole menu.
+   * Drives which chips are rendered in SearchFilterBarComponent.
+   */
+  availableFilters = computed<Set<FilterKey>>(() => {
+    const flags = new Set<FilterKey>();
+    for (const cat of this.categories()) {
+      for (const item of cat.items) {
+        if (item.featured)   flags.add('featured');
+        if (item.vegan)      flags.add('vegan');
+        if (item.vegetarian) flags.add('vegetarian');
+        if (item.glutenFree) flags.add('glutenFree');
+        if (item.spicy)      flags.add('spicy');
+      }
+      for (const sub of cat.subcategories ?? []) {
+        for (const item of sub.items) {
+          if (item.featured)   flags.add('featured');
+          if (item.vegan)      flags.add('vegan');
+          if (item.vegetarian) flags.add('vegetarian');
+          if (item.glutenFree) flags.add('glutenFree');
+          if (item.spicy)      flags.add('spicy');
+        }
+      }
+    }
+    return flags;
+  });
+
+  /** True when the user has typed something OR toggled at least one chip */
+  isFiltering = computed(() =>
+    this.searchQuery().trim().length > 0 || this.activeFilters().size > 0
+  );
+
+  /**
+   * The filtered view of categories fed into <app-menu-grid>.
+   * When nothing is active this returns the raw categories signal so zero
+   * overhead is added to the normal rendering path.
+   */
+  filteredCategories = computed(() => {
+    if (!this.isFiltering()) return this.categories();
+ 
+    const q       = this.searchQuery().trim().toLowerCase();
+    const filters = this.activeFilters();
+ 
+    const matchesFlags = (item: { featured: boolean; vegetarian: boolean; vegan: boolean; glutenFree: boolean; spicy: boolean }) => {
+      if (filters.has('featured')   && !item.featured)   return false;
+      if (filters.has('vegan')      && !item.vegan)      return false;
+      if (filters.has('vegetarian') && !item.vegetarian) return false;
+      if (filters.has('glutenFree') && !item.glutenFree) return false;
+      if (filters.has('spicy')      && !item.spicy)      return false;
+      return true;
+    };
+ 
+    const matchesQuery = (item: { name: string; nameAr: string | null; nameFr: string | null; description: string | null; tags: string | null }) => {
+      if (!q) return true;
+      return (
+        item.name.toLowerCase().includes(q) ||
+        (item.nameAr  ?? '').toLowerCase().includes(q) ||
+        (item.nameFr  ?? '').toLowerCase().includes(q) ||
+        (item.description ?? '').toLowerCase().includes(q) ||
+        (item.tags ?? '').toLowerCase().includes(q)
+      );
+    };
+ 
+    const filterItems = <T extends {
+      featured: boolean; vegetarian: boolean; vegan: boolean;
+      glutenFree: boolean; spicy: boolean;
+      name: string; nameAr: string | null; nameFr: string | null;
+      description: string | null; tags: string | null;
+    }>(items: T[]): T[] =>
+      items.filter(i => matchesFlags(i) && matchesQuery(i));
+ 
+    return this.categories()
+      .map(cat => ({
+        ...cat,
+        items: filterItems(cat.items),
+        subcategories: (cat.subcategories ?? []).map(sub => ({
+          ...sub,
+          items: filterItems(sub.items),
+        })).filter(sub => sub.items.length > 0),
+      }))
+      .filter(cat => cat.items.length > 0 || cat.subcategories.length > 0);
+  });
+
+  readonly emptySet = new Set<FilterKey>();
 
   latestOrderRef = computed(() => {
     const orders = this.activeOrders();
@@ -383,6 +474,16 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       robots: 'index,follow',
       structuredData: restaurantSchema,
     });
+  }
+
+  //──── Search & Filter ──────────────────────────────────────────────────────
+
+  onSearchQueryChange(q: string): void {
+    this.searchQuery.set(q);
+  }
+ 
+  onFiltersChange(filters: Set<FilterKey>): void {
+    this.activeFilters.set(filters);
   }
 
   // ── Category / subcategory ────────────────────────────────────────────────

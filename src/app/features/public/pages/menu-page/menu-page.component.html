@@ -34,6 +34,15 @@
     [tenant]="m.tenant">
   </app-menu-header>
 
+  <!-- SEARCH + FILTER BAR -->
+  <app-search-filter-bar
+    [availableFilters]="availableFilters()"
+    [activeFilters]="activeFilters()"
+    [searchQuery]="searchQuery()"
+    (queryChange)="onSearchQueryChange($event)"
+    (filtersChange)="onFiltersChange($event)">
+  </app-search-filter-bar>
+
   <!-- CATEGORY TABS -->
   <app-category-tabs
     [categories]="categories()"
@@ -44,9 +53,21 @@
     (selectSubcategory)="selectSubcategory($event)">
   </app-category-tabs>
 
+  @if (isFiltering() && filteredCategories().length === 0) {
+  <div class="mp-empty-filter">
+    <span class="mp-empty-filter__icon">🔍</span>
+    <p class="mp-empty-filter__text">
+      {{ 'menu.search.noResults' | translate }}
+    </p>
+    <button class="mp-empty-filter__reset" (click)="onSearchQueryChange(''); onFiltersChange(emptySet)">
+      {{ 'menu.filter.clear' | translate }}
+    </button>
+  </div>
+}
+ 
   <!-- ITEM GRID -->
   <app-menu-grid
-    [categories]="categories()"
+    [categories]="filteredCategories()"
     [currency]="currency()"
     [likedItems]="likedItems()"
     [itemLikeCounts]="itemLikeCounts()"
