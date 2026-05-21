@@ -37,17 +37,6 @@
       }
     </div>
 
-    <!-- Clear-all pill: shown when any filter or query is active -->
-    @if (hasActiveState()) {
-      <button class="sfb-clear-all" (click)="clearAll()">
-        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"
-             stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-          <line x1="1" y1="1" x2="11" y2="11"/>
-          <line x1="11" y1="1" x2="1" y2="11"/>
-        </svg>
-        {{ 'menu.filter.clear' | translate }}
-      </button>
-    }
   </div>
 
   <!-- Filter chips row (only rendered when ≥1 chip is available) -->
