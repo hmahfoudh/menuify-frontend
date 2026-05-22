@@ -3,6 +3,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { ownerGuard } from './core/guards/owner.guard';
 import { superAdminGuard } from './core/guards/super-admin.guard';
 import { tenantRedirectGuard } from './core/guards/tenant-redirect.guards';
+import { blogPostResolver } from './features/blog/services/blog-post.resolver';
 
 export const routes: Routes = [
 
@@ -77,7 +78,7 @@ export const routes: Routes = [
     children: [
       { path: '', loadComponent: () => import('./features/blog/pages/blog-list/blog-list.component').then(m => m.BlogListComponent) },
       { path: 'tag/:tag', loadComponent: () => import('./features/blog/pages/blog-list/blog-list.component').then(m => m.BlogListComponent) },
-      { path: ':slug', loadComponent: () => import('./features/blog/pages/blog-post/blog-post.component').then(m => m.BlogPostComponent) },
+      { path: ':slug', loadComponent: () => import('./features/blog/pages/blog-post/blog-post.component').then(m => m.BlogPostComponent), resolve: { post: blogPostResolver } },
     ]
   },
 
