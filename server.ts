@@ -4,7 +4,6 @@ import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import bootstrap from './src/main.server';
-import { SSR_API_URL } from './src/app/core/tokens/ssr-api-url.token';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -45,8 +44,6 @@ export function app(): express.Express {
   server.set('view engine', 'html');
   server.set('views', browserDistFolder);
   server.set('trust proxy', 1);
-
-  const ssrApiUrl = process.env['SSR_API_URL'] || '';
 
   // ── robots.txt ─────────────────────────────────────────────────────────────
   // Served per-context: different rules for main domain vs tenant subdomains.
@@ -175,7 +172,6 @@ export function app(): express.Express {
         publicPath: browserDistFolder,
         providers: [
           { provide: APP_BASE_HREF, useValue: baseUrl },
-          { provide: SSR_API_URL, useValue: ssrApiUrl },
         ],
       })
       .then((html) => res.send(html))
