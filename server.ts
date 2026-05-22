@@ -43,6 +43,7 @@ export function app(): express.Express {
 
   server.set('view engine', 'html');
   server.set('views', browserDistFolder);
+  server.set('trust proxy', 1);
 
   // ── robots.txt ─────────────────────────────────────────────────────────────
   // Served per-context: different rules for main domain vs tenant subdomains.
@@ -87,6 +88,10 @@ export function app(): express.Express {
         `  <sitemap>\n` +
         `    <loc>https://menuify.tn/sitemap-main.xml</loc>\n` +
         `  </sitemap>\n` +
+        `  <!-- Blog posts -->\n` +
+        `  <sitemap>\n` +
+        `    <loc>https://menuify.tn/sitemap-blog.xml</loc>\n` +
+        `  </sitemap>\n` +
         `\n` +
         `  <!-- Tenant subdomains -->\n` +
         `  <sitemap>\n` +
@@ -97,6 +102,12 @@ export function app(): express.Express {
         `  </sitemap>\n` +
         `  <sitemap>\n` +
         `    <loc>https://baristabistro.menuify.tn/sitemap.xml</loc>\n` +
+        `  </sitemap>\n` +
+        `  <sitemap>\n` +
+        `    <loc>https://platocoffee.menuify.tn/sitemap.xml</loc>\n` +
+        `  </sitemap>\n` +
+        `  <sitemap>\n` +
+        `    <loc>https://blackrabbit.menuify.tn/sitemap.xml</loc>\n` +
         `  </sitemap>\n` +
         `\n` +
         `</sitemapindex>`
@@ -140,13 +151,24 @@ export function app(): express.Express {
 
   // ── Angular SSR ────────────────────────────────────────────────────────────
   server.get('*', (req, res, next) => {
-    const { protocol, originalUrl, baseUrl, headers } = req;
+    const { originalUrl, baseUrl, headers } = req;
+
+    // Use X-Forwarded-Proto if available (set by Caddy), fallback to https
+    const protocol =
+      (headers['x-forwarded-proto'] as string)?.split(',')[0].trim() ?? 'https';
+
+    // Use the original host from Caddy, not what Express sees
+    const host =
+      (headers['x-original-host'] as string) ||
+      (headers['x-forwarded-host'] as string) ||
+      headers['host'] ||
+      'menuify.tn';
 
     commonEngine
       .render({
         bootstrap,
         documentFilePath: indexHtml,
-        url: `${protocol}://${headers.host}${originalUrl}`,
+        url: `${protocol}://${host}${originalUrl}`,
         publicPath: browserDistFolder,
         providers: [
           { provide: APP_BASE_HREF, useValue: baseUrl },
@@ -155,6 +177,7 @@ export function app(): express.Express {
       .then((html) => res.send(html))
       .catch((err) => next(err));
   });
+
 
   return server;
 }

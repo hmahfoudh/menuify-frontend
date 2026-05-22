@@ -9,6 +9,7 @@ import { tenantInterceptor } from './core/interceptors/tenant.interceptor';
 import { initApp } from './core/initializers/app-initializer';
 import { provideTranslateService } from "@ngx-translate/core";
 import { provideTranslateHttpLoader } from "@ngx-translate/http-loader";
+import { provideClientHydration } from '@angular/platform-browser';
 
 
 export const appConfig: ApplicationConfig = {
@@ -27,5 +28,6 @@ export const appConfig: ApplicationConfig = {
             useFactory: initApp,
             multi: true,
         },
+        provideClientHydration(),
     ],
 };
