@@ -1,19 +1,28 @@
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BlogPostSummary, BlogPostDetail, BlogTag, BlogPage, BlogPostRequest } from '../models/blog.model';
+import { SSR_API_URL } from '../../../core/tokens/ssr-api-url.token';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class BlogService {
 
-  private http = inject(HttpClient);
-  private base = `${environment.apiUrl}/api/public/blog`;
-  private adminBase = `${environment.apiUrl}/api/blog`;
+  private http      = inject(HttpClient);
+  private ssrApiUrl = inject(SSR_API_URL, { optional: true });
 
-  // ── Posts ─────────────────────────────────────────────────
+  // SSR → http://backend:8080  |  Browser → https://api.menuify.tn
+  private get apiBase(): string {
+    return (this.ssrApiUrl && this.ssrApiUrl !== '')
+      ? this.ssrApiUrl
+      : environment.apiUrl;
+  }
 
+  private get base(): string     { return `${this.apiBase}/api/public/blog`; }
+  private get adminBase(): string { return `${this.apiBase}/api/blog`; }
+
+  // ── Public ──────────────────────────────────────────────────────────────────
   getPublishedPosts(page = 0, size = 9): Observable<BlogPage> {
     const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<{ data: BlogPage }>(`${this.base}/posts`, { params })
@@ -36,15 +45,16 @@ export class BlogService {
       .pipe(map(r => r.data));
   }
 
-  // ── Tags ──────────────────────────────────────────────────
-
   getAllTags(): Observable<BlogTag[]> {
     return this.http.get<{ data: BlogTag[] }>(`${this.base}/tags`)
       .pipe(map(r => r.data));
   }
 
-  // ── Admin ──────────────────────────
+  incrementView(slug: string): void {
+    this.http.post(`${this.base}/posts/${slug}/view`, {}).subscribe();
+  }
 
+  // ── Admin ───────────────────────────────────────────────────────────────────
   getAllPostsAdmin(status?: string, page = 0, size = 20): Observable<BlogPage> {
     let params = new HttpParams().set('page', page).set('size', size);
     if (status) params = params.set('status', status);
@@ -80,12 +90,8 @@ export class BlogService {
 
   private buildFormData(req: BlogPostRequest, image?: File): FormData {
     const form = new FormData();
-    // Spring reads this as @RequestPart("data") with content-type application/json
     form.append('data', new Blob([JSON.stringify(req)], { type: 'application/json' }));
-    if (image) {
-      form.append('image', image);
-    }
+    if (image) form.append('image', image);
     return form;
   }
-
 }
