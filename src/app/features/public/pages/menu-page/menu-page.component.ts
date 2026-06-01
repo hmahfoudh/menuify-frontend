@@ -80,7 +80,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   private localStorage = inject(LocalStorageService);
   private metaTags = inject(MetaTagsService);
   private doc = inject(DOCUMENT);
-  private originalFavicon: string | null = null;
+  private originalFavicons: { link: HTMLLinkElement; href: string }[] = [];
 
   // ── Menu data ────────────────────────────────────────────────────────────
   menu = signal<PublicMenuResponse | null>(null);
@@ -481,18 +481,12 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   }
 
   private setFavicon(url: string): void {
-    console.log('Setting favicon to', url);
     if (!this.isBrowser) return;
-    let link = this.doc.querySelector<HTMLLinkElement>('link[rel="icon"]');
-    if (!link) {
-      link = this.doc.createElement('link');
-      link.rel = 'icon';
-      this.doc.head.appendChild(link);
+    const links = Array.from(this.doc.querySelectorAll<HTMLLinkElement>('link[rel="icon"]'));
+    if (this.originalFavicons.length === 0) {
+      this.originalFavicons = links.map(l => ({ link: l, href: l.href }));
     }
-    if (this.originalFavicon === null) {
-      this.originalFavicon = link.href;
-    }
-    link.href = url;
+    links.forEach(l => { l.href = url; });
   }
 
   //──── Search & Filter ──────────────────────────────────────────────────────
@@ -1046,10 +1040,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     clearTimeout(this.toastTimer);
     this.destroy$.next();
     this.destroy$.complete();
-    if (this.originalFavicon !== null) {
-      const link = this.doc.querySelector<HTMLLinkElement>('link[rel="icon"]');
-      if (link) link.href = this.originalFavicon;
-    }
+    this.originalFavicons.forEach(({ link, href }) => { link.href = href; });
   }
 
   @HostListener('document:keydown.escape')
