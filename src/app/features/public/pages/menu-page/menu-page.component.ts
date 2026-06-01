@@ -3,7 +3,7 @@ import {
   inject, HostListener, PLATFORM_ID,
   ViewEncapsulation
 } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PublicMenuService } from '../../services/public-menu.service';
 import { CartService } from '../../services/cart.service';
@@ -79,6 +79,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
   private itemLikeSvc = inject(ItemLikeService);
   private localStorage = inject(LocalStorageService);
   private metaTags = inject(MetaTagsService);
+  private doc = inject(DOCUMENT);
+  private originalFavicon: string | null = null;
 
   // ── Menu data ────────────────────────────────────────────────────────────
   menu = signal<PublicMenuResponse | null>(null);
@@ -474,6 +476,23 @@ export class MenuPageComponent implements OnInit, OnDestroy {
       robots: 'index,follow',
       structuredData: restaurantSchema,
     });
+
+    if (t.logoUrl) this.setFavicon(t.logoUrl);
+  }
+
+  private setFavicon(url: string): void {
+    console.log('Setting favicon to', url);
+    if (!this.isBrowser) return;
+    let link = this.doc.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (!link) {
+      link = this.doc.createElement('link');
+      link.rel = 'icon';
+      this.doc.head.appendChild(link);
+    }
+    if (this.originalFavicon === null) {
+      this.originalFavicon = link.href;
+    }
+    link.href = url;
   }
 
   //──── Search & Filter ──────────────────────────────────────────────────────
@@ -1027,6 +1046,10 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     clearTimeout(this.toastTimer);
     this.destroy$.next();
     this.destroy$.complete();
+    if (this.originalFavicon !== null) {
+      const link = this.doc.querySelector<HTMLLinkElement>('link[rel="icon"]');
+      if (link) link.href = this.originalFavicon;
+    }
   }
 
   @HostListener('document:keydown.escape')

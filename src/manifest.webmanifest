@@ -1,0 +1,34 @@
+{
+  "name": "Menuify — Menu numérique QR",
+  "short_name": "Menuify",
+  "description": "Plateforme de menus numériques accessibles par QR code pour restaurants et cafés en Tunisie.",
+  "theme_color": "#C8982E",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "lang": "fr",
+  "dir": "ltr",
+  "orientation": "portrait-primary",
+  "categories": ["food", "business"],
+  "icons": [
+    {
+      "src": "assets/brand/logo-mark-gold.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/brand/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/brand/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
